@@ -1244,9 +1244,9 @@
           const devBua = getVal('dev-bua', '150,000');
           const devInv = getVal('dev-inv', '45,00,00,000');
           const elDevBua = document.getElementById('preview-dev-bua');
-          if (elDevBua) elDevBua.textContent = devBua.includes('Sq') ? devBua : `${Number(devBua.replace(/[^0-9.]/g,'') || 150000).toLocaleString('en-IN')} Sq.Ft.`;
+          if (elDevBua) elDevBua.textContent = devBua.includes('Sq') ? devBua : `${Number(devBua.replace(/[^0-9.]/g, '') || 150000).toLocaleString('en-IN')} Sq.Ft.`;
           const elDevInv = document.getElementById('preview-dev-inv');
-          if (elDevInv) elDevInv.textContent = devInv.includes('₹') ? devInv : `₹ ${Number(devInv.replace(/[^0-9.]/g,'') || 450000000).toLocaleString('en-IN')}`;
+          if (elDevInv) elDevInv.textContent = devInv.includes('₹') ? devInv : `₹ ${Number(devInv.replace(/[^0-9.]/g, '') || 450000000).toLocaleString('en-IN')}`;
 
           const prevDirectorsTbody = document.getElementById('preview-directors-tbody');
           if (prevDirectorsTbody) {
@@ -3819,28 +3819,46 @@
                     <table style="width:100%; border-collapse: collapse; font-size: 11.5px;" id="directors-table">
                       <thead>
                         <tr style="background: #f1f5f9; border-bottom: 1px solid var(--line);">
-                          <th style="padding: 7px 8px; text-align: center; width: 45px; color: #475569; font-weight: 700;">S.No.</th>
-                          <th style="padding: 7px 8px; text-align: left; color: #475569; font-weight: 700;">Name of Director / Partner <span class="text-rose-500">*</span></th>
-                          <th style="padding: 7px 8px; text-align: left; width: 175px; color: #475569; font-weight: 700;">Designation <span class="text-rose-500">*</span></th>
-                          <th style="padding: 7px 8px; text-align: left; width: 140px; color: #475569; font-weight: 700;">DIN / PAN <span class="text-rose-500">*</span></th>
-                          <th style="padding: 7px 8px; text-align: left; width: 160px; color: #475569; font-weight: 700;">Contact / Email <span class="text-rose-500">*</span></th>
-                          <th style="padding: 7px 8px; text-align: center; width: 75px; color: #475569; font-weight: 700;">Action</th>
+                          <th
+                            style="padding: 7px 8px; text-align: center; width: 45px; color: #475569; font-weight: 700;">
+                            S.No.</th>
+                          <th style="padding: 7px 8px; text-align: left; color: #475569; font-weight: 700;">Name of
+                            Director / Partner <span class="text-rose-500">*</span></th>
+                          <th
+                            style="padding: 7px 8px; text-align: left; width: 175px; color: #475569; font-weight: 700;">
+                            Designation <span class="text-rose-500">*</span></th>
+                          <th
+                            style="padding: 7px 8px; text-align: left; width: 140px; color: #475569; font-weight: 700;">
+                            DIN / PAN <span class="text-rose-500">*</span></th>
+                          <th
+                            style="padding: 7px 8px; text-align: left; width: 160px; color: #475569; font-weight: 700;">
+                            Contact<span class="text-rose-500">*</span></th>
+                          <th
+                            style="padding: 7px 8px; text-align: center; width: 75px; color: #475569; font-weight: 700;">
+                            Action</th>
                         </tr>
                       </thead>
                       <tbody id="directors-tbody">
                         <tr class="director-row border-b border-slate-200 transition-colors">
-                          <td class="director-sl text-center font-semibold text-xs text-slate-600 p-2 border-r border-slate-200">1</td>
+                          <td
+                            class="director-sl text-center font-semibold text-xs text-slate-600 p-2 border-r border-slate-200">
+                            1</td>
                           <td class="p-1.5 border-r border-slate-200">
-                            <input type="text" class="form-input text-xs director-name w-full" placeholder="Full Name" style="padding: 5px 8px; font-size: 12px; border-radius: 4px;">
+                            <input type="text" class="form-input text-xs director-name w-full" placeholder="Full Name"
+                              style="padding: 5px 8px; font-size: 12px; border-radius: 4px;">
                           </td>
                           <td class="p-1.5 border-r border-slate-200">
-                            <input type="text" class="form-input text-xs director-desig w-full" placeholder="e.g. Director / Partner" list="director-desig-list" style="padding: 5px 8px; font-size: 12px; border-radius: 4px;">
+                            <input type="text" class="form-input text-xs director-desig w-full"
+                              placeholder="e.g. Director / Partner" list="director-desig-list"
+                              style="padding: 5px 8px; font-size: 12px; border-radius: 4px;">
                           </td>
                           <td class="p-1.5 border-r border-slate-200">
-                            <input type="text" class="form-input text-xs director-din w-full" placeholder="DIN or PAN" style="padding: 5px 8px; font-size: 12px; border-radius: 4px;">
+                            <input type="text" class="form-input text-xs director-din w-full" placeholder="DIN or PAN"
+                              style="padding: 5px 8px; font-size: 12px; border-radius: 4px;">
                           </td>
                           <td class="p-1.5 border-r border-slate-200">
-                            <input type="text" class="form-input text-xs director-contact w-full" placeholder="Phone or Email" style="padding: 5px 8px; font-size: 12px; border-radius: 4px;">
+                            <input type="text" class="form-input text-xs director-contact w-full" placeholder="Phone"
+                              style="padding: 5px 8px; font-size: 12px; border-radius: 4px;">
                           </td>
                           <td class="director-action-cell p-1.5 text-center" style="vertical-align: middle;">
                             <button type="button" onclick="commitDirectorRow(this)"
@@ -3863,8 +3881,13 @@
                     <option value="Designated Partner"></option>
                     <option value="Authorized Signatory"></option>
                   </datalist>
-                  <div id="directors-table-msg" class="text-rose-600 text-[11px] font-semibold mt-2 hidden flex items-center gap-1.5">
-                    <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                  <div id="directors-table-msg"
+                    class="text-rose-600 text-[11px] font-semibold mt-2 hidden flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                        clip-rule="evenodd"></path>
+                    </svg>
                     <span id="directors-table-msg-text">Please fill Director/Partner details before adding.</span>
                   </div>
                 </div>
@@ -4414,7 +4437,8 @@
 
               <!-- Board of Directors / Partners Preview Table -->
               <div class="mt-4 pt-3 border-t border-slate-100">
-                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-2">Board of Directors / Partners (Details of Promoters)</label>
+                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-2">Board of
+                  Directors / Partners (Details of Promoters)</label>
                 <div class="overflow-x-auto border border-slate-200 rounded-md">
                   <table class="w-full text-left text-xs border-collapse">
                     <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
@@ -5504,7 +5528,7 @@
           item.el.classList.remove('border-slate-300', 'bg-white');
           if (!firstInvalid) firstInvalid = item.el;
 
-          const clearHandler = function() {
+          const clearHandler = function () {
             if (item.el.value.trim()) {
               item.el.classList.remove('border-rose-500', 'bg-rose-50');
               item.el.classList.add('border-slate-300', 'bg-white');
