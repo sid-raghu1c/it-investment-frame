@@ -94,6 +94,7 @@
           }
         }
       });
+      eoiDraftMemory.directors = getDirectorsData();
       eoiDraftMemory._plotId = currentSelectedPlot ? currentSelectedPlot.id : null;
       eoiDraftMemory._savedAt = new Date().toISOString();
       eoiDraftMemory._unlockedLevel = window.eoiStepperState ? window.eoiStepperState.unlockedLevel : 1;
@@ -595,23 +596,56 @@
         }
 
         // Board of Directors / Partners table (only evaluated if developer block is visible)
-        const directorInputs = document.querySelectorAll('#directors-tbody .director-name');
-        let hasDirector = false;
-        directorInputs.forEach(inp => {
-          if (inp.value && inp.value.trim()) hasDirector = true;
-        });
-        if (!hasDirector && directorInputs.length > 0) {
-          flagInvalid(directorInputs[0]);
-        } else if (directorInputs.length > 0) {
-          clearFieldInvalid(directorInputs[0]);
+        // If active row has complete data, auto-commit it before validating
+        const activeRow = document.querySelector('#directors-tbody tr:not(.committed-row)');
+        if (activeRow) {
+          const aName = activeRow.querySelector('.director-name')?.value?.trim() || '';
+          const aDesig = activeRow.querySelector('.director-desig')?.value?.trim() || '';
+          const aDin = activeRow.querySelector('.director-din')?.value?.trim() || '';
+          const aContact = activeRow.querySelector('.director-contact')?.value?.trim() || '';
+          if (aName && aDesig && aDin && aContact) {
+            const addBtn = activeRow.querySelector('.director-add-btn');
+            if (addBtn) commitDirectorRow(addBtn, false);
+          }
+        }
+
+        const committedRows = document.querySelectorAll('#directors-tbody tr.committed-row');
+        if (committedRows.length === 0) {
+          isValid = false;
+          const firstRow = document.querySelector('#directors-tbody tr');
+          if (firstRow) {
+            const fName = firstRow.querySelector('.director-name');
+            const fDesig = firstRow.querySelector('.director-desig');
+            const fDin = firstRow.querySelector('.director-din');
+            const fContact = firstRow.querySelector('.director-contact');
+            [fName, fDesig, fDin, fContact].forEach(el => {
+              if (el && !el.value.trim()) {
+                markFieldInvalid(el);
+              }
+            });
+            if (!firstInvalidEl && fName) firstInvalidEl = fName;
+          }
+          const msgBox = document.getElementById('directors-table-msg');
+          const msgText = document.getElementById('directors-table-msg-text');
+          if (msgBox && msgText) {
+            msgText.textContent = "Please fill Director/Partner details before adding.";
+            msgBox.classList.remove('hidden');
+          }
+        } else {
+          const allInputs = document.querySelectorAll('#directors-tbody input, #directors-tbody select');
+          allInputs.forEach(inp => clearFieldInvalid(inp));
+          const msgBox = document.getElementById('directors-table-msg');
+          if (msgBox) msgBox.classList.add('hidden');
         }
       } else {
         const devBua = document.getElementById('dev-bua');
         if (devBua) clearFieldInvalid(devBua);
         const devInv = document.getElementById('dev-inv');
         if (devInv) clearFieldInvalid(devInv);
-        const directorInputs = document.querySelectorAll('#directors-tbody .director-name');
+        const directorInputs = document.querySelectorAll('#directors-tbody input, #directors-tbody select');
         directorInputs.forEach(inp => clearFieldInvalid(inp));
+        const msgBox = document.getElementById('directors-table-msg');
+        if (msgBox) msgBox.classList.add('hidden');
       }
 
       // 3. Proposed Project Details (I–VII)
@@ -1201,6 +1235,45 @@
       const elTotFin = document.getElementById('preview-total-finance');
       if (elTotFin) elTotFin.textContent = totalFin;
 
+      // Developer Track & Promoters Preview
+      const isDevTrack = (category.toLowerCase().includes('developer') || (document.getElementById('devOnlyBlock') && document.getElementById('devOnlyBlock').style.display !== 'none'));
+      const prevDevBlock = document.getElementById('preview-developer-block');
+      if (prevDevBlock) {
+        if (isDevTrack) {
+          prevDevBlock.classList.remove('hidden');
+          const devBua = getVal('dev-bua', '150,000');
+          const devInv = getVal('dev-inv', '45,00,00,000');
+          const elDevBua = document.getElementById('preview-dev-bua');
+          if (elDevBua) elDevBua.textContent = devBua.includes('Sq') ? devBua : `${Number(devBua.replace(/[^0-9.]/g,'') || 150000).toLocaleString('en-IN')} Sq.Ft.`;
+          const elDevInv = document.getElementById('preview-dev-inv');
+          if (elDevInv) elDevInv.textContent = devInv.includes('₹') ? devInv : `₹ ${Number(devInv.replace(/[^0-9.]/g,'') || 450000000).toLocaleString('en-IN')}`;
+
+          const prevDirectorsTbody = document.getElementById('preview-directors-tbody');
+          if (prevDirectorsTbody) {
+            const directors = getDirectorsData();
+            if (directors && directors.length > 0) {
+              prevDirectorsTbody.innerHTML = directors.map((d, i) => `
+                <tr class="hover:bg-slate-50/50">
+                  <td class="py-2 px-3 text-center font-semibold text-slate-500 border-r border-slate-100">${i + 1}</td>
+                  <td class="py-2 px-3 font-medium text-slate-900 border-r border-slate-100">${escapePlotHtml(d.name)}</td>
+                  <td class="py-2 px-3 text-slate-700 border-r border-slate-100">${escapePlotHtml(d.designation)}</td>
+                  <td class="py-2 px-3 font-mono text-slate-700 border-r border-slate-100">${escapePlotHtml(d.din)}</td>
+                  <td class="py-2 px-3 text-slate-700">${escapePlotHtml(d.contact)}</td>
+                </tr>
+              `).join('');
+            } else {
+              prevDirectorsTbody.innerHTML = `
+                <tr>
+                  <td colspan="5" class="py-3 px-4 text-center text-slate-400 italic">No Director / Partner records added.</td>
+                </tr>
+              `;
+            }
+          }
+        } else {
+          prevDevBlock.classList.add('hidden');
+        }
+      }
+
       // 5. Section 4 Document Checklist matching Screenshot
       renderPreviewDocChecklist();
 
@@ -1641,6 +1714,7 @@
           upfrontLiability: upfrontStr,
           totalCost: costStr,
           headcount: headcountStr,
+          directors: getDirectorsData(),
           dscCertSerial: 'CCA-MPSEDC-DSC3-94821',
           dscDigest: 'SHA256:' + Array.from({ length: 16 }, () => Math.floor(Math.random() * 16).toString(16)).join('')
         };
@@ -3739,37 +3813,59 @@
                     <h4 style="margin:0; font-size: 12.5px; color: var(--brand-d); font-weight:700;">Board of Directors
                       /
                       Partners (Details of Promoters) <span class="req">*</span></h4>
+                    <span class="text-[11px] text-slate-500 font-medium">Add promoter details row-by-row</span>
                   </div>
-                  <table style="width:100%; border-collapse: collapse; font-size: 11.5px;" id="directors-table">
-                    <thead>
-                      <tr style="background: #f1f5f9; border-bottom: 1px solid var(--line);">
-                        <th style="padding: 6px 8px; text-align: left;">Name</th>
-                        <th style="padding: 6px 8px; text-align: left;">Designation</th>
-                        <th style="padding: 6px 8px; text-align: left;">DIN / PAN</th>
-                        <th style="padding: 6px 8px; text-align: left;">Contact</th>
-                        <th style="padding: 6px 8px; text-align: center; width: 40px;">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody id="directors-tbody">
-                      <tr>
-                        <td style="padding: 4px;"><input class="form-input director-name" placeholder="Full Name"></td>
-                        <td style="padding: 4px;"><input class="form-input director-desig"
-                            placeholder="Director / Partner"></td>
-                        <td style="padding: 4px;"><input class="form-input director-din" placeholder="DIN or PAN"></td>
-                        <td style="padding: 4px;"><input class="form-input director-contact" placeholder="Phone">
-                        </td>
-                        <td style="padding: 4px; text-align: center;"><button type="button"
-                            onclick="removeDirectorRow(this)"
-                            style="color:red; background:none; border:none; cursor:pointer; font-size: 14px;">&times;</button>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                  <div class="mt-2.5">
-                    <button type="button" onclick="addDirectorRow()"
-                      class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 active:bg-blue-200 border border-blue-200 rounded-md shadow-sm transition-colors cursor-pointer">
-                      + Add Director / Partner
-                    </button>
+                  <div class="overflow-x-auto border border-slate-200 rounded-md">
+                    <table style="width:100%; border-collapse: collapse; font-size: 11.5px;" id="directors-table">
+                      <thead>
+                        <tr style="background: #f1f5f9; border-bottom: 1px solid var(--line);">
+                          <th style="padding: 7px 8px; text-align: center; width: 45px; color: #475569; font-weight: 700;">S.No.</th>
+                          <th style="padding: 7px 8px; text-align: left; color: #475569; font-weight: 700;">Name of Director / Partner <span class="text-rose-500">*</span></th>
+                          <th style="padding: 7px 8px; text-align: left; width: 175px; color: #475569; font-weight: 700;">Designation <span class="text-rose-500">*</span></th>
+                          <th style="padding: 7px 8px; text-align: left; width: 140px; color: #475569; font-weight: 700;">DIN / PAN <span class="text-rose-500">*</span></th>
+                          <th style="padding: 7px 8px; text-align: left; width: 160px; color: #475569; font-weight: 700;">Contact / Email <span class="text-rose-500">*</span></th>
+                          <th style="padding: 7px 8px; text-align: center; width: 75px; color: #475569; font-weight: 700;">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody id="directors-tbody">
+                        <tr class="director-row border-b border-slate-200 transition-colors">
+                          <td class="director-sl text-center font-semibold text-xs text-slate-600 p-2 border-r border-slate-200">1</td>
+                          <td class="p-1.5 border-r border-slate-200">
+                            <input type="text" class="form-input text-xs director-name w-full" placeholder="Full Name" style="padding: 5px 8px; font-size: 12px; border-radius: 4px;">
+                          </td>
+                          <td class="p-1.5 border-r border-slate-200">
+                            <input type="text" class="form-input text-xs director-desig w-full" placeholder="e.g. Director / Partner" list="director-desig-list" style="padding: 5px 8px; font-size: 12px; border-radius: 4px;">
+                          </td>
+                          <td class="p-1.5 border-r border-slate-200">
+                            <input type="text" class="form-input text-xs director-din w-full" placeholder="DIN or PAN" style="padding: 5px 8px; font-size: 12px; border-radius: 4px;">
+                          </td>
+                          <td class="p-1.5 border-r border-slate-200">
+                            <input type="text" class="form-input text-xs director-contact w-full" placeholder="Phone or Email" style="padding: 5px 8px; font-size: 12px; border-radius: 4px;">
+                          </td>
+                          <td class="director-action-cell p-1.5 text-center" style="vertical-align: middle;">
+                            <button type="button" onclick="commitDirectorRow(this)"
+                              class="director-add-btn px-3 py-1 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-semibold rounded inline-flex items-center justify-center gap-1 cursor-pointer transition-colors shadow-sm"
+                              title="Add this Director/Partner">
+                              + Add
+                            </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <datalist id="director-desig-list">
+                    <option value="Managing Director"></option>
+                    <option value="Director"></option>
+                    <option value="Executive Director"></option>
+                    <option value="Whole-Time Director"></option>
+                    <option value="Independent Director"></option>
+                    <option value="Partner"></option>
+                    <option value="Designated Partner"></option>
+                    <option value="Authorized Signatory"></option>
+                  </datalist>
+                  <div id="directors-table-msg" class="text-rose-600 text-[11px] font-semibold mt-2 hidden flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                    <span id="directors-table-msg-text">Please fill Director/Partner details before adding.</span>
                   </div>
                 </div>
               </div>
@@ -4313,6 +4409,27 @@
                   <div
                     class="font-mono font-bold text-slate-900 text-sm p-2.5 bg-slate-50 border border-slate-200 rounded"
                     id="preview-dev-inv">—</div>
+                </div>
+              </div>
+
+              <!-- Board of Directors / Partners Preview Table -->
+              <div class="mt-4 pt-3 border-t border-slate-100">
+                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-2">Board of Directors / Partners (Details of Promoters)</label>
+                <div class="overflow-x-auto border border-slate-200 rounded-md">
+                  <table class="w-full text-left text-xs border-collapse">
+                    <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
+                      <tr>
+                        <th class="py-2 px-3 text-center w-12 border-r border-slate-200">S.No.</th>
+                        <th class="py-2 px-3 border-r border-slate-200">Name of Director / Partner</th>
+                        <th class="py-2 px-3 border-r border-slate-200">Designation</th>
+                        <th class="py-2 px-3 border-r border-slate-200">DIN / PAN</th>
+                        <th class="py-2 px-3">Contact / Email</th>
+                      </tr>
+                    </thead>
+                    <tbody id="preview-directors-tbody" class="divide-y divide-slate-100 text-slate-800">
+                      <!-- Populated dynamically by renderEoiPreview() -->
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
@@ -5355,61 +5472,173 @@
 
     // ==========================================
     // Dynamic Board of Directors / Partners (Form 1-A)
+    // Inline Action Column Workflow
     // ==========================================
-    function addDirectorRow(name = '', desig = 'Director', din = '') {
+    function commitDirectorRow(btn, triggerToast = true) {
+      const row = btn.closest('tr');
+      if (!row) return false;
+
+      const nameInput = row.querySelector('.director-name');
+      const desigInput = row.querySelector('.director-desig');
+      const dinInput = row.querySelector('.director-din');
+      const contactInput = row.querySelector('.director-contact');
+
+      const nameVal = nameInput?.value?.trim() || '';
+      const desigVal = desigInput?.value?.trim() || '';
+      const dinVal = dinInput?.value?.trim() || '';
+      const contactVal = contactInput?.value?.trim() || '';
+
+      let hasError = false;
+      let firstInvalid = null;
+
+      [
+        { el: nameInput, val: nameVal },
+        { el: desigInput, val: desigVal },
+        { el: dinInput, val: dinVal },
+        { el: contactInput, val: contactVal }
+      ].forEach(item => {
+        if (!item.el) return;
+        if (!item.val) {
+          hasError = true;
+          item.el.classList.add('border-rose-500', 'bg-rose-50');
+          item.el.classList.remove('border-slate-300', 'bg-white');
+          if (!firstInvalid) firstInvalid = item.el;
+
+          const clearHandler = function() {
+            if (item.el.value.trim()) {
+              item.el.classList.remove('border-rose-500', 'bg-rose-50');
+              item.el.classList.add('border-slate-300', 'bg-white');
+              item.el.removeEventListener('input', clearHandler);
+              const anyErr = row.querySelectorAll('.border-rose-500');
+              if (anyErr.length === 0) {
+                const msgBox = document.getElementById('directors-table-msg');
+                if (msgBox) msgBox.classList.add('hidden');
+              }
+            }
+          };
+          item.el.addEventListener('input', clearHandler);
+        } else {
+          item.el.classList.remove('border-rose-500', 'bg-rose-50');
+          item.el.classList.add('border-slate-300', 'bg-white');
+        }
+      });
+
+      if (hasError) {
+        const msgBox = document.getElementById('directors-table-msg');
+        const msgText = document.getElementById('directors-table-msg-text');
+        if (msgBox && msgText) {
+          msgText.textContent = "Please fill Director/Partner details before adding.";
+          msgBox.classList.remove('hidden');
+        }
+        if (triggerToast) {
+          showGlobalToast("Please fill Director/Partner details before adding.", "error");
+        }
+        if (firstInvalid) firstInvalid.focus();
+        return false;
+      }
+
+      // Hide inline error message
+      const msgBox = document.getElementById('directors-table-msg');
+      if (msgBox) msgBox.classList.add('hidden');
+
+      // 1. Lock/freeze the current row as a committed entry
+      row.classList.add('committed-row');
+      [nameInput, desigInput, dinInput, contactInput].forEach(inp => {
+        if (inp) {
+          inp.readOnly = true;
+          inp.classList.remove('bg-white', 'border-slate-300');
+          inp.classList.add('bg-slate-50', 'text-slate-800', 'border-slate-200', 'font-medium', 'cursor-default');
+          inp.style.backgroundColor = '#f8fafc';
+          inp.style.borderColor = '#e2e8f0';
+        }
+      });
+
+      // 2. Change the button in that row's Action column to a Delete cross icon (red ✕ button)
+      const actionCell = row.querySelector('.director-action-cell');
+      if (actionCell) {
+        actionCell.innerHTML = `
+          <button type="button" onclick="removeDirectorRow(this)"
+            class="text-rose-600 hover:text-rose-800 hover:bg-rose-50 p-1 rounded font-bold transition-colors cursor-pointer inline-flex items-center justify-center w-7 h-7"
+            title="Delete this record">
+            <span class="text-base leading-none font-bold">&times;</span>
+          </button>
+        `;
+      }
+
+      // 3. Automatically append a new blank editable row directly below it, displaying [ + Add ] in Action column
+      appendBlankDirectorRow();
+
+      // 4. Increment the sequential S.No. for the new row automatically
+      updateDirectorRowIndices();
+
+      if (triggerToast) {
+        showGlobalToast(`Director/Partner "${nameVal}" added successfully.`, "success");
+      }
+      return true;
+    }
+
+    function appendBlankDirectorRow() {
       const tbody = document.getElementById('directors-tbody');
       if (!tbody) return;
 
+      // Ensure we don't duplicate uncommitted blank rows
+      const existingBlank = tbody.querySelector('tr:not(.committed-row)');
+      if (existingBlank) {
+        const nameInp = existingBlank.querySelector('.director-name');
+        if (nameInp) nameInp.focus();
+        return;
+      }
+
       const tr = document.createElement('tr');
-      tr.className = 'director-row';
-      tr.style.cssText = 'border-bottom: 1px solid #e2e8f0;';
+      tr.className = 'director-row border-b border-slate-200 transition-colors';
       tr.innerHTML = `
-        <td class="director-sl" style="text-align:center; font-weight:600; font-size:12px; color:#475569; padding:8px 6px; border-right:1px solid #e2e8f0; vertical-align:middle;"></td>
-        <td style="padding:6px 8px; border-right:1px solid #e2e8f0; vertical-align:middle;">
-          <input type="text" class="form-input text-xs director-name" placeholder="Full Name" value="${name}" required style="border:1px solid #cbd5e1; padding:5px 8px; font-size:12px; border-radius:4px; width:100%;">
+        <td class="director-sl text-center font-semibold text-xs text-slate-600 p-2 border-r border-slate-200"></td>
+        <td class="p-1.5 border-r border-slate-200">
+          <input type="text" class="form-input text-xs director-name w-full" placeholder="Full Name" style="padding: 5px 8px; font-size: 12px; border-radius: 4px;">
         </td>
-        <td style="padding:6px 8px; border-right:1px solid #e2e8f0; vertical-align:middle;">
-          <select class="form-select text-xs director-desig" style="border:1px solid #cbd5e1; padding:5px 8px; font-size:12px; border-radius:4px; width:100%;">
-            <option value="Managing Director"${desig === 'Managing Director' ? ' selected' : ''}>Managing Director</option>
-            <option value="Director"${desig === 'Director' ? ' selected' : ''}>Director</option>
-            <option value="Executive Director"${desig === 'Executive Director' ? ' selected' : ''}>Executive Director</option>
-            <option value="Whole-Time Director"${desig === 'Whole-Time Director' ? ' selected' : ''}>Whole-Time Director</option>
-            <option value="Independent Director"${desig === 'Independent Director' ? ' selected' : ''}>Independent Director</option>
-            <option value="Partner"${desig === 'Partner' ? ' selected' : ''}>Partner</option>
-            <option value="Designated Partner"${desig === 'Designated Partner' ? ' selected' : ''}>Designated Partner</option>
-            <option value="Authorized Signatory"${desig === 'Authorized Signatory' ? ' selected' : ''}>Authorized Signatory</option>
-          </select>
+        <td class="p-1.5 border-r border-slate-200">
+          <input type="text" class="form-input text-xs director-desig w-full" placeholder="e.g. Director / Partner" list="director-desig-list" style="padding: 5px 8px; font-size: 12px; border-radius: 4px;">
         </td>
-        <td style="padding:6px 8px; border-right:1px solid #e2e8f0; vertical-align:middle;">
-          <input type="text" class="form-input text-xs director-din" placeholder="DIN / PAN" value="${din}" style="border:1px solid #cbd5e1; padding:5px 8px; font-size:12px; border-radius:4px; width:100%;">
+        <td class="p-1.5 border-r border-slate-200">
+          <input type="text" class="form-input text-xs director-din w-full" placeholder="DIN or PAN" style="padding: 5px 8px; font-size: 12px; border-radius: 4px;">
         </td>
-        <td style="text-align:center; padding:6px 4px; vertical-align:middle;">
-          <button type="button" class="director-remove-btn px-2 py-1 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded transition-colors inline-flex items-center gap-1 cursor-pointer" onclick="removeDirectorRow(this)" title="Remove this row">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-            Remove
+        <td class="p-1.5 border-r border-slate-200">
+          <input type="text" class="form-input text-xs director-contact w-full" placeholder="Phone or Email" style="padding: 5px 8px; font-size: 12px; border-radius: 4px;">
+        </td>
+        <td class="director-action-cell p-1.5 text-center" style="vertical-align: middle;">
+          <button type="button" onclick="commitDirectorRow(this)"
+            class="director-add-btn px-3 py-1 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-semibold rounded inline-flex items-center justify-center gap-1 cursor-pointer transition-colors shadow-sm"
+            title="Add this Director/Partner">
+            + Add
           </button>
         </td>
       `;
       tbody.appendChild(tr);
       updateDirectorRowIndices();
 
-      const newNameInput = tr.querySelector('.director-name');
-      if (newNameInput && !name) {
-        newNameInput.focus();
-      }
+      const newNameInp = tr.querySelector('.director-name');
+      if (newNameInp) newNameInp.focus();
     }
 
     function removeDirectorRow(btn) {
-      const tbody = document.getElementById('directors-tbody');
-      if (!tbody) return;
-      const rows = tbody.querySelectorAll('tr');
-      if (rows.length <= 1) {
-        return; // Ensure at least one row remains present and cannot be deleted
-      }
       const row = btn.closest('tr');
-      if (row) {
-        row.remove();
-        updateDirectorRowIndices();
+      if (!row) return;
+
+      const nameVal = row.querySelector('.director-name')?.value?.trim();
+      row.remove();
+      updateDirectorRowIndices();
+
+      // Ensure an active editable row is always present
+      const tbody = document.getElementById('directors-tbody');
+      if (tbody) {
+        const activeRow = tbody.querySelector('tr:not(.committed-row)');
+        if (!activeRow) {
+          appendBlankDirectorRow();
+        }
+      }
+
+      if (nameVal) {
+        showGlobalToast(`Removed "${nameVal}" from Board of Directors / Partners.`, "info");
       }
     }
 
@@ -5417,26 +5646,10 @@
       const tbody = document.getElementById('directors-tbody');
       if (!tbody) return;
       const rows = tbody.querySelectorAll('tr');
-      const isOnlyOne = (rows.length <= 1);
-
       rows.forEach((row, idx) => {
         const slCell = row.querySelector('.director-sl');
         if (slCell) {
           slCell.textContent = (idx + 1);
-        }
-        const removeBtn = row.querySelector('.director-remove-btn');
-        if (removeBtn) {
-          if (isOnlyOne) {
-            removeBtn.disabled = true;
-            removeBtn.title = 'At least one director/partner must remain present';
-            removeBtn.classList.add('opacity-40', 'cursor-not-allowed');
-            removeBtn.classList.remove('cursor-pointer');
-          } else {
-            removeBtn.disabled = false;
-            removeBtn.title = 'Remove this row';
-            removeBtn.classList.remove('opacity-40', 'cursor-not-allowed');
-            removeBtn.classList.add('cursor-pointer');
-          }
         }
       });
     }
@@ -5446,14 +5659,51 @@
       if (!tbody) return [];
       const list = [];
       tbody.querySelectorAll('tr').forEach(row => {
+        const isCommitted = row.classList.contains('committed-row');
         const name = row.querySelector('.director-name')?.value?.trim() || '';
-        const designation = row.querySelector('.director-desig')?.value || '';
+        const designation = row.querySelector('.director-desig')?.value?.trim() || '';
         const din = row.querySelector('.director-din')?.value?.trim() || '';
-        if (name || din) {
-          list.push({ name, designation, din });
+        const contact = row.querySelector('.director-contact')?.value?.trim() || '';
+        if (isCommitted || (name && (din || designation || contact))) {
+          list.push({
+            sNo: list.length + 1,
+            name,
+            designation: designation || 'Director',
+            din: din || '—',
+            contact: contact || '—'
+          });
         }
       });
       return list;
+    }
+
+    function addDirectorRow(name = '', desig = 'Director', din = '', contact = '') {
+      const tbody = document.getElementById('directors-tbody');
+      if (!tbody) return;
+
+      if (!name && !din && !contact) {
+        appendBlankDirectorRow();
+        return;
+      }
+
+      let activeRow = tbody.querySelector('tr:not(.committed-row)');
+      if (!activeRow) {
+        appendBlankDirectorRow();
+        activeRow = tbody.querySelector('tr:not(.committed-row)');
+      }
+
+      if (activeRow) {
+        const nameInp = activeRow.querySelector('.director-name');
+        const desigInp = activeRow.querySelector('.director-desig');
+        const dinInp = activeRow.querySelector('.director-din');
+        const contactInp = activeRow.querySelector('.director-contact');
+        if (nameInp) nameInp.value = name;
+        if (desigInp) desigInp.value = desig;
+        if (dinInp) dinInp.value = din;
+        if (contactInp) contactInp.value = contact;
+        const addBtn = activeRow.querySelector('.director-add-btn');
+        if (addBtn) commitDirectorRow(addBtn, false);
+      }
     }
 
 
