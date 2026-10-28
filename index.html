@@ -3893,359 +3893,321 @@
 
 
       <!-- ========================================================================= -->
+      <!-- ========================================================================= -->
       <!-- VIEW: EOI APPLICATION FORM PREVIEW (#view-eoi-preview)                     -->
       <!-- ========================================================================= -->
       <div id="view-eoi-preview" class="hidden px-4 md:px-8 py-6 flex-1 space-y-6"
         style="margin-top: 0; padding-top: 24px; max-width: 1200px; margin-left: auto; margin-right: auto;">
 
-        <!-- Header & Application Meta Card -->
-        <div class="bg-white rounded border border-slate-200 shadow-sm p-5 md:p-6">
-          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-            <div>
-              <div class="flex items-center gap-2 mb-1 flex-wrap">
-                <span
-                  class="bg-blue-100 text-blue-800 font-bold px-2.5 py-0.5 rounded text-[11px] uppercase tracking-wider">Step
-                  2: Verification</span>
-                <span class="bg-amber-100 text-amber-800 font-bold px-2.5 py-0.5 rounded text-[11px]">Draft
-                  Preview</span>
-                <span class="text-slate-400 text-xs font-mono">Tender Ref: MPSEDC:ITIA:ALLOT:2026:674</span>
-              </div>
-              <h2 class="text-xl font-black text-slate-900 tracking-tight">EOI Application Form Preview (Form-2)</h2>
-              <p class="text-xs text-slate-500 mt-0.5">
-                Carefully review all submitted entity data, project profile, statutory tariffs, and mandatory documents
-                prior to Class-3 Digital Signature (DSC) sealing.
-              </p>
-            </div>
-            <div class="flex items-center gap-2">
-              <button type="button" onclick="editEoiFormFromPreview()"
-                class="bg-[#f59e0b] hover:bg-[#d97706] text-white font-bold text-xs sm:text-sm py-2 px-5 rounded-[3px] shadow-xs transition cursor-pointer border-0 inline-flex items-center gap-1.5">
-                <span>&#9998;</span><span>Edit Application</span>
-              </button>
-              <button type="button" onclick="window.print()"
-                class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs sm:text-sm py-2 px-3.5 rounded-[3px] transition cursor-pointer border border-slate-300 inline-flex items-center gap-1.5">
-                <span>&#128438;</span><span>Print Preview</span>
-              </button>
-            </div>
+        <!-- 1. PREVIEW HEADER & TOP-RIGHT PRINT BUTTON -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 mb-2 border-b border-slate-200">
+          <div>
+            <h2 class="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">EOI Application Form Preview</h2>
+            <p class="text-xs text-slate-500 mt-1">
+              Carefully review all submitted entity data, project profile, statutory tariffs, and attached documents prior to Class-3 Digital Signature (DSC) sealing.
+            </p>
           </div>
+          <button type="button" onclick="window.print()"
+            class="no-print bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs sm:text-sm py-2 px-4 rounded-[3px] border border-slate-300 shadow-2xs transition cursor-pointer inline-flex items-center gap-2 self-start sm:self-auto flex-shrink-0">
+            <span>🖨️</span><span>Print Preview</span>
+          </button>
+        </div>
 
-          <!-- Quick Plot & Allotment Summary Strip -->
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-1">
-            <div class="bg-slate-50 border border-slate-200 rounded p-2.5 text-center">
-              <div class="text-[10.5px] uppercase font-bold text-slate-500 tracking-wide">Allotment Target</div>
-              <div class="text-sm font-extrabold text-[#2b579a] mt-0.5" id="preview-plot-id">Plot ITP-IND-201</div>
-              <div class="text-[11px] text-slate-600 truncate" id="preview-plot-park">Crystal IT Park, Indore</div>
+        <!-- 2. SECTION 1: DETAILS OF THE APPLICANT / ORGANIZATION -->
+        <div class="bg-white rounded border border-slate-200 shadow-xs overflow-hidden preview-section">
+          <div class="bg-[#2b579a] px-5 py-3 text-white font-bold text-sm tracking-wide flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-white/20 text-white text-xs flex items-center justify-center font-bold">1</span>
+              <span>1. Details of the Applicant / Organization</span>
             </div>
-            <div class="bg-slate-50 border border-slate-200 rounded p-2.5 text-center">
-              <div class="text-[10.5px] uppercase font-bold text-slate-500 tracking-wide">Plot Size &amp; Purpose</div>
-              <div class="text-sm font-extrabold text-slate-800 mt-0.5" id="preview-plot-area">50,000 Sq.Ft.</div>
-              <div class="text-[11px] text-slate-600 truncate" id="preview-plot-purpose">IT / ITeS Operations</div>
-            </div>
-            <div class="bg-slate-50 border border-slate-200 rounded p-2.5 text-center">
-              <div class="text-[10.5px] uppercase font-bold text-slate-500 tracking-wide">Allotment Mode</div>
-              <div class="text-sm font-extrabold text-indigo-900 mt-0.5" id="preview-plot-type">EOI Allotment</div>
-              <div class="text-[11px] text-emerald-700 font-semibold" id="preview-rebate-summary">Rebate Eligible</div>
-            </div>
-            <div class="bg-blue-50/70 border border-blue-200 rounded p-2.5 text-center">
-              <div class="text-[10.5px] uppercase font-bold text-blue-700 tracking-wide">Upfront Liability</div>
-              <div class="text-sm font-black text-blue-900 mt-0.5 font-mono" id="preview-plot-upfront-card">₹
-                6,135,000.00</div>
-              <div class="text-[10.5px] text-blue-600">App Fee + 25% Advance</div>
+            <span class="text-xs bg-white/20 px-2.5 py-0.5 rounded font-medium">Read-Only</span>
+          </div>
+          <div class="p-5 md:p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div class="md:col-span-2">
+                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">Applicant / Company / Firm Name</label>
+                <div class="font-bold text-slate-900 text-sm p-2.5 bg-slate-50 border border-slate-200 rounded" id="preview-applicant-name">—</div>
+              </div>
+              <div>
+                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">Constitution / Entity Type</label>
+                <div class="font-semibold text-slate-800 text-sm p-2.5 bg-slate-50 border border-slate-200 rounded" id="preview-entity-constitution">—</div>
+              </div>
+              <div>
+                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">Applicant Category</label>
+                <div class="font-semibold text-slate-800 text-sm p-2.5 bg-slate-50 border border-slate-200 rounded" id="preview-applicant-category">—</div>
+              </div>
+              <div>
+                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">CIN / Registration No.</label>
+                <div class="font-mono font-bold text-slate-900 text-sm p-2.5 bg-slate-50 border border-slate-200 rounded" id="preview-applicant-cin">—</div>
+              </div>
+              <div>
+                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">Date of Incorporation / Registration</label>
+                <div class="font-mono font-semibold text-slate-800 text-sm p-2.5 bg-slate-50 border border-slate-200 rounded" id="preview-applicant-inc-date">—</div>
+              </div>
+              <div>
+                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">Permanent Account Number (PAN)</label>
+                <div class="font-mono font-bold text-slate-900 text-sm p-2.5 bg-slate-50 border border-slate-200 rounded" id="preview-applicant-pan">—</div>
+              </div>
+              <div>
+                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">GSTIN</label>
+                <div class="font-mono font-semibold text-slate-800 text-sm p-2.5 bg-slate-50 border border-slate-200 rounded" id="preview-applicant-gstin">—</div>
+              </div>
+              <div>
+                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">Is execution planned in consortium?</label>
+                <div class="font-semibold text-slate-800 text-sm p-2.5 bg-slate-50 border border-slate-200 rounded" id="preview-applicant-consortium">No</div>
+              </div>
+              <div id="preview-consortium-name-wrapper" class="hidden">
+                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">Name of the Company in Consortium</label>
+                <div class="font-semibold text-slate-800 text-sm p-2.5 bg-amber-50 border border-amber-200 rounded" id="preview-consortium-company-name">—</div>
+              </div>
+              <div class="md:col-span-2">
+                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">Registered Office Address</label>
+                <div class="text-slate-800 text-sm p-2.5 bg-slate-50 border border-slate-200 rounded" id="preview-applicant-reg-address">—</div>
+              </div>
+              <div>
+                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">District</label>
+                <div class="font-semibold text-slate-800 text-sm p-2.5 bg-slate-50 border border-slate-200 rounded" id="preview-applicant-district">—</div>
+              </div>
+              <div>
+                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">Pin Code</label>
+                <div class="font-mono font-semibold text-slate-800 text-sm p-2.5 bg-slate-50 border border-slate-200 rounded" id="preview-applicant-pincode">—</div>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- 1. Applicant & Organization Details Card -->
-        <div class="bg-white rounded border border-slate-200 shadow-sm overflow-hidden">
-          <div class="bg-[#3b5998] px-5 py-3 flex items-center justify-between text-white">
-            <h3 class="font-bold text-sm tracking-wide flex items-center gap-2">
-              <span
-                class="w-5 h-5 rounded-full bg-white/20 text-white text-xs flex items-center justify-center font-bold">1</span>
-              <span>Applicant &amp; Organization Details</span>
-            </h3>
-            <span class="text-xs bg-white/20 px-2 py-0.5 rounded font-medium">Read-Only</span>
+        <!-- 3. SECTION 2: DETAILS OF THE AUTHORISED PERSON -->
+        <div class="bg-white rounded border border-slate-200 shadow-xs overflow-hidden preview-section">
+          <div class="bg-[#2b579a] px-5 py-3 text-white font-bold text-sm tracking-wide flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-white/20 text-white text-xs flex items-center justify-center font-bold">2</span>
+              <span>2. Details of the Authorised Person</span>
+            </div>
+            <span class="text-xs bg-white/20 px-2.5 py-0.5 rounded font-medium">Read-Only</span>
+          </div>
+          <div class="p-5 md:p-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
+              <!-- Left 3 cols: Info Grid -->
+              <div class="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div>
+                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">Name of Authorised Person</label>
+                  <div class="font-bold text-slate-900 text-sm p-2.5 bg-slate-50 border border-slate-200 rounded" id="preview-auth-name">—</div>
+                </div>
+                <div>
+                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">Designation</label>
+                  <div class="font-semibold text-slate-800 text-sm p-2.5 bg-slate-50 border border-slate-200 rounded" id="preview-auth-designation">—</div>
+                </div>
+                <div>
+                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">Mobile No.</label>
+                  <div class="font-mono font-semibold text-slate-800 text-sm p-2.5 bg-slate-50 border border-slate-200 rounded" id="preview-auth-mobile">—</div>
+                </div>
+                <div>
+                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">E-mail ID</label>
+                  <div class="font-medium text-slate-800 text-sm p-2.5 bg-slate-50 border border-slate-200 rounded truncate" id="preview-auth-email">—</div>
+                </div>
+              </div>
+
+              <!-- Right 1 col: Photo Thumbnail -->
+              <div class="flex flex-col items-center justify-center p-3 bg-slate-50 border border-slate-200 rounded text-center">
+                <label class="text-[10.5px] font-bold text-slate-500 uppercase tracking-wide block mb-2">Authorised Photo</label>
+                <div class="w-24 h-28 bg-white border border-slate-300 rounded overflow-hidden shadow-2xs flex items-center justify-center relative">
+                  <img id="preview-auth-photo" src="" alt="Authorised Person" class="w-full h-full object-cover hidden">
+                  <span id="preview-auth-photo-ph" class="text-slate-400 font-semibold text-[11px] px-2 text-center">No Photo</span>
+                </div>
+                <span class="text-[10px] text-slate-500 mt-1.5 font-medium">Passport Size Photo</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. SECTION 3: FORM 1 / PROJECT PROFILE -->
+        <div class="bg-white rounded border border-slate-200 shadow-xs overflow-hidden preview-section">
+          <div class="bg-[#2b579a] px-5 py-3 text-white font-bold text-sm tracking-wide flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-white/20 text-white text-xs flex items-center justify-center font-bold">3</span>
+              <span id="preview-sec-3-title">3. Form 1 / Project Profile</span>
+            </div>
+            <span class="text-xs bg-white/20 px-2.5 py-0.5 rounded font-medium">Read-Only</span>
           </div>
           <div class="p-5 md:p-6 space-y-5">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-              <!-- Left 2 Cols: Entity Parameters -->
-              <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3.5 text-xs">
-                <div>
-                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Entity / Company
-                    Name</label>
-                  <div class="font-bold text-slate-900 text-sm mt-0.5" id="preview-applicant-name">Apex Precision
-                    Engineering Works Pvt Ltd</div>
+            <!-- Sub-heading: Technical Pre-Qualification & Operations -->
+            <div>
+              <h4 class="text-xs font-bold text-[#1e3a8a] uppercase tracking-wider mb-3 pb-1 border-b border-slate-100 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+                <span>Technical Pre-Qualification &amp; Operational Metrics</span>
+              </h4>
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                <div class="sm:col-span-2 md:col-span-2">
+                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">Type of Business (Primary Domain)</label>
+                  <div class="font-semibold text-slate-800 text-sm p-2.5 bg-slate-50 border border-slate-200 rounded" id="preview-primary-business-type">—</div>
                 </div>
                 <div>
-                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Constitution of
-                    Entity</label>
-                  <div class="font-semibold text-slate-800 mt-0.5" id="preview-entity-constitution">Private Limited
-                    Company</div>
+                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">No. of Employees (Current)</label>
+                  <div class="font-mono font-bold text-slate-900 text-sm p-2.5 bg-slate-50 border border-slate-200 rounded" id="preview-unit-emp-count">—</div>
                 </div>
                 <div>
-                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Applicant Category</label>
-                  <div class="font-semibold text-slate-800 mt-0.5" id="preview-applicant-category">IT/ITeS Unit</div>
+                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">Turnover — last 3 FY (₹)</label>
+                  <div class="font-mono font-bold text-slate-900 text-sm p-2.5 bg-slate-50 border border-slate-200 rounded" id="preview-unit-turnover">—</div>
+                </div>
+                <div class="sm:col-span-2 md:col-span-2">
+                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">Investment till date in India (₹)</label>
+                  <div class="font-mono font-bold text-slate-900 text-sm p-2.5 bg-slate-50 border border-slate-200 rounded" id="preview-unit-past-inv">—</div>
+                </div>
+                <div class="sm:col-span-2 md:col-span-2">
+                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">Present Activities of the Firm</label>
+                  <div class="text-slate-800 text-xs p-2.5 bg-slate-50 border border-slate-200 rounded leading-relaxed min-h-[42px]" id="preview-unit-present-act">—</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Developer-Only Block (if applicable) -->
+            <div id="preview-developer-block" class="hidden pt-3 border-t border-slate-200">
+              <h4 class="text-xs font-bold text-[#1e3a8a] uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+                <span>Developer Infrastructure Details (Form 1-A)</span>
+              </h4>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div>
+                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">Total Built-Up Area Proposed (Sq.Ft.)</label>
+                  <div class="font-mono font-bold text-slate-900 text-sm p-2.5 bg-slate-50 border border-slate-200 rounded" id="preview-dev-bua">—</div>
                 </div>
                 <div>
-                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">CIN / Registration
-                    No.</label>
-                  <div class="font-mono font-bold text-slate-900 mt-0.5" id="preview-applicant-cin">
-                    U29299MP2021PTC012342</div>
+                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">Total Proposed Investment (excluding land)</label>
+                  <div class="font-mono font-bold text-slate-900 text-sm p-2.5 bg-slate-50 border border-slate-200 rounded" id="preview-dev-inv">—</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sub-heading: Proposed Activities of the Project (I–VII) -->
+            <div class="pt-2">
+              <h4 class="text-xs font-bold text-[#1e3a8a] uppercase tracking-wider mb-3 pb-1 border-b border-slate-100 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+                <span>Proposed Activities of the Project (I–VII)</span>
+              </h4>
+              <div class="space-y-3.5 text-xs">
+                <div>
+                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">Project Title</label>
+                  <div class="font-bold text-slate-900 text-sm p-2.5 bg-slate-50 border border-slate-200 rounded" id="preview-proj-title">—</div>
                 </div>
                 <div>
-                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Date of
-                    Incorporation</label>
-                  <div class="font-mono font-semibold text-slate-800 mt-0.5" id="preview-applicant-inc-date">14/08/2021
+                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">I. Objective — nature of business/activity</label>
+                  <div class="text-slate-800 text-xs p-2.5 bg-slate-50 border border-slate-200 rounded leading-relaxed" id="preview-proj-obj">—</div>
+                </div>
+                <div>
+                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">II. Details of promoters &amp; background</label>
+                  <div class="text-slate-800 text-xs p-2.5 bg-slate-50 border border-slate-200 rounded leading-relaxed" id="preview-proj-promoters">—</div>
+                </div>
+                <div>
+                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">III. Proposed investment incl. land, building &amp; plant/machinery</label>
+                  <div class="text-slate-800 text-xs p-2.5 bg-slate-50 border border-slate-200 rounded leading-relaxed" id="preview-proj-inv-split">—</div>
+                </div>
+                <div>
+                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">IV. Project implementation plan with timelines</label>
+                  <div class="text-slate-800 text-xs p-2.5 bg-slate-50 border border-slate-200 rounded leading-relaxed" id="preview-proj-timeline">—</div>
+                </div>
+                <div>
+                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">V. Manpower to be deployed under the project (Direct employment commitment over 3 years)</label>
+                  <div class="text-slate-800 text-xs p-2.5 bg-slate-50 border border-slate-200 rounded leading-relaxed font-medium" id="preview-proj-manpower">—</div>
+                </div>
+                <div>
+                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">VI. Break-up of investment</label>
+                  <div class="text-slate-800 text-xs p-2.5 bg-slate-50 border border-slate-200 rounded leading-relaxed" id="preview-proj-inv-breakup">—</div>
+                </div>
+                <div>
+                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">VII. Source of funds — equity, loan, or other means</label>
+                  <div class="text-slate-800 text-xs p-2.5 bg-slate-50 border border-slate-200 rounded leading-relaxed" id="preview-proj-funds-source">—</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 5. SECTION 4: PROJECT FINANCIALS & MEANS OF FINANCE -->
+        <div class="bg-white rounded border border-slate-200 shadow-xs overflow-hidden preview-section">
+          <div class="bg-[#2b579a] px-5 py-3 text-white font-bold text-sm tracking-wide flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-white/20 text-white text-xs flex items-center justify-center font-bold">4</span>
+              <span>4. Project Financials &amp; Means of Finance</span>
+            </div>
+            <span class="text-xs bg-white/20 px-2.5 py-0.5 rounded font-medium">Read-Only</span>
+          </div>
+          <div class="p-5 md:p-6 space-y-5">
+
+            <!-- Card A & Card B side-by-side grid, exactly mirroring Section 4 of EOI Form -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+              <!-- Card A: Project Cost Components (₹) -->
+              <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs flex flex-col justify-between">
+                <div>
+                  <h3 class="text-sm font-bold text-[#1e3a8a] mb-4 pb-1 border-b border-slate-100 flex items-center justify-between">
+                    <span>A. Project Cost Components (₹)</span>
+                    <span class="text-[11px] font-normal text-slate-500">Capital Outlay</span>
+                  </h3>
+                  <div class="space-y-3 text-xs">
+                    <div>
+                      <label class="text-[11px] font-bold text-slate-600 uppercase tracking-wide block mb-1">Land Premium / Base Cost (₹) <span class="text-slate-400 font-normal">(locked from selected plot)</span></label>
+                      <div class="font-mono font-semibold text-slate-800 text-sm p-2 bg-slate-100 border border-slate-200 rounded text-right" id="preview-cost-land">₹ 0.00</div>
+                    </div>
+                    <div>
+                      <label class="text-[11px] font-bold text-slate-600 uppercase tracking-wide block mb-1">Development Charges (₹) <span class="text-slate-400 font-normal">(locked from selected plot)</span></label>
+                      <div class="font-mono font-semibold text-slate-800 text-sm p-2 bg-slate-100 border border-slate-200 rounded text-right" id="preview-cost-dev">₹ 0.00</div>
+                    </div>
+                    <div>
+                      <label class="text-[11px] font-bold text-slate-600 uppercase tracking-wide block mb-1">Civil Construction / Built-up Cost (₹)</label>
+                      <div class="font-mono font-medium text-slate-800 text-sm p-2 bg-slate-50 border border-slate-200 rounded text-right" id="preview-cost-building">₹ 0.00</div>
+                    </div>
+                    <div>
+                      <label class="text-[11px] font-bold text-slate-600 uppercase tracking-wide block mb-1">Plant &amp; Machinery / IT Infrastructure (₹)</label>
+                      <div class="font-mono font-medium text-slate-800 text-sm p-2 bg-slate-50 border border-slate-200 rounded text-right" id="preview-cost-machinery">₹ 0.00</div>
+                    </div>
+                    <div>
+                      <label class="text-[11px] font-bold text-slate-600 uppercase tracking-wide block mb-1">Working Capital / Contingencies (₹)</label>
+                      <div class="font-mono font-medium text-slate-800 text-sm p-2 bg-slate-50 border border-slate-200 rounded text-right" id="preview-cost-contingency">₹ 0.00</div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Total Project Cost Bar (matching Form) -->
+                <div class="bg-[#244376] text-white flex justify-between items-center px-4 py-2.5 rounded-lg font-bold text-sm mt-4">
+                  <span>Total Project Cost:</span>
+                  <span class="font-mono" id="preview-total-cost">₹ 0.00</span>
+                </div>
+              </div>
+
+              <!-- Card B: Means of Finance (₹) -->
+              <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs flex flex-col justify-between">
+                <div>
+                  <h3 class="text-sm font-bold text-[#1e3a8a] mb-4 pb-1 border-b border-slate-100 flex items-center justify-between">
+                    <span>B. Means of Finance (₹)</span>
+                    <span class="text-[11px] font-normal text-slate-500">Funding Plan</span>
+                  </h3>
+                  <div class="space-y-3 text-xs">
+                    <div>
+                      <label class="text-[11px] font-bold text-slate-600 uppercase tracking-wide block mb-1">Promoter Equity / Internal Accruals (₹)</label>
+                      <div class="font-mono font-medium text-slate-800 text-sm p-2 bg-slate-50 border border-slate-200 rounded text-right" id="preview-fin-equity">₹ 0.00</div>
+                    </div>
+                    <div>
+                      <label class="text-[11px] font-bold text-slate-600 uppercase tracking-wide block mb-1">Term Loan from Bank (₹)</label>
+                      <div class="font-mono font-medium text-slate-800 text-sm p-2 bg-slate-50 border border-slate-200 rounded text-right" id="preview-fin-loan">₹ 0.00</div>
+                    </div>
+                    <div>
+                      <label class="text-[11px] font-bold text-slate-600 uppercase tracking-wide block mb-1">Other Sources (₹)</label>
+                      <div class="font-mono font-medium text-slate-800 text-sm p-2 bg-slate-50 border border-slate-200 rounded text-right" id="preview-fin-other">₹ 0.00</div>
+                    </div>
                   </div>
                 </div>
                 <div>
-                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Permanent Account Number
-                    (PAN)</label>
-                  <div class="font-mono font-bold text-slate-900 mt-0.5" id="preview-applicant-pan">AAACA1234F</div>
+                  <!-- Total Means of Finance Box (matching Form) -->
+                  <div class="bg-[#eaf1fb] border border-blue-200 text-blue-900 flex justify-between items-center px-4 py-2.5 rounded-lg font-bold text-sm mt-4">
+                    <span>Total Means of Finance:</span>
+                    <span class="font-mono" id="preview-total-finance">₹ 0.00</span>
+                  </div>
+                  <!-- Reconciliation Status -->
+                  <div id="preview-fin-reconcile-status" class="text-right text-xs font-semibold text-emerald-700 mt-2">
+                    ✓ Reconciled with Total Project Cost
+                  </div>
                 </div>
-                <div>
-                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">GSTIN</label>
-                  <div class="font-mono font-semibold text-slate-800 mt-0.5" id="preview-applicant-gstin">
-                    23AAACA1234F1Z5</div>
-                </div>
-                <div class="sm:col-span-2">
-                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Consortium Status</label>
-                  <div class="font-semibold text-slate-800 mt-0.5" id="preview-applicant-consortium">No (Single Entity
-                    Applicant)</div>
-                </div>
-              </div>
-
-              <!-- Right Col: Authorized Signatory Details + Photo -->
-              <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 flex flex-col items-center text-center">
-                <div
-                  class="w-24 h-28 bg-slate-200 border border-slate-300 rounded overflow-hidden shadow-xs mb-2.5 flex items-center justify-center relative">
-                  <img id="preview-auth-photo" src="" alt="Signatory Photo" class="w-full h-full object-cover hidden">
-                  <span id="preview-auth-photo-ph" class="text-slate-400 font-semibold text-xs px-2">No Photo</span>
-                </div>
-                <div class="text-[10px] uppercase font-bold text-blue-700 tracking-wider">Authorized Signatory</div>
-                <div class="font-extrabold text-slate-900 text-sm mt-0.5" id="preview-auth-name">Satya Vishwakarma</div>
-                <div class="text-xs text-slate-600 font-medium" id="preview-auth-designation">Managing Director</div>
-                <div class="text-xs text-slate-500 font-mono mt-2" id="preview-auth-mobile">+91 98260 12345</div>
-                <div class="text-xs text-slate-500 truncate max-w-full" id="preview-auth-email">
-                  satya.v@apexprecision.com</div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-
-        <!-- 2. Project Profile & Employment Metrics Card -->
-        <div class="bg-white rounded border border-slate-200 shadow-sm overflow-hidden">
-          <div class="bg-[#3b5998] px-5 py-3 flex items-center justify-between text-white">
-            <h3 class="font-bold text-sm tracking-wide flex items-center gap-2">
-              <span
-                class="w-5 h-5 rounded-full bg-white/20 text-white text-xs flex items-center justify-center font-bold">2</span>
-              <span>Project Profile &amp; Employment Metrics</span>
-            </h3>
-            <span class="text-xs bg-white/20 px-2 py-0.5 rounded font-medium">Read-Only</span>
-          </div>
-          <div class="p-5 md:p-6 space-y-4">
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs">
-              <div class="sm:col-span-2">
-                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Proposed Project
-                  Title</label>
-                <div class="font-bold text-slate-900 text-sm mt-0.5" id="preview-proj-title">Advanced Software
-                  Engineering &amp; Embedded Systems Development Facility</div>
-              </div>
-              <div>
-                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Primary Industry
-                  Sector</label>
-                <div class="font-semibold text-slate-800 mt-0.5" id="preview-primary-business-type">IT / ITeS / Software
-                  Development</div>
-              </div>
-              <div>
-                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Current Technical
-                  Headcount</label>
-                <div class="font-bold text-slate-900 mt-0.5 font-mono text-sm" id="preview-unit-emp-count">240
-                  Professionals</div>
-              </div>
-              <div>
-                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Annual Turnover (Last
-                  FY)</label>
-                <div class="font-bold text-slate-900 mt-0.5 font-mono text-sm" id="preview-unit-turnover">₹ 42.50 Cr
-                </div>
-              </div>
-              <div>
-                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Past Capital
-                  Investments</label>
-                <div class="font-bold text-slate-900 mt-0.5 font-mono text-sm" id="preview-unit-past-inv">₹ 18.20 Cr
-                </div>
-              </div>
-            </div>
-
-            <!-- Committed Employment Metrics Banner -->
-            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded p-4">
-              <div class="flex items-center gap-2 mb-1.5">
-                <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
-                <span class="text-xs font-bold text-blue-900 uppercase tracking-wide">Committed 3-Year Direct Employment
-                  Metrics &amp; Phasing</span>
-              </div>
-              <div class="text-xs text-slate-800 font-medium leading-relaxed" id="preview-proj-manpower">
-                Phase-I (Year 1): 200 software engineers &amp; QA specialists; Phase-II (Year 2): 150 embedded firmware
-                developers; Phase-III (Year 3): 150 cloud AI architects. Total 3-Year Committed Headcount: 500 tech
-                professionals.
-              </div>
-            </div>
-
-            <!-- Project Details Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs pt-1">
-              <div class="bg-slate-50 border border-slate-200 rounded p-3">
-                <label class="text-[11px] font-bold text-slate-600 uppercase tracking-wide block mb-1">Present Technical
-                  Operations</label>
-                <div class="text-slate-800 leading-relaxed" id="preview-unit-present-act">Enterprise cloud engineering,
-                  industrial automation firmware, and IT consulting services.</div>
-              </div>
-              <div class="bg-slate-50 border border-slate-200 rounded p-3">
-                <label class="text-[11px] font-bold text-slate-600 uppercase tracking-wide block mb-1">Implementation
-                  Schedule / Milestones</label>
-                <div class="text-slate-800 leading-relaxed" id="preview-proj-timeline">Civil works completion within 12
-                  months; Fit-out &amp; machinery commissioning within 18 months; Commercial operations launch within 24
-                  months of lease deed.</div>
-              </div>
-              <div class="bg-slate-50 border border-slate-200 rounded p-3">
-                <label class="text-[11px] font-bold text-slate-600 uppercase tracking-wide block mb-1">Promoter
-                  Credentials &amp; Track Record</label>
-                <div class="text-slate-800 leading-relaxed" id="preview-proj-promoters">Promoters possess 20+ years of
-                  domain experience in industrial IT software, holding Master's degrees from IIT/NIT.</div>
-              </div>
-              <div class="bg-slate-50 border border-slate-200 rounded p-3">
-                <label class="text-[11px] font-bold text-slate-600 uppercase tracking-wide block mb-1">Capex &amp; Means
-                  of Finance Breakdown</label>
-                <div class="text-slate-800 leading-relaxed" id="preview-proj-funds-source">Financed via 65% Internal
-                  Accruals &amp; Equity Capital, 35% Sanctioned Term Loan from Scheduled Commercial Bank.</div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- 3. Financial Details & Proposed Outlay Card -->
-        <div class="bg-white rounded border border-slate-200 shadow-sm overflow-hidden">
-          <div class="bg-[#3b5998] px-5 py-3 flex items-center justify-between text-white">
-            <h3 class="font-bold text-sm tracking-wide flex items-center gap-2">
-              <span
-                class="w-5 h-5 rounded-full bg-white/20 text-white text-xs flex items-center justify-center font-bold">3</span>
-              <span>Financial Details, Statutory Tariffs &amp; Proposed Outlay</span>
-            </h3>
-            <span class="text-xs bg-white/20 px-2 py-0.5 rounded font-medium">Read-Only</span>
-          </div>
-          <div class="p-5 md:p-6 space-y-5">
-
-            <!-- Statutory Land Tariffs Table -->
-            <div>
-              <div
-                class="text-xs font-bold text-slate-700 uppercase tracking-wide mb-2 flex items-center justify-between">
-                <span>Statutory Land Allotment Tariffs (Calculated per MPSEDC Policy 2023)</span>
-                <span class="text-blue-700 font-semibold lowercase text-[11px]">inclusive of progressive multi-slab
-                  rebate</span>
-              </div>
-              <div class="overflow-x-auto border border-slate-200 rounded">
-                <table class="w-full text-xs text-left">
-                  <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
-                    <tr>
-                      <th class="p-2.5">Base Land Premium</th>
-                      <th class="p-2.5">Rebate Allowed</th>
-                      <th class="p-2.5">Net Land Premium</th>
-                      <th class="p-2.5 text-blue-900">25% Advance Premium</th>
-                      <th class="p-2.5">Development Charges</th>
-                      <th class="p-2.5">1% Lease Rent / yr</th>
-                      <th class="p-2.5">2% Security Deposit</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-slate-200 font-mono text-slate-800">
-                    <tr class="bg-white">
-                      <td class="p-2.5" id="preview-land-prem">₹ 24,500,000.00</td>
-                      <td class="p-2.5 text-emerald-700 font-semibold" id="preview-rebate-val">₹ 0.00</td>
-                      <td class="p-2.5 font-bold" id="preview-net-prem">₹ 24,500,000.00</td>
-                      <td class="p-2.5 text-blue-900 font-bold bg-blue-50/50" id="preview-advance-prem">₹ 6,125,000.00
-                      </td>
-                      <td class="p-2.5" id="preview-dev-charges">₹ 7,000,000.00</td>
-                      <td class="p-2.5" id="preview-lease-rent">₹ 245,000.00</td>
-                      <td class="p-2.5" id="preview-security-deposit">₹ 490,000.00</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <!-- Capital Outlay & Means of Finance 2-Col Tables -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-
-              <!-- Proposed Project Outlay -->
-              <div class="border border-slate-200 rounded overflow-hidden">
-                <div class="bg-slate-100 px-4 py-2 font-bold text-xs text-slate-700 border-b border-slate-200">
-                  Proposed Capital Outlay
-                </div>
-                <table class="w-full text-xs text-left">
-                  <tbody class="divide-y divide-slate-100 text-slate-800 font-medium">
-                    <tr>
-                      <td class="p-2 px-4 text-slate-600">Land Premium (as calculated)</td>
-                      <td class="p-2 px-4 text-right font-mono" id="preview-cost-land">₹ 24,500,000.00</td>
-                    </tr>
-                    <tr>
-                      <td class="p-2 px-4 text-slate-600">Site Development &amp; Landscaping</td>
-                      <td class="p-2 px-4 text-right font-mono" id="preview-cost-dev">₹ 2,500,000.00</td>
-                    </tr>
-                    <tr>
-                      <td class="p-2 px-4 text-slate-600">Civil Building &amp; Interior Infrastructure</td>
-                      <td class="p-2 px-4 text-right font-mono" id="preview-cost-building">₹ 45,000,000.00</td>
-                    </tr>
-                    <tr>
-                      <td class="p-2 px-4 text-slate-600">IT Hardware, Machinery &amp; Servers</td>
-                      <td class="p-2 px-4 text-right font-mono" id="preview-cost-machinery">₹ 18,000,000.00</td>
-                    </tr>
-                    <tr>
-                      <td class="p-2 px-4 text-slate-600">Contingencies &amp; Pre-op Expenses</td>
-                      <td class="p-2 px-4 text-right font-mono" id="preview-cost-contingency">₹ 2,000,000.00</td>
-                    </tr>
-                    <tr class="bg-slate-50 font-bold border-t border-slate-200">
-                      <td class="p-2.5 px-4 text-slate-900">Total Proposed Capital Outlay</td>
-                      <td class="p-2.5 px-4 text-right font-mono text-[#2b579a] text-sm font-extrabold"
-                        id="preview-total-cost">₹ 92,000,000.00</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <!-- Means of Finance -->
-              <div class="border border-slate-200 rounded overflow-hidden">
-                <div class="bg-slate-100 px-4 py-2 font-bold text-xs text-slate-700 border-b border-slate-200">
-                  Means of Finance (Funding Plan)
-                </div>
-                <table class="w-full text-xs text-left">
-                  <tbody class="divide-y divide-slate-100 text-slate-800 font-medium">
-                    <tr>
-                      <td class="p-2 px-4 text-slate-600">Promoter Equity &amp; Share Capital</td>
-                      <td class="p-2 px-4 text-right font-mono" id="preview-fin-equity">₹ 55,000,000.00</td>
-                    </tr>
-                    <tr>
-                      <td class="p-2 px-4 text-slate-600">Term Loan from Banks / Financial Inst.</td>
-                      <td class="p-2 px-4 text-right font-mono" id="preview-fin-loan">₹ 32,000,000.00</td>
-                    </tr>
-                    <tr>
-                      <td class="p-2 px-4 text-slate-600">Internal Accruals &amp; Other Sources</td>
-                      <td class="p-2 px-4 text-right font-mono" id="preview-fin-other">₹ 5,000,000.00</td>
-                    </tr>
-                    <tr>
-                      <td class="p-2 px-4 text-slate-400 italic">Funding Gap</td>
-                      <td class="p-2 px-4 text-right font-mono text-emerald-600">₹ 0.00 (Fully Funded)</td>
-                    </tr>
-                    <tr>
-                      <td class="p-2 px-4 text-slate-400">&nbsp;</td>
-                      <td class="p-2 px-4 text-right">&nbsp;</td>
-                    </tr>
-                    <tr class="bg-slate-50 font-bold border-t border-slate-200">
-                      <td class="p-2.5 px-4 text-slate-900">Total Means of Finance</td>
-                      <td class="p-2.5 px-4 text-right font-mono text-emerald-700 text-sm font-extrabold"
-                        id="preview-total-finance">₹ 92,000,000.00</td>
-                    </tr>
-                  </tbody>
-                </table>
               </div>
 
             </div>
@@ -4253,78 +4215,74 @@
           </div>
         </div>
 
-        <!-- 4. Mandatory Documents Verification Checklist (MATCHING SCREENSHOT) -->
-        <div class="bg-white rounded border border-slate-200 shadow-sm overflow-hidden">
-          <div class="bg-[#3b5998] px-5 py-3 flex items-center justify-between text-white">
-            <h3 class="font-bold text-sm tracking-wide flex items-center gap-2">
-              <span
-                class="w-5 h-5 rounded-full bg-white/20 text-white text-xs flex items-center justify-center font-bold">4</span>
-              <span>Mandatory Documents Verification Checklist</span>
-            </h3>
-            <span class="text-xs bg-emerald-500/80 px-2 py-0.5 rounded font-medium text-white flex items-center gap-1">
-              <span>&#10003;</span><span>All Verified</span>
+        <!-- 6. SECTION 5: DOCUMENTS ATTACHED ALONG WITH APPLICATION FORM -->
+        <div class="bg-white rounded border border-slate-200 shadow-xs overflow-hidden preview-section">
+          <div class="bg-[#2b579a] px-5 py-3 text-white font-bold text-sm tracking-wide flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-white/20 text-white text-xs flex items-center justify-center font-bold">5</span>
+              <span>5. Documents Attached along with Application Form</span>
+            </div>
+            <span class="text-xs bg-emerald-500/90 text-white px-2.5 py-0.5 rounded font-medium flex items-center gap-1">
+              <span>✓</span><span>Attached</span>
             </span>
           </div>
 
-          <!-- Document Verification Table styled strictly based on screenshot -->
-          <div class="overflow-x-auto">
-            <table class="w-full text-xs text-left border-collapse" style="font-family: inherit;">
-              <thead class="bg-slate-50 text-slate-700 border-b border-slate-200">
-                <tr>
-                  <th class="py-2.5 px-4 w-16 text-center font-bold">S.No.</th>
-                  <th class="py-2.5 px-4 font-bold">Document Name</th>
-                  <th class="py-2.5 px-4 w-44 font-bold text-center">Status / File</th>
-                  <th class="py-2.5 px-4 w-28 text-center font-bold">Action</th>
-                </tr>
-              </thead>
-              <tbody id="preview-doc-table-body" class="divide-y divide-slate-200 text-slate-800">
-                <!-- Populated by renderPreviewDocChecklist() based on screenshot -->
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Statutory Declaration Summary Strip -->
-          <div
-            class="p-4 bg-slate-50/70 border-t border-slate-200 flex items-center justify-between text-xs text-slate-600 flex-wrap gap-2">
-            <div class="flex items-center gap-2">
-              <span class="text-emerald-700 font-bold">&#10003;</span>
-              <span><b>Form-2 Statutory Consent:</b> Applicant accepted undertaking &amp; all terms on <span
-                  id="preview-consent-timestamp" class="font-mono">Today</span></span>
+          <div class="p-5 md:p-6 space-y-4">
+            <!-- Document Table -->
+            <div class="overflow-x-auto border border-slate-200 rounded-lg">
+              <table class="w-full text-xs text-left border-collapse">
+                <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
+                  <tr>
+                    <th class="py-2.5 px-4 w-14 text-center">S.No.</th>
+                    <th class="py-2.5 px-4">Document Title / Type</th>
+                    <th class="py-2.5 px-4 w-56 text-center">Attached File Name</th>
+                    <th class="py-2.5 px-4 w-28 text-center no-print">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="preview-doc-table-body" class="divide-y divide-slate-200 text-slate-800">
+                  <!-- Populated dynamically by renderPreviewDocChecklist() -->
+                </tbody>
+              </table>
             </div>
-            <div class="text-[11px] text-slate-500">
-              Security Hash: <span class="font-mono text-slate-700 font-bold"
-                id="preview-form-hash">SHA256:7c9e...4b12</span>
+
+            <!-- Statutory Form-2 Undertaking Acceptance Status -->
+            <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+              <div class="flex items-start gap-2.5">
+                <span class="text-emerald-700 font-bold text-base leading-none">✓</span>
+                <div>
+                  <span class="font-bold text-slate-900 block">Form-2 Statutory Undertaking &amp; Terms Acceptance:</span>
+                  <span class="text-slate-600">Applicant accepted and confirmed the undertaking on <span id="preview-consent-timestamp" class="font-mono font-medium text-slate-800">Today</span></span>
+                </div>
+              </div>
+              <div class="text-[11px] text-slate-500 sm:text-right font-mono">
+                Security Hash: <span id="preview-form-hash" class="font-bold text-slate-700">SHA256:7c9e...4b12</span>
+              </div>
             </div>
           </div>
-
         </div>
 
-        <!-- ========================================================================= -->
-        <!-- FORM PREVIEW FOOTER (STRICTLY MATCHING ATTACHED SCREENSHOT)               -->
-        <!-- ========================================================================= -->
+        <!-- 7. PREVIEW FOOTER: BANNER, ACTION BUTTONS & UNIPAY NOTICE -->
         <div class="mt-8 pt-2">
 
           <!-- A. Consolidated Upfront Financial Banner -->
-          <div
-            class="w-full bg-[#e8eef5] text-slate-800 text-center font-bold text-sm py-3 px-4 rounded mb-5 border border-slate-200">
-            <span id="preview-upfront-banner-text">Application fee + Advance Premium (25% of Land Premium) : ₹ <span
-                id="preview-upfront-amount">3,22,500</span></span>
+          <div class="w-full bg-[#e8eef5] text-slate-800 text-center font-bold text-sm py-3 px-4 rounded mb-5 border border-slate-200">
+            <span id="preview-upfront-banner-text">Application fee + Advance Premium (25% of Land Premium) : ₹ <span id="preview-upfront-amount">3,22,500</span></span>
           </div>
 
           <!-- B. Action Buttons (Edit & Affix DSC) -->
-          <div class="flex items-center justify-center gap-3">
+          <div class="flex items-center justify-center gap-3 no-print">
             <button type="button" onclick="editEoiFormFromPreview()"
-              class="bg-[#f59e0b] hover:bg-[#d97706] text-white font-bold text-sm py-2 px-6 rounded-[3px] shadow-sm transition cursor-pointer border-0">
+              class="bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 px-6 rounded-[3px] transition cursor-pointer border-0">
               Edit
             </button>
             <button type="button" id="preview-btn-affix-dsc" onclick="executeFinalDscSubmission()"
-              class="bg-[#2b579a] hover:bg-[#1e3e6f] text-white font-bold text-sm py-2 px-6 rounded-[3px] shadow-sm transition cursor-pointer border-0 inline-flex items-center gap-2">
+              class="bg-[#2b579a] hover:bg-blue-900 text-white font-semibold py-2 px-6 rounded-[3px] shadow-sm transition cursor-pointer border-0 inline-flex items-center gap-2">
               <span>Affix DSC</span>
             </button>
           </div>
 
           <!-- C. UniPay Utility Advisory Note & Link -->
-          <div class="text-xs text-slate-600 mt-4 text-center">
+          <div class="text-xs text-slate-600 mt-4 text-center no-print">
             NOTE : To sign-up using digital sign (DSC), DSC utility (UniPay) has to be installed and running. To install
             UniPay utility <a href="javascript:void(0)" onclick="showUniPayModal()"
               class="text-red-700 underline font-semibold hover:text-red-800">Click here</a>
