@@ -5579,8 +5579,29 @@
         //   </a>
         // ` : '';
 
-        const form2TemplateLinkHtml = isForm2;
 
+        // row.innerHTML = `
+        //   <div style="flex: 1; padding-right: 15px;">
+        //     <div class="name font-bold text-slate-900 text-xs">${d.name}</div>
+        //     <div class="meta text-[11px] text-slate-500 mt-1">Accepted format: PDF | Maximum file size: ${maxDocMb} MB</div>
+        //   </div>
+        //   <span class="${badgeClass}">${badgeText}</span>
+        //   <div class="doc-upload-cell" style="display: flex; align-items: center; justify-content: flex-end; gap: 8px; position: relative; flex-wrap: wrap;">
+        //     <div class="file" id="doc-file-${i}" style="margin: 0;">
+        //       <span style="font-weight:600; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle;" id="doc-name-${i}">—</span>
+        //       <span style="white-space: nowrap;">
+        //         <a href="javascript:void(0)" onclick="alert('Viewing preview of uploaded document: ' + document.getElementById('doc-name-${i}').textContent)" style="color:var(--brand);margin-left:8px;font-weight:700;">View</a>
+        //         <a href="javascript:void(0)" onclick="deleteDoc(${i})" style="color:var(--bad);margin-left:8px;font-weight:700;">Delete</a>
+        //       </span>
+        //     </div>
+        //     <div class="up" id="doc-btn-${i}" onclick="mockUploadDoc(${i})" style="margin: 0; white-space: nowrap;">
+        //       <input type="file" id="doc-file-input-${i}" accept=".pdf" style="display:none;" onchange="handleDocFileChange(${i}, this)" onclick="event.stopPropagation()">
+        //       📎 Upload (PDF, max ${maxDocMb}MB)
+        //     </div>
+        //     // ${form2TemplateLinkHtml}
+        //     ${tooltipButtonHtml}
+        //   </div>
+        // `;
 
 
         row.innerHTML = `
@@ -5601,7 +5622,7 @@
               <input type="file" id="doc-file-input-${i}" accept=".pdf" style="display:none;" onchange="handleDocFileChange(${i}, this)" onclick="event.stopPropagation()">
               📎 Upload (PDF, max ${maxDocMb}MB)
             </div>
-            ${form2TemplateLinkHtml}
+          
             ${tooltipButtonHtml}
           </div>
         `;
