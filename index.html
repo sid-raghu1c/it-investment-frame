@@ -1055,7 +1055,7 @@
       // 1. Plot & Location Parameters
       const plotId = document.getElementById('plot-id-display')?.textContent?.trim() || (currentSelectedPlot?.id) || 'Plot ITP-IND-201';
       const itPark = document.getElementById('plot-area-display')?.textContent?.trim() || (currentSelectedPlot?.parkName) || 'Crystal IT Park, Indore';
-      const purpose = document.getElementById('plot-purpose-display')?.textContent?.replace('Purpose:', '')?.trim() || (currentSelectedPlot?.purpose) || 'IT/ITeS Operations';
+      const purpose = document.getElementById('plot-purpose-display')?.textContent?.replace('Purpose:', '')?.trim() || (currentSelectedPlot?.purpose) || 'IT/ITeS/ESDM/Data Centre/Edge Data Centre';
       const landType = currentSelectedPlot?.landType || document.getElementById('plot-land-type-display')?.textContent?.trim() || 'EOI Allotment';
       const plotSize = currentSelectedPlot?.sizeSqFt ? `${currentSelectedPlot.sizeSqFt.toLocaleString('en-IN')} Sq.Ft.` : '50,000 Sq.Ft.';
 
@@ -3214,7 +3214,8 @@
                   0.80 Acre</td>
                 <td class="land-table-td text-center text-xs font-semibold text-blue-900">
                   <span
-                    class="inline-block bg-blue-50 text-blue-800 border border-blue-200 rounded px-1.5 py-0.5 text-[11px]">IT/ITeS</span>
+                    class="inline-block bg-blue-50 text-blue-800 border border-blue-200 rounded px-1.5 py-0.5 text-[11px]">IT/ITeS/ESDM/Data
+                    Centre/Edge Data Centre</span>
                 </td>
                 <td
                   class="land-table-td text-right tabular-nums text-xs md:text-[13px] font-bold text-slate-900 bg-slate-50">
@@ -3244,8 +3245,8 @@
                   0.41 Acre</td>
                 <td class="land-table-td text-center text-xs font-semibold text-purple-900">
                   <span
-                    class="inline-block bg-purple-50 text-purple-800 border border-purple-200 rounded px-1.5 py-0.5 text-[11px]">ESDM,
-                    Developer</span>
+                    class="inline-block bg-purple-50 text-purple-800 border border-purple-200 rounded px-1.5 py-0.5 text-[11px]">IT/ITeS/ESDM/Data
+                    Centre/Edge Data Centre, Developer (IT/ITeS/ESDM/ITIA)</span>
                 </td>
                 <td
                   class="land-table-td text-right tabular-nums text-xs md:text-[13px] font-bold text-slate-900 bg-slate-50">
@@ -3336,7 +3337,7 @@
                     Plot ITP-IND-201</div>
                 </div>
                 <span class="text-[10.5px] font-semibold text-[#059669] leading-none mt-1.5 block"
-                  id="plot-purpose-display">Purpose: IT/ITeS</span>
+                  id="plot-purpose-display">Purpose: IT/ITeS/ESDM/Data Centre/Edge Data Centre</span>
               </div>
 
               <!-- Box 3: Plot Size -->
@@ -5165,27 +5166,56 @@
                     class="flex flex-wrap gap-1.5 p-2 bg-slate-50 border border-slate-200 rounded-md mt-1">
                     <button type="button"
                       class="purpose-pill px-2.5 py-1 text-xs font-semibold rounded-full border transition-all cursor-pointer bg-[#4267b2] text-white border-[#4267b2] shadow-xs"
-                      data-val="IT/ITeS" onclick="togglePurposePill(this)">✓ IT/ITeS</button>
+                      data-val="IT/ITeS/ESDM/Data Centre/Edge Data Centre" onclick="togglePurposePill(this)">✓
+                      IT/ITeS/ESDM/Data Centre/Edge Data Centre</button>
                     <button type="button"
                       class="purpose-pill px-2.5 py-1 text-xs font-semibold rounded-full border transition-all cursor-pointer bg-white text-slate-700 border-slate-300 hover:bg-slate-100"
-                      data-val="ESDM" onclick="togglePurposePill(this)">ESDM</button>
+                      data-val="Developer (IT/ITeS/ESDM/ITIA)" onclick="togglePurposePill(this)">Developer
+                      (IT/ITeS/ESDM/ITIA)</button>
                     <button type="button"
                       class="purpose-pill px-2.5 py-1 text-xs font-semibold rounded-full border transition-all cursor-pointer bg-white text-slate-700 border-slate-300 hover:bg-slate-100"
-                      data-val="Data Centre" onclick="togglePurposePill(this)">Data Centre</button>
+                      data-val="Coworking Space Provider" onclick="togglePurposePill(this)">Coworking Space
+                      Provider</button>
                     <button type="button"
                       class="purpose-pill px-2.5 py-1 text-xs font-semibold rounded-full border transition-all cursor-pointer bg-white text-slate-700 border-slate-300 hover:bg-slate-100"
-                      data-val="GCC" onclick="togglePurposePill(this)">GCC</button>
+                      data-val="Global Capability Centre (GCC)" onclick="togglePurposePill(this)">Global Capability
+                      Centre (GCC)</button>
                     <button type="button"
                       class="purpose-pill px-2.5 py-1 text-xs font-semibold rounded-full border transition-all cursor-pointer bg-white text-slate-700 border-slate-300 hover:bg-slate-100"
-                      data-val="AVGC-XR" onclick="togglePurposePill(this)">AVGC-XR</button>
+                      data-val="AVGC-XR (Animation, VFX, Gaming &amp; Comics)" onclick="togglePurposePill(this)">AVGC-XR
+                      (Animation, VFX, Gaming &amp; Comics)</button>
                     <button type="button"
                       class="purpose-pill px-2.5 py-1 text-xs font-semibold rounded-full border transition-all cursor-pointer bg-white text-slate-700 border-slate-300 hover:bg-slate-100"
-                      data-val="Semiconductor" onclick="togglePurposePill(this)">Semiconductor</button>
+                      data-val="Private Institute (AVGC-XR)" onclick="togglePurposePill(this)">Private Institute
+                      (AVGC-XR)</button>
                     <button type="button"
                       class="purpose-pill px-2.5 py-1 text-xs font-semibold rounded-full border transition-all cursor-pointer bg-white text-slate-700 border-slate-300 hover:bg-slate-100"
-                      data-val="Developer" onclick="togglePurposePill(this)">Infrastructure Developer</button>
+                      data-val="DES/DSDM (Drone)" onclick="togglePurposePill(this)">DES/DSDM (Drone)</button>
+                    <button type="button"
+                      class="purpose-pill px-2.5 py-1 text-xs font-semibold rounded-full border transition-all cursor-pointer bg-white text-slate-700 border-slate-300 hover:bg-slate-100"
+                      data-val="Collage/Institute/University/Academia"
+                      onclick="togglePurposePill(this)">Collage/Institute/University/Academia</button>
+                    <button type="button"
+                      class="purpose-pill px-2.5 py-1 text-xs font-semibold rounded-full border transition-all cursor-pointer bg-white text-slate-700 border-slate-300 hover:bg-slate-100"
+                      data-val="Fabless Products/IP" onclick="togglePurposePill(this)">Fabless Products/IP</button>
+                    <button type="button"
+                      class="purpose-pill px-2.5 py-1 text-xs font-semibold rounded-full border transition-all cursor-pointer bg-white text-slate-700 border-slate-300 hover:bg-slate-100"
+                      data-val="Semiconductor Design/Design Services/GCC extension centers"
+                      onclick="togglePurposePill(this)">Semiconductor Design/Design Services/GCC extension
+                      centers</button>
+                    <button type="button"
+                      class="purpose-pill px-2.5 py-1 text-xs font-semibold rounded-full border transition-all cursor-pointer bg-white text-slate-700 border-slate-300 hover:bg-slate-100"
+                      data-val="Semiconductor &amp; Component Manufacturing"
+                      onclick="togglePurposePill(this)">Semiconductor &amp; Component Manufacturing</button>
+                    <button type="button"
+                      class="purpose-pill px-2.5 py-1 text-xs font-semibold rounded-full border transition-all cursor-pointer bg-white text-slate-700 border-slate-300 hover:bg-slate-100"
+                      data-val="CoE for Semiconductors &amp; ESDM" onclick="togglePurposePill(this)">CoE for
+                      Semiconductors &amp; ESDM</button>
+                    <button type="button"
+                      class="purpose-pill px-2.5 py-1 text-xs font-semibold rounded-full border transition-all cursor-pointer bg-white text-slate-700 border-slate-300 hover:bg-slate-100"
+                      data-val="Institutes" onclick="togglePurposePill(this)">Institutes</button>
                   </div>
-                  <input type="hidden" id="input-purpose" value="IT/ITeS" required>
+                  <input type="hidden" id="input-purpose" value="IT/ITeS/ESDM/Data Centre/Edge Data Centre" required>
                   <span class="file-hint">Select one or multiple applicable categories (multi-select pill
                     selector)</span>
                 </div>
@@ -5314,7 +5344,7 @@
         sizeSqFt: 35000,
         sqm: "0.80 Acre",
         loc: "Crystal IT Park (Indore), M.P.",
-        purpose: "IT/ITeS",
+        purpose: "IT/ITeS/ESDM/Data Centre/Edge Data Centre",
         landType: "EOI Allotment",
         premium: "Rs. 24,500,000.00",
         dev: "Rs. 7,000,000.00",
@@ -5334,7 +5364,7 @@
         sizeSqFt: 18000,
         sqm: "0.41 Acre",
         loc: "IT Park Badwai (Bhopal), M.P.",
-        purpose: "ESDM, Developer",
+        purpose: "IT/ITeS/ESDM/Data Centre/Edge Data Centre, Developer (IT/ITeS/ESDM/ITIA)",
         landType: "Mega Project Allotment",
         premium: "Rs. 12,600,000.00",
         dev: "Rs. 3,600,000.00",
@@ -5357,8 +5387,8 @@
         itPark: "Crystal IT Park, Indore",
         park: "Crystal IT Park, Indore",
         plotNo: "ITP-IND-201",
-        purpose: "IT/ITeS",
-        landUse: "IT/ITeS",
+        purpose: "IT/ITeS/ESDM/Data Centre/Edge Data Centre",
+        landUse: "IT/ITeS/ESDM/Data Centre/Edge Data Centre",
         landType: "EOI Allotment",
         sizeAcres: 0.80,
         acres: 0.80,
@@ -5387,8 +5417,8 @@
         itPark: "IT Park Badwai, Bhopal",
         park: "IT Park Badwai, Bhopal",
         plotNo: "ITP-BHP-108",
-        purpose: "ESDM, Developer",
-        landUse: "ESDM, Developer",
+        purpose: "IT/ITeS/ESDM/Data Centre/Edge Data Centre, Developer (IT/ITeS/ESDM/ITIA)",
+        landUse: "IT/ITeS/ESDM/Data Centre/Edge Data Centre, Developer (IT/ITeS/ESDM/ITIA)",
         landType: "Mega Project Allotment",
         sizeAcres: 0.41,
         acres: 0.41,
@@ -6053,15 +6083,10 @@
       if (!catSelect) return;
 
       const rawPurpose = String(plotPurpose || '').trim();
-      const tokens = rawPurpose.split(/[,;/]+/).map(t => t.trim()).filter(Boolean);
-
-      const unitKeywords = ['it/ites', 'it', 'ites', 'esdm', 'data centre', 'data center', 'gcc', 'avgc-xr', 'avgc', 'semiconductor', 'electronics manufacturing'];
+      const tokens = parseSelectedPurposes(rawPurpose);
 
       const hasDeveloper = tokens.some(t => t.toLowerCase().includes('developer'));
-      const hasUnit = tokens.some(t => {
-        const tl = t.toLowerCase();
-        return unitKeywords.some(uk => tl.includes(uk)) || (!tl.includes('developer'));
-      });
+      const hasUnit = tokens.some(t => !t.toLowerCase().includes('developer'));
 
       if (hasDeveloper && !hasUnit) {
         // Only Developer -> Automatically select Form 1-A and FREEZE/DISABLE
@@ -6128,7 +6153,7 @@
       let leaseVal = 350000;
       let appChargesVal = 10000;
       let landTypeStr = "EOI Allotment";
-      let purposeStr = "IT/ITeS";
+      let purposeStr = "IT/ITeS/ESDM/Data Centre/Edge Data Centre";
       let sizeSqFtVal = 35000;
 
       if (oicPlot) {
@@ -6138,7 +6163,7 @@
         leaseVal = oicPlot.lease || 350000;
         appChargesVal = oicPlot.appCharges || 10000;
         landTypeStr = oicPlot.landType || "EOI Allotment";
-        purposeStr = oicPlot.purpose || "IT/ITeS";
+        purposeStr = oicPlot.purpose || "IT/ITeS/ESDM/Data Centre/Edge Data Centre";
         sizeSqFtVal = oicPlot.sizeSqFt || 35000;
       } else if (plot) {
         if (plot.premium) {
@@ -6489,6 +6514,50 @@
     });
 
     // Dynamic Purpose Pill Selector Handlers (Multi-select)
+    const PURPOSE_PILL_OPTIONS = [
+      'IT/ITeS/ESDM/Data Centre/Edge Data Centre',
+      'Developer (IT/ITeS/ESDM/ITIA)',
+      'Coworking Space Provider',
+      'Global Capability Centre (GCC)',
+      'AVGC-XR (Animation, VFX, Gaming & Comics)',
+      'Private Institute (AVGC-XR)',
+      'DES/DSDM (Drone)',
+      'Collage/Institute/University/Academia',
+      'Fabless Products/IP',
+      'Semiconductor Design/Design Services/GCC extension centers',
+      'Semiconductor & Component Manufacturing',
+      'CoE for Semiconductors & ESDM',
+      'Institutes'
+    ];
+    const DEFAULT_PURPOSE_OPTION = PURPOSE_PILL_OPTIONS[0];
+
+    function parseSelectedPurposes(input) {
+      if (Array.isArray(input)) {
+        return input.map(s => String(s).trim()).filter(Boolean);
+      }
+      const raw = String(input || '').trim();
+      if (!raw) return [];
+      const matched = [];
+      let remaining = raw;
+      const sortedOpts = [...PURPOSE_PILL_OPTIONS].sort((a, b) => b.length - a.length);
+      sortedOpts.forEach(opt => {
+        const escaped = opt.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const re = new RegExp(`(^|,\\s*)${escaped}(?=\\s*,|$)`, 'i');
+        if (re.test(remaining)) {
+          matched.push(opt);
+          remaining = remaining
+            .replace(re, '$1')
+            .replace(/(^,\s*|,\s*$)/g, '')
+            .replace(/,\s*,+/g, ', ')
+            .trim();
+        }
+      });
+      if (matched.length > 0) {
+        return PURPOSE_PILL_OPTIONS.filter(opt => matched.includes(opt));
+      }
+      return raw.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
+    }
+
     function togglePurposePill(btn) {
       const val = btn.getAttribute('data-val');
       const isSelected = btn.classList.contains('bg-[#4267b2]');
@@ -6527,12 +6596,20 @@
     }
 
     function getSelectedPurposePills() {
+      const allPills = document.querySelectorAll('.purpose-pill');
+      const selectedVals = [];
+      allPills.forEach(p => {
+        if (p.classList.contains('bg-[#4267b2]')) {
+          selectedVals.push(p.getAttribute('data-val'));
+        }
+      });
+      if (selectedVals.length > 0) return selectedVals.join(', ');
       const hiddenInput = document.getElementById('input-purpose');
-      return hiddenInput?.value?.trim() || 'IT/ITeS';
+      return hiddenInput?.value?.trim() || '';
     }
 
-    function resetPurposePills(defaultStr = 'IT/ITeS') {
-      const targetItems = defaultStr.split(/[,;/]+/).map(s => s.trim().toLowerCase());
+    function resetPurposePills(defaultStr = DEFAULT_PURPOSE_OPTION) {
+      const targetItems = parseSelectedPurposes(defaultStr).map(s => s.toLowerCase());
       const allPills = document.querySelectorAll('.purpose-pill');
       allPills.forEach(p => {
         const val = p.getAttribute('data-val');
@@ -6644,7 +6721,7 @@
     function resetFinancialCalculations() {
       setTimeout(() => {
         editingPlotId = null;
-        resetPurposePills('IT/ITeS');
+        resetPurposePills(DEFAULT_PURPOSE_OPTION);
         const landType = document.getElementById('input-land-type');
         if (landType) landType.value = 'EOI Allotment';
         handleLandTypeChange('EOI Allotment');
@@ -6713,6 +6790,12 @@
 
       if (!itPark || !plotNo) {
         showToast("Please select an IT Park and Plot Number.", "error");
+        return;
+      }
+
+      const selectedPillCount = Array.from(document.querySelectorAll('.purpose-pill')).filter(p => p.classList.contains('bg-[#4267b2]')).length;
+      if (selectedPillCount < 1 || !purpose) {
+        showToast("Please select at least one Purpose of Plot.", "error");
         return;
       }
 
@@ -6891,7 +6974,7 @@
             <span class="text-xs font-semibold px-2 py-0.5 rounded bg-blue-50 text-blue-900 border border-blue-200">${plot.plotNo || plot.id}</span>
           </td>
           <td class="oic-table-td">
-            <div class="text-xs font-semibold text-slate-800">${plot.purpose || plot.landUse || 'IT/ITeS'}</div>
+            <div class="text-xs font-semibold text-slate-800">${plot.purpose || plot.landUse || DEFAULT_PURPOSE_OPTION}</div>
           </td>
           <td class="oic-table-td text-right">
             <span class="tabular-nums font-semibold text-slate-800 text-xs">${formatAcres(plotAcres)}</span>
@@ -6954,7 +7037,7 @@
         landType.value = plot.landType || 'EOI Allotment';
         handleLandTypeChange(landType.value);
       }
-      resetPurposePills(plot.purpose || plot.landUse || 'IT/ITeS');
+      resetPurposePills(plot.purpose || plot.landUse || DEFAULT_PURPOSE_OPTION);
       updateFinancialCalculations();
 
       const formEl = document.getElementById('form-fill-plot');
@@ -7129,7 +7212,7 @@
           sizeSqFt: plot.sizeSqFt || Math.round(plotAcres * 43560),
           sqm: formatAcres(plotAcres),
           loc: plot.itPark + ", M.P.",
-          purpose: plot.purpose || "IT/ITeS",
+          purpose: plot.purpose || DEFAULT_PURPOSE_OPTION,
           landType: plot.landType || "EOI Allotment",
           premium: "Rs. " + formatInr(plot.premium),
           dev: "Rs. " + formatInr(plot.dev),
@@ -7159,7 +7242,7 @@
           <td class="land-table-td font-semibold text-center text-blue-900 text-xs">${plot.plotNo}</td>
           <td class="land-table-td text-right tabular-nums text-xs md:text-[13px] font-semibold text-slate-800">${formatAcres(plotAcres)}</td>
           <td class="land-table-td text-center text-xs font-semibold text-blue-900">
-            <span class="inline-block bg-blue-50 text-blue-800 border border-blue-200 rounded px-1.5 py-0.5 text-[11px]">${plot.purpose || 'IT/ITeS'}</span>
+            <span class="inline-block bg-blue-50 text-blue-800 border border-blue-200 rounded px-1.5 py-0.5 text-[11px]">${plot.purpose || DEFAULT_PURPOSE_OPTION}</span>
           </td>
           <td class="land-table-td text-right tabular-nums text-xs md:text-[13px] font-bold text-slate-900 bg-slate-50">₹ ${formatInr(totalLandAmount)}</td>
           <td class="land-table-td text-center tabular-nums text-xs text-slate-700">${plot.startDate}</td>
