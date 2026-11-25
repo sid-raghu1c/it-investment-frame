@@ -10307,17 +10307,17 @@
 
         </div>
       `;
-        }
+    }
 
     function renderScrutinyAttachments(app) {
-            const tbody = document.getElementById('scrutiny-attachments-tbody');
-            const badge = document.getElementById('scrutiny-attachments-badge');
-            if (!tbody) return;
-            const docs = app.attachments || [];
-            const verifiedCount = docs.filter(d => d.verified).length;
-            if (badge) badge.textContent = `${verifiedCount} / ${docs.length} Verified`;
+      const tbody = document.getElementById('scrutiny-attachments-tbody');
+      const badge = document.getElementById('scrutiny-attachments-badge');
+      if (!tbody) return;
+      const docs = app.attachments || [];
+      const verifiedCount = docs.filter(d => d.verified).length;
+      if (badge) badge.textContent = `${verifiedCount} / ${docs.length} Verified`;
 
-            tbody.innerHTML = docs.map((d, i) => `
+      tbody.innerHTML = docs.map((d, i) => `
         <tr class="hover:bg-slate-50 transition">
           <td class="p-3 text-center font-mono text-slate-700">${i + 1}</td>
           <td class="p-3">
@@ -10329,9 +10329,9 @@
           </td>
           <td class="p-3 text-center">
             ${d.mandatory
-                ? '<span class="inline-block bg-red-50 text-red-700 border border-red-200 text-[10px] font-bold px-2 py-0.5 rounded-full">Mandatory</span>'
-                : '<span class="inline-block bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold px-2 py-0.5 rounded-full">Optional</span>'
-              }
+          ? '<span class="inline-block bg-red-50 text-red-700 border border-red-200 text-[10px] font-bold px-2 py-0.5 rounded-full">Mandatory</span>'
+          : '<span class="inline-block bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold px-2 py-0.5 rounded-full">Optional</span>'
+        }
           </td>
           <td class="p-3 text-center">
             <input type="checkbox" ${d.verified ? 'checked' : ''}
@@ -10340,83 +10340,83 @@
           </td>
         </tr>
       `).join('');
-          }
+    }
 
     function toggleScrutinyAttachmentVerify(docIndex, isChecked) {
-            const app = (window.oicLandApplications || []).find(a => a.appNo === currentScrutinyAppNo);
-            if (!app || !app.attachments || !app.attachments[docIndex]) return;
-            app.attachments[docIndex].verified = Boolean(isChecked);
-            if (typeof savePersistedApplications === 'function') savePersistedApplications();
-            renderScrutinyAttachments(app);
-          }
+      const app = (window.oicLandApplications || []).find(a => a.appNo === currentScrutinyAppNo);
+      if (!app || !app.attachments || !app.attachments[docIndex]) return;
+      app.attachments[docIndex].verified = Boolean(isChecked);
+      if (typeof savePersistedApplications === 'function') savePersistedApplications();
+      renderScrutinyAttachments(app);
+    }
 
     function verifyAllScrutinyAttachments() {
-            const app = (window.oicLandApplications || []).find(a => a.appNo === currentScrutinyAppNo);
-            if (!app || !app.attachments) return;
-            app.attachments.forEach(d => { d.verified = true; });
-            if (typeof savePersistedApplications === 'function') savePersistedApplications();
-            renderScrutinyAttachments(app);
-            showGlobalToast('All attachments marked as verified by OIC IT Park.', 'success');
-          }
+      const app = (window.oicLandApplications || []).find(a => a.appNo === currentScrutinyAppNo);
+      if (!app || !app.attachments) return;
+      app.attachments.forEach(d => { d.verified = true; });
+      if (typeof savePersistedApplications === 'function') savePersistedApplications();
+      renderScrutinyAttachments(app);
+      showGlobalToast('All attachments marked as verified by OIC IT Park.', 'success');
+    }
 
     const IT_PARK_GIS_PROFILES = {
-          'Crystal IT Park, Indore': {
-            coords: '22.6812° N, 75.8794° E',
-            sector: 'Sector-C, Khandwa Road, Indore',
-            road: '30m Wide Ring-Road Approach (NH-52 Spur)',
-            substation: '33/11 kV Dedicated Grid Substation (West Block)',
-            neighborPlots: ['ITP-IND-199 (Allotted)', 'ITP-IND-200 (Vacant)', 'ITP-IND-202 (Green Zone)']
-          },
-          'IT Park Badwai, Bhopal': {
-            coords: '23.3189° N, 77.3814° E',
-            sector: 'Phase-II Mega ESDM Cluster, Badwai, Bhopal',
-            road: '36m Wide Airport-Bypass Arterial Road',
-            substation: '132/33 kV GIS Power Substation (North Sector)',
-            neighborPlots: ['ITP-BHP-107 (Operational)', 'ITP-BHP-MEGA-02 (Reserved)', 'ITP-BHP-109 (Vacant)']
-          },
-          'IT Park Sinhasa, Indore': {
-            coords: '22.6944° N, 75.7921° E',
-            sector: 'Dhar Road IT & Data Centre Corridor, Sinhasa',
-            road: '24m Wide Super-Corridor Link Road',
-            substation: 'Dual-Feed 33 kV Substation (East Boundary)',
-            neighborPlots: ['ITP-SIN-111 (Vacant)', 'ITP-SIN-113 (Operational)', 'Utility Buffer Zone']
-          },
-          'IT Park Purva, Jabalpur': {
-            coords: '23.1362° N, 79.8825° E',
-            sector: 'Bargi Hills Tech Zone, Purva, Jabalpur',
-            road: '24m Wide Medical-College Link Avenue',
-            substation: '33/11 kV IT Park Dedicated Feeder',
-            neighborPlots: ['ITP-JBP-018 (Operational)', 'ITP-JBP-020 (Vacant)', 'STP & Rainwater Zone']
-          },
-          'IT Park Ganga Malanpur, Gwalior': {
-            coords: '26.3510° N, 78.2684° E',
-            sector: 'Malanpur-Ghirongi Industrial IT Corridor, Gwalior',
-            road: '30m Wide NH-44 Logistics Expressway',
-            substation: '132 kV Dedicated Industrial Substation',
-            neighborPlots: ['ITP-GWL-MEGA-01 (Allotted)', 'ITP-GWL-005 (Vacant)', 'Central Green Spine']
-          }
-        };
+      'Crystal IT Park, Indore': {
+        coords: '22.6812° N, 75.8794° E',
+        sector: 'Sector-C, Khandwa Road, Indore',
+        road: '30m Wide Ring-Road Approach (NH-52 Spur)',
+        substation: '33/11 kV Dedicated Grid Substation (West Block)',
+        neighborPlots: ['ITP-IND-199 (Allotted)', 'ITP-IND-200 (Vacant)', 'ITP-IND-202 (Green Zone)']
+      },
+      'IT Park Badwai, Bhopal': {
+        coords: '23.3189° N, 77.3814° E',
+        sector: 'Phase-II Mega ESDM Cluster, Badwai, Bhopal',
+        road: '36m Wide Airport-Bypass Arterial Road',
+        substation: '132/33 kV GIS Power Substation (North Sector)',
+        neighborPlots: ['ITP-BHP-107 (Operational)', 'ITP-BHP-MEGA-02 (Reserved)', 'ITP-BHP-109 (Vacant)']
+      },
+      'IT Park Sinhasa, Indore': {
+        coords: '22.6944° N, 75.7921° E',
+        sector: 'Dhar Road IT & Data Centre Corridor, Sinhasa',
+        road: '24m Wide Super-Corridor Link Road',
+        substation: 'Dual-Feed 33 kV Substation (East Boundary)',
+        neighborPlots: ['ITP-SIN-111 (Vacant)', 'ITP-SIN-113 (Operational)', 'Utility Buffer Zone']
+      },
+      'IT Park Purva, Jabalpur': {
+        coords: '23.1362° N, 79.8825° E',
+        sector: 'Bargi Hills Tech Zone, Purva, Jabalpur',
+        road: '24m Wide Medical-College Link Avenue',
+        substation: '33/11 kV IT Park Dedicated Feeder',
+        neighborPlots: ['ITP-JBP-018 (Operational)', 'ITP-JBP-020 (Vacant)', 'STP & Rainwater Zone']
+      },
+      'IT Park Ganga Malanpur, Gwalior': {
+        coords: '26.3510° N, 78.2684° E',
+        sector: 'Malanpur-Ghirongi Industrial IT Corridor, Gwalior',
+        road: '30m Wide NH-44 Logistics Expressway',
+        substation: '132 kV Dedicated Industrial Substation',
+        neighborPlots: ['ITP-GWL-MEGA-01 (Allotted)', 'ITP-GWL-005 (Vacant)', 'Central Green Spine']
+      }
+    };
 
-        function getItParkGisProfile(parkName) {
-          const key = Object.keys(IT_PARK_GIS_PROFILES).find(k =>
-            parkName && k.toLowerCase().includes(parkName.split(',')[0].trim().toLowerCase())
-          );
-          return IT_PARK_GIS_PROFILES[key || 'Crystal IT Park, Indore'];
-        }
+    function getItParkGisProfile(parkName) {
+      const key = Object.keys(IT_PARK_GIS_PROFILES).find(k =>
+        parkName && k.toLowerCase().includes(parkName.split(',')[0].trim().toLowerCase())
+      );
+      return IT_PARK_GIS_PROFILES[key || 'Crystal IT Park, Indore'];
+    }
 
-        function adjustScrutinyMapZoom(delta) {
-          if (delta === 0) scrutinyMapZoomLevel = 1.0;
-          else scrutinyMapZoomLevel = Math.min(1.4, Math.max(0.8, +(scrutinyMapZoomLevel + delta).toFixed(2)));
-          const svg = document.getElementById('scrutiny-gis-svg');
-          if (svg) svg.style.transform = `scale(${scrutinyMapZoomLevel})`;
-        }
+    function adjustScrutinyMapZoom(delta) {
+      if (delta === 0) scrutinyMapZoomLevel = 1.0;
+      else scrutinyMapZoomLevel = Math.min(1.4, Math.max(0.8, +(scrutinyMapZoomLevel + delta).toFixed(2)));
+      const svg = document.getElementById('scrutiny-gis-svg');
+      if (svg) svg.style.transform = `scale(${scrutinyMapZoomLevel})`;
+    }
 
-        function renderScrutinyPlotMap(app) {
-          const container = document.getElementById('scrutiny-map-container');
-          if (!container) return;
-          const gis = getItParkGisProfile(app.itPark);
+    function renderScrutinyPlotMap(app) {
+      const container = document.getElementById('scrutiny-map-container');
+      if (!container) return;
+      const gis = getItParkGisProfile(app.itPark);
 
-          container.innerHTML = `
+      container.innerHTML = `
         <div class="space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-50 border border-slate-200 rounded px-3.5 py-2.5 text-xs">
             <div>
@@ -10493,383 +10493,383 @@
           </div>
         </div>
       `;
+    }
+
+    function getOicAvailableActions(app) {
+      const isMega = app.applicationType === 'Mega Project Allotment';
+      if (app.stage === 'initial_scrutiny') {
+        return [
+          { value: 'query_applicant', label: 'Query to Applicant' },
+          isMega
+            ? { value: 'forward_oic_ip', label: 'Forward to OIC IP' }
+            : { value: 'forward_subsidy_admin', label: 'Forward to Subsidy Admin' }
+        ];
+      }
+      if (app.stage === 'post_approval') {
+        if (isMega) {
+          return [
+            { value: 'generate_loa_mega', label: 'Generate LOA (Direct Allotment)' }
+          ];
         }
-
-        function getOicAvailableActions(app) {
-          const isMega = app.applicationType === 'Mega Project Allotment';
-          if (app.stage === 'initial_scrutiny') {
-            return [
-              { value: 'query_applicant', label: 'Query to Applicant' },
-              isMega
-                ? { value: 'forward_oic_ip', label: 'Forward to OIC IP' }
-                : { value: 'forward_subsidy_admin', label: 'Forward to Subsidy Admin' }
-            ];
-          }
-          if (app.stage === 'post_approval') {
-            if (isMega) {
-              return [
-                { value: 'generate_loa_mega', label: 'Generate LOA (Direct Allotment)' }
-              ];
-            }
-            if (app.bidCount === 'multiple') {
-              return [
-                { value: 'push_mp_ebidding', label: 'Push to MP Tender E-Bidding' }
-              ];
-            }
-            return [
-              { value: 'generate_loa_eoi_single', label: 'Generate LOA (15-Day SLA)' }
-            ];
-          }
-          if (app.stage === 'lease_deed') {
-            return [
-              isMega
-                ? { value: 'verify_lease_ed2', label: 'Verify Lease Deed & Forward to ED2' }
-                : { value: 'verify_lease_ed', label: 'Verify Lease Deed & Forward to ED' }
-            ];
-          }
-          return [];
+        if (app.bidCount === 'multiple') {
+          return [
+            { value: 'push_mp_ebidding', label: 'Push to MP Tender E-Bidding' }
+          ];
         }
+        return [
+          { value: 'generate_loa_eoi_single', label: 'Generate LOA (15-Day SLA)' }
+        ];
+      }
+      if (app.stage === 'lease_deed') {
+        return [
+          isMega
+            ? { value: 'verify_lease_ed2', label: 'Verify Lease Deed & Forward to ED2' }
+            : { value: 'verify_lease_ed', label: 'Verify Lease Deed & Forward to ED' }
+        ];
+      }
+      return [];
+    }
 
-        function renderScrutinyActionPanel(app) {
-          const selectEl = document.getElementById('scrutiny-action-select');
-          const formEl = document.getElementById('scrutiny-action-form');
-          const contextBox = document.getElementById('scrutiny-action-context');
-          const stagePill = document.getElementById('scrutiny-stage-pill');
-          const ebidPanel = document.getElementById('scrutiny-ebidding-panel');
-          const commentEl = document.getElementById('scrutiny-comment-input');
-          const declEl = document.getElementById('scrutiny-declaration-check');
-          const h1Confirm = document.getElementById('ebid-h1-confirm');
-          const h1Wrap = document.getElementById('ebid-h1-select-wrap');
+    function renderScrutinyActionPanel(app) {
+      const selectEl = document.getElementById('scrutiny-action-select');
+      const formEl = document.getElementById('scrutiny-action-form');
+      const contextBox = document.getElementById('scrutiny-action-context');
+      const stagePill = document.getElementById('scrutiny-stage-pill');
+      const ebidPanel = document.getElementById('scrutiny-ebidding-panel');
+      const commentEl = document.getElementById('scrutiny-comment-input');
+      const declEl = document.getElementById('scrutiny-declaration-check');
+      const h1Confirm = document.getElementById('ebid-h1-confirm');
+      const h1Wrap = document.getElementById('ebid-h1-select-wrap');
 
-          clearScrutinyValidation('all');
-          if (commentEl) commentEl.value = '';
-          if (declEl) declEl.checked = false;
-          if (ebidPanel) ebidPanel.classList.add('hidden');
-          if (h1Confirm) h1Confirm.checked = false;
-          if (h1Wrap) h1Wrap.classList.add('hidden');
+      clearScrutinyValidation('all');
+      if (commentEl) commentEl.value = '';
+      if (declEl) declEl.checked = false;
+      if (ebidPanel) ebidPanel.classList.add('hidden');
+      if (h1Confirm) h1Confirm.checked = false;
+      if (h1Wrap) h1Wrap.classList.add('hidden');
 
-          const stageLabels = {
-            initial_scrutiny: 'Stage 1: Initial Scrutiny',
-            post_approval: 'Stage 2: Post-Approval LOA',
-            lease_deed: 'Stage 3: Lease Deed Verification',
-            queried: 'Queried to Applicant',
-            forwarded: 'Forwarded / Processed'
-          };
-          if (stagePill) stagePill.textContent = stageLabels[app.stage] || 'Scrutiny';
+      const stageLabels = {
+        initial_scrutiny: 'Stage 1: Initial Scrutiny',
+        post_approval: 'Stage 2: Post-Approval LOA',
+        lease_deed: 'Stage 3: Lease Deed Verification',
+        queried: 'Queried to Applicant',
+        forwarded: 'Forwarded / Processed'
+      };
+      if (stagePill) stagePill.textContent = stageLabels[app.stage] || 'Scrutiny';
 
-          const options = getOicAvailableActions(app);
-          if (selectEl) {
-            selectEl.innerHTML = `<option value="">-- Please Select --</option>` +
-              options.map(o => `<option value="${o.value}">${escapePlotHtml(o.label)}</option>`).join('');
-          }
+      const options = getOicAvailableActions(app);
+      if (selectEl) {
+        selectEl.innerHTML = `<option value="">-- Please Select --</option>` +
+          options.map(o => `<option value="${o.value}">${escapePlotHtml(o.label)}</option>`).join('');
+      }
 
-          if (options.length === 0) {
-            if (formEl) formEl.classList.add('hidden');
-            if (contextBox) {
-              contextBox.classList.remove('hidden');
-              const simBtn = app.stage === 'queried'
-                ? `<div class="mt-3 pt-2.5 border-t border-amber-200"><button type="button" onclick="simulateApplicantQueryResponse('${escapePlotHtml(app.appNo)}')" class="bg-[#4267b2] hover:bg-[#3557a0] text-white font-bold text-[11px] px-3 py-1.5 rounded cursor-pointer transition">Simulate Applicant Query Response &rarr;</button></div>`
-                : '';
-              contextBox.className = 'rounded border p-3.5 text-xs bg-amber-50 border-amber-200 text-amber-950';
-              contextBox.innerHTML = `
+      if (options.length === 0) {
+        if (formEl) formEl.classList.add('hidden');
+        if (contextBox) {
+          contextBox.classList.remove('hidden');
+          const simBtn = app.stage === 'queried'
+            ? `<div class="mt-3 pt-2.5 border-t border-amber-200"><button type="button" onclick="simulateApplicantQueryResponse('${escapePlotHtml(app.appNo)}')" class="bg-[#4267b2] hover:bg-[#3557a0] text-white font-bold text-[11px] px-3 py-1.5 rounded cursor-pointer transition">Simulate Applicant Query Response &rarr;</button></div>`
+            : '';
+          contextBox.className = 'rounded border p-3.5 text-xs bg-amber-50 border-amber-200 text-amber-950';
+          contextBox.innerHTML = `
             <div class="font-bold text-slate-900 mb-1">Current Status: ${escapePlotHtml(app.status)}</div>
             <div>Application currently at: <b>${escapePlotHtml(app.applicationAt)}</b></div>
             <div class="text-[11px] text-slate-600 mt-1">No further OIC IT Park action is pending at this step. Review the Application History timeline below for full audit details.</div>
             ${simBtn}
           `;
-            }
+        }
+      } else {
+        if (formEl) formEl.classList.remove('hidden');
+        if (contextBox) {
+          if (app.stage === 'post_approval' || app.stage === 'lease_deed') {
+            contextBox.classList.remove('hidden');
+            contextBox.className = 'rounded border p-3 text-xs bg-blue-50 border-blue-200 text-blue-950';
+            contextBox.innerHTML = app.stage === 'post_approval'
+              ? `<b>Post-Approval Action:</b> ${app.applicationType === 'Mega Project Allotment' ? 'Sanctioned by Principal Secretary (PS). Generate Direct Allotment LOA for ED2 DSC.' : (app.bidCount === 'multiple' ? 'Approved by MD with >1 EOI applications. Push to MP Tender E-Bidding or confirm H1 Winner to generate LOA.' : 'Approved by MD (Single EOI). Generate 15-Day SLA LOA for ED DSC.')}`
+              : `<b>Lease Deed Verification:</b> Registered Lease Deed & balance payment submitted. Verify and forward to ${app.applicationType === 'Mega Project Allotment' ? 'ED2' : 'ED'}.`;
+          } else if (app.queriedBy || (app.status || '').includes('Queried')) {
+            contextBox.classList.remove('hidden');
+            contextBox.className = 'rounded border p-3 text-xs bg-red-50 border-red-200 text-red-950';
+            contextBox.innerHTML = `<div class="font-bold text-red-800 mb-1">&#9888; ${escapePlotHtml(app.status)}</div><div class="text-[11.5px] leading-relaxed">${escapePlotHtml(app.queriedBackReason || app.queryRemarks || 'Returned for OIC IT Park verification.')}</div>`;
           } else {
-            if (formEl) formEl.classList.remove('hidden');
-            if (contextBox) {
-              if (app.stage === 'post_approval' || app.stage === 'lease_deed') {
-                contextBox.classList.remove('hidden');
-                contextBox.className = 'rounded border p-3 text-xs bg-blue-50 border-blue-200 text-blue-950';
-                contextBox.innerHTML = app.stage === 'post_approval'
-                  ? `<b>Post-Approval Action:</b> ${app.applicationType === 'Mega Project Allotment' ? 'Sanctioned by Principal Secretary (PS). Generate Direct Allotment LOA for ED2 DSC.' : (app.bidCount === 'multiple' ? 'Approved by MD with >1 EOI applications. Push to MP Tender E-Bidding or confirm H1 Winner to generate LOA.' : 'Approved by MD (Single EOI). Generate 15-Day SLA LOA for ED DSC.')}`
-                  : `<b>Lease Deed Verification:</b> Registered Lease Deed & balance payment submitted. Verify and forward to ${app.applicationType === 'Mega Project Allotment' ? 'ED2' : 'ED'}.`;
-              } else if (app.queriedBy || (app.status || '').includes('Queried')) {
-                contextBox.classList.remove('hidden');
-                contextBox.className = 'rounded border p-3 text-xs bg-red-50 border-red-200 text-red-950';
-                contextBox.innerHTML = `<div class="font-bold text-red-800 mb-1">&#9888; ${escapePlotHtml(app.status)}</div><div class="text-[11.5px] leading-relaxed">${escapePlotHtml(app.queriedBackReason || app.queryRemarks || 'Returned for OIC IT Park verification.')}</div>`;
-              } else {
-                contextBox.classList.add('hidden');
-              }
-            }
+            contextBox.classList.add('hidden');
           }
         }
+      }
+    }
 
-        function handleScrutinyActionSelectChange() {
-          clearScrutinyValidation('action');
-          const actionVal = document.getElementById('scrutiny-action-select')?.value || '';
-          const ebidPanel = document.getElementById('scrutiny-ebidding-panel');
-          const app = (window.oicLandApplications || []).find(a => a.appNo === currentScrutinyAppNo);
+    function handleScrutinyActionSelectChange() {
+      clearScrutinyValidation('action');
+      const actionVal = document.getElementById('scrutiny-action-select')?.value || '';
+      const ebidPanel = document.getElementById('scrutiny-ebidding-panel');
+      const app = (window.oicLandApplications || []).find(a => a.appNo === currentScrutinyAppNo);
 
-          if (ebidPanel) {
-            if (actionVal === 'push_mp_ebidding' && app) {
-              ebidPanel.classList.remove('hidden');
-              const startInp = document.getElementById('ebid-start-date');
-              const endInp = document.getElementById('ebid-end-date');
-              if (startInp && !startInp.value) startInp.value = '2026-12-01';
-              if (endInp && !endInp.value) endInp.value = '2026-12-10';
+      if (ebidPanel) {
+        if (actionVal === 'push_mp_ebidding' && app) {
+          ebidPanel.classList.remove('hidden');
+          const startInp = document.getElementById('ebid-start-date');
+          const endInp = document.getElementById('ebid-end-date');
+          if (startInp && !startInp.value) startInp.value = '2026-12-01';
+          if (endInp && !endInp.value) endInp.value = '2026-12-10';
 
-              const bidders = app.competingBidders || [
-                { bidder: app.orgName, appNo: app.appNo, baseOffer: `${app.landPremium} (H1)` }
-              ];
-              const listEl = document.getElementById('ebid-bidders-list');
-              if (listEl) {
-                listEl.innerHTML = bidders.map((b, i) => `
+          const bidders = app.competingBidders || [
+            { bidder: app.orgName, appNo: app.appNo, baseOffer: `${app.landPremium} (H1)` }
+          ];
+          const listEl = document.getElementById('ebid-bidders-list');
+          if (listEl) {
+            listEl.innerHTML = bidders.map((b, i) => `
               <div class="flex items-center justify-between py-0.5 ${i === 0 ? 'font-bold text-emerald-800' : ''}">
                 <span>${i + 1}. ${escapePlotHtml(b.bidder)}</span>
                 <span class="font-mono">${escapePlotHtml(b.baseOffer)}</span>
               </div>
             `).join('');
-              }
-              const h1Sel = document.getElementById('ebid-h1-bidder');
-              if (h1Sel) {
-                h1Sel.innerHTML = bidders.map(b => `<option value="${escapePlotHtml(b.bidder)}">${escapePlotHtml(b.bidder)} (${escapePlotHtml(b.baseOffer)})</option>`).join('');
-              }
-            } else {
-              ebidPanel.classList.add('hidden');
-            }
           }
+          const h1Sel = document.getElementById('ebid-h1-bidder');
+          if (h1Sel) {
+            h1Sel.innerHTML = bidders.map(b => `<option value="${escapePlotHtml(b.bidder)}">${escapePlotHtml(b.bidder)} (${escapePlotHtml(b.baseOffer)})</option>`).join('');
+          }
+        } else {
+          ebidPanel.classList.add('hidden');
         }
+      }
+    }
 
-        function toggleH1WinnerSelect(checked) {
-          const wrap = document.getElementById('ebid-h1-select-wrap');
-          if (wrap) {
-            if (checked) wrap.classList.remove('hidden');
-            else wrap.classList.add('hidden');
-          }
+    function toggleH1WinnerSelect(checked) {
+      const wrap = document.getElementById('ebid-h1-select-wrap');
+      if (wrap) {
+        if (checked) wrap.classList.remove('hidden');
+        else wrap.classList.add('hidden');
+      }
+    }
+
+    function clearScrutinyValidation(which) {
+      const ids = which === 'all' ? ['action', 'comment', 'decl'] : [which];
+      ids.forEach(k => {
+        const err = document.getElementById(`scrutiny-${k}-err`);
+        if (err) err.classList.add('hidden');
+      });
+      if (which === 'all' || which === 'comment') {
+        document.getElementById('scrutiny-comment-input')?.classList.remove('border-red-500');
+      }
+      if (which === 'all' || which === 'action') {
+        document.getElementById('scrutiny-action-select')?.classList.remove('border-red-500');
+      }
+    }
+
+    function formatCurrentOicTimestamp() {
+      const now = new Date();
+      const pad = n => String(n).padStart(2, '0');
+      let h = now.getHours();
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12 || 12;
+      return `${pad(now.getDate())}-${pad(now.getMonth() + 1)}-${now.getFullYear()} ${pad(h)}:${pad(now.getMinutes())} ${ampm}`;
+    }
+
+    function submitOicScrutinyAction(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      const app = (window.oicLandApplications || []).find(a => a.appNo === currentScrutinyAppNo);
+      if (!app) return;
+
+      const actionEl = document.getElementById('scrutiny-action-select');
+      const commentEl = document.getElementById('scrutiny-comment-input');
+      const declEl = document.getElementById('scrutiny-declaration-check');
+
+      const actionVal = actionEl?.value || '';
+      const commentVal = commentEl?.value?.trim() || '';
+      const declChecked = Boolean(declEl?.checked);
+
+      let valid = true;
+      if (!actionVal) {
+        document.getElementById('scrutiny-action-err')?.classList.remove('hidden');
+        actionEl?.classList.add('border-red-500');
+        valid = false;
+      }
+      if (!commentVal) {
+        document.getElementById('scrutiny-comment-err')?.classList.remove('hidden');
+        commentEl?.classList.add('border-red-500');
+        valid = false;
+      }
+      if (!declChecked) {
+        document.getElementById('scrutiny-decl-err')?.classList.remove('hidden');
+        valid = false;
+      }
+
+      let ebidStart = '';
+      let ebidEnd = '';
+      let h1Confirmed = false;
+      let h1Winner = '';
+      if (actionVal === 'push_mp_ebidding') {
+        ebidStart = document.getElementById('ebid-start-date')?.value || '';
+        ebidEnd = document.getElementById('ebid-end-date')?.value || '';
+        if (!ebidStart || !ebidEnd || ebidEnd < ebidStart) {
+          showGlobalToast('Please select a valid Bidding Start Date and Bidding End Date.', 'error');
+          valid = false;
         }
+        h1Confirmed = Boolean(document.getElementById('ebid-h1-confirm')?.checked);
+        h1Winner = document.getElementById('ebid-h1-bidder')?.value || app.orgName;
+      }
 
-        function clearScrutinyValidation(which) {
-          const ids = which === 'all' ? ['action', 'comment', 'decl'] : [which];
-          ids.forEach(k => {
-            const err = document.getElementById(`scrutiny-${k}-err`);
-            if (err) err.classList.add('hidden');
-          });
-          if (which === 'all' || which === 'comment') {
-            document.getElementById('scrutiny-comment-input')?.classList.remove('border-red-500');
-          }
-          if (which === 'all' || which === 'action') {
-            document.getElementById('scrutiny-action-select')?.classList.remove('border-red-500');
-          }
+      if (!valid) return;
+
+      let newStatus = '';
+      let newAt = '';
+      let newStage = 'forwarded';
+      let historyStatus = '';
+
+      if (actionVal === 'query_applicant') {
+        newStatus = 'Queried to Applicant';
+        newAt = 'Applicant';
+        newStage = 'queried';
+        historyStatus = 'Query Raised to Applicant';
+      } else if (actionVal === 'forward_subsidy_admin') {
+        newStatus = 'Pending with Subsidy Admin';
+        newAt = 'SUBSIDY_ADMIN';
+        newStage = 'subsidy_scrutiny';
+        historyStatus = 'Verified By OIC IT Park - Forwarded to Subsidy Admin';
+      } else if (actionVal === 'forward_oic_ip') {
+        newStatus = 'Verified by OIC IT Park - Forwarded to OIC IP';
+        newAt = 'OIC IP';
+        newStage = 'forwarded';
+        historyStatus = 'Verified By OIC IT Park - Forwarded to OIC IP';
+      } else if (actionVal === 'generate_loa_eoi_single') {
+        newStatus = 'LOA Generated (15-Day SLA) - Pending ED DSC Sign';
+        newAt = 'Executive Director (ED)';
+        newStage = 'forwarded';
+        historyStatus = 'LOA Generated (15-Day SLA) - Routed to ED for DSC Sign';
+      } else if (actionVal === 'push_mp_ebidding') {
+        if (h1Confirmed) {
+          newStatus = `LOA Generated (H1: ${h1Winner}) - Pending ED DSC Sign`;
+          newAt = 'Executive Director (ED)';
+          newStage = 'forwarded';
+          historyStatus = `E-Bidding (${ebidStart} to ${ebidEnd}) H1 Confirmed (${h1Winner}) - LOA Routed to ED for DSC Sign`;
+        } else {
+          newStatus = `Pushed to MP Tender E-Bidding (${ebidStart} to ${ebidEnd})`;
+          newAt = 'MP Tender E-Bidding';
+          newStage = 'post_approval';
+          historyStatus = `Pushed to MP Tender E-Bidding (${ebidStart} to ${ebidEnd})`;
         }
+      } else if (actionVal === 'generate_loa_mega') {
+        newStatus = 'LOA Generated (Direct Allotment) - Pending ED2 DSC Sign';
+        newAt = 'ED2';
+        newStage = 'forwarded';
+        historyStatus = 'LOA Generated (Direct Allotment) - Routed to ED2 for DSC Sign';
+      } else if (actionVal === 'verify_lease_ed') {
+        newStatus = 'Lease Deed Verified by OIC IT Park - Forwarded to ED';
+        newAt = 'Executive Director (ED)';
+        newStage = 'forwarded';
+        historyStatus = 'Lease Deed Verified by OIC IT Park - Forwarded to ED';
+      } else if (actionVal === 'verify_lease_ed2') {
+        newStatus = 'Lease Deed Verified by OIC IT Park - Forwarded to ED2';
+        newAt = 'ED2';
+        newStage = 'forwarded';
+        historyStatus = 'Lease Deed Verified by OIC IT Park - Forwarded to ED2';
+      }
 
-        function formatCurrentOicTimestamp() {
-          const now = new Date();
-          const pad = n => String(n).padStart(2, '0');
-          let h = now.getHours();
-          const ampm = h >= 12 ? 'PM' : 'AM';
-          h = h % 12 || 12;
-          return `${pad(now.getDate())}-${pad(now.getMonth() + 1)}-${now.getFullYear()} ${pad(h)}:${pad(now.getMinutes())} ${ampm}`;
+      pendingOicActionPayload = {
+        appNo: app.appNo,
+        actionVal,
+        newStatus,
+        newAt,
+        newStage,
+        historyStatus,
+        commentVal,
+        timestamp: formatCurrentOicTimestamp()
+      };
+
+      const subEl = document.getElementById('oic-success-modal-sub');
+      if (subEl) subEl.textContent = `${app.appNo}: ${historyStatus}`;
+      document.getElementById('modal-oic-action-success')?.classList.remove('hidden');
+    }
+
+    function confirmOicSuccessModalOk() {
+      document.getElementById('modal-oic-action-success')?.classList.add('hidden');
+      if (!pendingOicActionPayload) return;
+
+      const p = pendingOicActionPayload;
+      pendingOicActionPayload = null;
+      const app = (window.oicLandApplications || []).find(a => a.appNo === p.appNo);
+      if (!app) return;
+
+      app.status = p.newStatus;
+      app.applicationAt = p.newAt;
+      app.stage = p.newStage;
+      app.pendingSince = p.timestamp;
+      if (p.actionVal === 'query_applicant' || p.newStage === 'queried') {
+        app.queryRemarks = p.commentVal || '';
+      } else if (p.actionVal === 'forward_subsidy_admin') {
+        app.queriedBy = '';
+        app.queriedBackBy = '';
+        app.queriedBackReason = '';
+        app.queriedBackTo = '';
+      }
+      app.history = app.history || [];
+      app.history.push({
+        actor: 'OIC IT Park',
+        timestamp: p.timestamp,
+        status: p.historyStatus,
+        remark: p.commentVal
+      });
+
+      // Synchronize status back to Investor Dashboard table & localStorage
+      if (window.submittedApplicationsMap[app.appNo]) {
+        window.submittedApplicationsMap[app.appNo].status = app.status;
+      }
+      window.submittedApplicationsMap[app.appNo] = app;
+      const invRow = document.querySelector(`#applied-tbody tr[data-app-no="${app.appNo}"] .investor-status-badge`);
+      if (invRow) {
+        invRow.textContent = app.status;
+        if (app.stage === 'queried') {
+          invRow.className = 'investor-status-badge bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded text-[11px]';
+        } else {
+          invRow.className = 'investor-status-badge bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[11px]';
         }
+      }
+      if (typeof savePersistedApplications === 'function') savePersistedApplications();
+      if (typeof renderInvestorDashboard === 'function') renderInvestorDashboard();
 
-        function submitOicScrutinyAction(e) {
-          if (e && e.preventDefault) e.preventDefault();
-          const app = (window.oicLandApplications || []).find(a => a.appNo === currentScrutinyAppNo);
-          if (!app) return;
+      updateOicStats();
+      updateOicProcessStats();
+      renderOicApplicationsTable();
+      if (typeof renderSubsidyDashboard === 'function') renderSubsidyDashboard();
+      if (typeof renderAuthorityWorkbench === 'function' && window.currentOfficerRole) renderAuthorityWorkbench(window.currentOfficerRole);
+      renderScrutinyActionPanel(app);
+      renderScrutinyHistory(app);
+      showGlobalToast(`Status updated: ${p.historyStatus}`, 'success');
+    }
 
-          const actionEl = document.getElementById('scrutiny-action-select');
-          const commentEl = document.getElementById('scrutiny-comment-input');
-          const declEl = document.getElementById('scrutiny-declaration-check');
+    function simulateApplicantQueryResponse(appNo) {
+      const app = (window.oicLandApplications || []).find(a => a.appNo === appNo);
+      if (!app) return;
+      const ts = formatCurrentOicTimestamp();
+      app.status = 'Query Responded';
+      app.applicationAt = 'OIC IT Park';
+      app.stage = 'initial_scrutiny';
+      app.pendingSince = ts;
+      app.history.push({
+        actor: app.orgName,
+        timestamp: ts,
+        status: 'Query Responded',
+        remark: 'Applicant uploaded rectified statutory document & response remarks for OIC IT Park re-scrutiny.'
+      });
+      if (typeof savePersistedApplications === 'function') savePersistedApplications();
+      if (typeof renderInvestorDashboard === 'function') renderInvestorDashboard();
+      updateOicStats();
+      updateOicProcessStats();
+      renderOicApplicationsTable();
+      renderScrutinyActionPanel(app);
+      renderScrutinyHistory(app);
+      showGlobalToast(`Applicant response received for ${appNo}. Ready for OIC IT Park scrutiny.`, 'info');
+    }
 
-          const actionVal = actionEl?.value || '';
-          const commentVal = commentEl?.value?.trim() || '';
-          const declChecked = Boolean(declEl?.checked);
-
-          let valid = true;
-          if (!actionVal) {
-            document.getElementById('scrutiny-action-err')?.classList.remove('hidden');
-            actionEl?.classList.add('border-red-500');
-            valid = false;
-          }
-          if (!commentVal) {
-            document.getElementById('scrutiny-comment-err')?.classList.remove('hidden');
-            commentEl?.classList.add('border-red-500');
-            valid = false;
-          }
-          if (!declChecked) {
-            document.getElementById('scrutiny-decl-err')?.classList.remove('hidden');
-            valid = false;
-          }
-
-          let ebidStart = '';
-          let ebidEnd = '';
-          let h1Confirmed = false;
-          let h1Winner = '';
-          if (actionVal === 'push_mp_ebidding') {
-            ebidStart = document.getElementById('ebid-start-date')?.value || '';
-            ebidEnd = document.getElementById('ebid-end-date')?.value || '';
-            if (!ebidStart || !ebidEnd || ebidEnd < ebidStart) {
-              showGlobalToast('Please select a valid Bidding Start Date and Bidding End Date.', 'error');
-              valid = false;
-            }
-            h1Confirmed = Boolean(document.getElementById('ebid-h1-confirm')?.checked);
-            h1Winner = document.getElementById('ebid-h1-bidder')?.value || app.orgName;
-          }
-
-          if (!valid) return;
-
-          let newStatus = '';
-          let newAt = '';
-          let newStage = 'forwarded';
-          let historyStatus = '';
-
-          if (actionVal === 'query_applicant') {
-            newStatus = 'Queried to Applicant';
-            newAt = 'Applicant';
-            newStage = 'queried';
-            historyStatus = 'Query Raised to Applicant';
-          } else if (actionVal === 'forward_subsidy_admin') {
-            newStatus = 'Pending with Subsidy Admin';
-            newAt = 'SUBSIDY_ADMIN';
-            newStage = 'subsidy_scrutiny';
-            historyStatus = 'Verified By OIC IT Park - Forwarded to Subsidy Admin';
-          } else if (actionVal === 'forward_oic_ip') {
-            newStatus = 'Verified by OIC IT Park - Forwarded to OIC IP';
-            newAt = 'OIC IP';
-            newStage = 'forwarded';
-            historyStatus = 'Verified By OIC IT Park - Forwarded to OIC IP';
-          } else if (actionVal === 'generate_loa_eoi_single') {
-            newStatus = 'LOA Generated (15-Day SLA) - Pending ED DSC Sign';
-            newAt = 'Executive Director (ED)';
-            newStage = 'forwarded';
-            historyStatus = 'LOA Generated (15-Day SLA) - Routed to ED for DSC Sign';
-          } else if (actionVal === 'push_mp_ebidding') {
-            if (h1Confirmed) {
-              newStatus = `LOA Generated (H1: ${h1Winner}) - Pending ED DSC Sign`;
-              newAt = 'Executive Director (ED)';
-              newStage = 'forwarded';
-              historyStatus = `E-Bidding (${ebidStart} to ${ebidEnd}) H1 Confirmed (${h1Winner}) - LOA Routed to ED for DSC Sign`;
-            } else {
-              newStatus = `Pushed to MP Tender E-Bidding (${ebidStart} to ${ebidEnd})`;
-              newAt = 'MP Tender E-Bidding';
-              newStage = 'post_approval';
-              historyStatus = `Pushed to MP Tender E-Bidding (${ebidStart} to ${ebidEnd})`;
-            }
-          } else if (actionVal === 'generate_loa_mega') {
-            newStatus = 'LOA Generated (Direct Allotment) - Pending ED2 DSC Sign';
-            newAt = 'ED2';
-            newStage = 'forwarded';
-            historyStatus = 'LOA Generated (Direct Allotment) - Routed to ED2 for DSC Sign';
-          } else if (actionVal === 'verify_lease_ed') {
-            newStatus = 'Lease Deed Verified by OIC IT Park - Forwarded to ED';
-            newAt = 'Executive Director (ED)';
-            newStage = 'forwarded';
-            historyStatus = 'Lease Deed Verified by OIC IT Park - Forwarded to ED';
-          } else if (actionVal === 'verify_lease_ed2') {
-            newStatus = 'Lease Deed Verified by OIC IT Park - Forwarded to ED2';
-            newAt = 'ED2';
-            newStage = 'forwarded';
-            historyStatus = 'Lease Deed Verified by OIC IT Park - Forwarded to ED2';
-          }
-
-          pendingOicActionPayload = {
-            appNo: app.appNo,
-            actionVal,
-            newStatus,
-            newAt,
-            newStage,
-            historyStatus,
-            commentVal,
-            timestamp: formatCurrentOicTimestamp()
-          };
-
-          const subEl = document.getElementById('oic-success-modal-sub');
-          if (subEl) subEl.textContent = `${app.appNo}: ${historyStatus}`;
-          document.getElementById('modal-oic-action-success')?.classList.remove('hidden');
-        }
-
-        function confirmOicSuccessModalOk() {
-          document.getElementById('modal-oic-action-success')?.classList.add('hidden');
-          if (!pendingOicActionPayload) return;
-
-          const p = pendingOicActionPayload;
-          pendingOicActionPayload = null;
-          const app = (window.oicLandApplications || []).find(a => a.appNo === p.appNo);
-          if (!app) return;
-
-          app.status = p.newStatus;
-          app.applicationAt = p.newAt;
-          app.stage = p.newStage;
-          app.pendingSince = p.timestamp;
-          if (p.actionVal === 'query_applicant' || p.newStage === 'queried') {
-            app.queryRemarks = p.commentVal || '';
-          } else if (p.actionVal === 'forward_subsidy_admin') {
-            app.queriedBy = '';
-            app.queriedBackBy = '';
-            app.queriedBackReason = '';
-            app.queriedBackTo = '';
-          }
-          app.history = app.history || [];
-          app.history.push({
-            actor: 'OIC IT Park',
-            timestamp: p.timestamp,
-            status: p.historyStatus,
-            remark: p.commentVal
-          });
-
-          // Synchronize status back to Investor Dashboard table & localStorage
-          if (window.submittedApplicationsMap[app.appNo]) {
-            window.submittedApplicationsMap[app.appNo].status = app.status;
-          }
-          window.submittedApplicationsMap[app.appNo] = app;
-          const invRow = document.querySelector(`#applied-tbody tr[data-app-no="${app.appNo}"] .investor-status-badge`);
-          if (invRow) {
-            invRow.textContent = app.status;
-            if (app.stage === 'queried') {
-              invRow.className = 'investor-status-badge bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded text-[11px]';
-            } else {
-              invRow.className = 'investor-status-badge bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[11px]';
-            }
-          }
-          if (typeof savePersistedApplications === 'function') savePersistedApplications();
-          if (typeof renderInvestorDashboard === 'function') renderInvestorDashboard();
-
-          updateOicStats();
-          updateOicProcessStats();
-          renderOicApplicationsTable();
-          if (typeof renderSubsidyDashboard === 'function') renderSubsidyDashboard();
-          if (typeof renderAuthorityWorkbench === 'function' && window.currentOfficerRole) renderAuthorityWorkbench(window.currentOfficerRole);
-          renderScrutinyActionPanel(app);
-          renderScrutinyHistory(app);
-          showGlobalToast(`Status updated: ${p.historyStatus}`, 'success');
-        }
-
-        function simulateApplicantQueryResponse(appNo) {
-          const app = (window.oicLandApplications || []).find(a => a.appNo === appNo);
-          if (!app) return;
-          const ts = formatCurrentOicTimestamp();
-          app.status = 'Query Responded';
-          app.applicationAt = 'OIC IT Park';
-          app.stage = 'initial_scrutiny';
-          app.pendingSince = ts;
-          app.history.push({
-            actor: app.orgName,
-            timestamp: ts,
-            status: 'Query Responded',
-            remark: 'Applicant uploaded rectified statutory document & response remarks for OIC IT Park re-scrutiny.'
-          });
-          if (typeof savePersistedApplications === 'function') savePersistedApplications();
-          if (typeof renderInvestorDashboard === 'function') renderInvestorDashboard();
-          updateOicStats();
-          updateOicProcessStats();
-          renderOicApplicationsTable();
-          renderScrutinyActionPanel(app);
-          renderScrutinyHistory(app);
-          showGlobalToast(`Applicant response received for ${appNo}. Ready for OIC IT Park scrutiny.`, 'info');
-        }
-
-        function renderScrutinyHistory(app) {
-          const container = document.getElementById('scrutiny-history-timeline');
-          if (!container) return;
-          const hist = app.history || [];
-          if (hist.length === 0) {
-            container.innerHTML = `<div class="text-xs text-slate-400 italic text-center py-4">No workflow history recorded yet.</div>`;
-            return;
-          }
-          container.innerHTML = hist.map(item => `
+    function renderScrutinyHistory(app) {
+      const container = document.getElementById('scrutiny-history-timeline');
+      if (!container) return;
+      const hist = app.history || [];
+      if (hist.length === 0) {
+        container.innerHTML = `<div class="text-xs text-slate-400 italic text-center py-4">No workflow history recorded yet.</div>`;
+        return;
+      }
+      container.innerHTML = hist.map(item => `
         <div class="space-y-1">
           <div class="flex items-center justify-between gap-2 text-[11.5px] font-semibold text-slate-800">
             <span class="truncate">${escapePlotHtml(item.actor)}</span>
@@ -10881,182 +10881,182 @@
           </div>
         </div>
       `).join('');
+    }
+
+    // =========================================================================
+    // STAGE 2: SUBSIDY ADMIN (SUBSIDY_ADMIN) SCRUTINY & HIGHER AUTHORITY ENGINE
+    // =========================================================================
+    let subsidyActiveKpiFilter = 'pending';
+    let subsidySortKey = 'sno';
+    let subsidySortAsc = true;
+    let currentSubsidyAppNo = null;
+    window.currentAuthorityAppNo = null;
+    window.currentOfficerRole = 'FINANCE_ADMIN';
+
+    function parseCurrencyNum(val) {
+      const n = parseFloat(String(val || '').replace(/[^0-9.-]+/g, ''));
+      return isNaN(n) ? 0 : n;
+    }
+
+    function formatCurrencyInr(num) {
+      return '₹ ' + Number(num || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function computeRebateSlabBreakdown(app) {
+      const acres = Math.max(0, parseFloat(String(app?.plotSizeAcres || '0').replace(/[^0-9.]+/g, '')) || 0.8);
+      const netPayable = parseCurrencyNum(app?.landPremium);
+      const matchedPlot = (oicPlotInventory || []).find(p => p.plotNo === app?.plotNo || p.id === app?.plotNo);
+      const effectiveAcres = (matchedPlot && matchedPlot.sizeAcres) ? Number(matchedPlot.sizeAcres) : acres;
+
+      const s1 = Math.min(effectiveAcres, 0.5);
+      const s2 = effectiveAcres > 0.5 ? Math.min(effectiveAcres - 0.5, 0.5) : 0;
+      const s3 = effectiveAcres > 1.0 ? Math.min(effectiveAcres - 1.0, 4.0) : 0;
+      const s4 = effectiveAcres > 5.0 ? (effectiveAcres - 5.0) : 0;
+
+      const weightedPayableFactor = (s1 * 0.25 + s2 * 0.40 + s3 * 0.50 + s4 * 0.75) / (effectiveAcres || 1);
+      const impliedRatePerAcre = netPayable > 0 && weightedPayableFactor > 0
+        ? Math.round(netPayable / (effectiveAcres * weightedPayableFactor))
+        : 80000000;
+
+      const slabs = [
+        { label: 'Slab 1 (Up to 0.50 Acre)', acres: s1, rebatePct: 75, payPct: 25 },
+        { label: 'Slab 2 (> 0.50 to 1.00 Acre)', acres: s2, rebatePct: 60, payPct: 40 },
+        { label: 'Slab 3 (> 1.00 to 5.00 Acres)', acres: s3, rebatePct: 50, payPct: 50 },
+        { label: 'Slab 4 (> 5.00 Acres)', acres: s4, rebatePct: 25, payPct: 75 }
+      ].filter(s => s.acres > 0).map(s => {
+        const gross = Math.round(s.acres * impliedRatePerAcre);
+        const payable = Math.round(gross * (s.payPct / 100));
+        return { ...s, gross, rebateAmt: gross - payable, payable };
+      });
+
+      const grossGuidelineTotal = slabs.reduce((acc, s) => acc + s.gross, 0);
+      const totalRebateAmt = slabs.reduce((acc, s) => acc + s.rebateAmt, 0);
+      const totalPayableCalc = netPayable > 0 ? netPayable : slabs.reduce((acc, s) => acc + s.payable, 0);
+      const slabSummary = slabs.map(s => `Slab ${s.rebatePct}%`).join(' + ');
+
+      return {
+        acres: effectiveAcres,
+        impliedRatePerAcre,
+        slabs,
+        grossGuidelineTotal,
+        totalRebateAmt,
+        netPayable: totalPayableCalc,
+        advanceEmd25: Math.round(totalPayableCalc * 0.25),
+        slabSummary: app?.rebateSlabLabel || slabSummary
+      };
+    }
+
+    function isSubsidyEoiScope(app) {
+      return !String(app?.applicationType || '').toLowerCase().includes('mega');
+    }
+
+    function isSubsidyPendingItem(app) {
+      return isSubsidyEoiScope(app) && isApplicationAtRole(app, 'SUBSIDY_ADMIN');
+    }
+
+    function isSubsidyForwardedItem(app) {
+      if (!isSubsidyEoiScope(app)) return false;
+      return Boolean(app.subsidyVerifiedAt) ||
+        isApplicationAtRole(app, 'FINANCE_ADMIN') ||
+        isApplicationAtRole(app, 'ED') ||
+        isApplicationAtRole(app, 'MD') ||
+        app.stage === 'finance_scrutiny' ||
+        app.stage === 'ed_scrutiny' ||
+        app.stage === 'md_scrutiny';
+    }
+
+    function isSubsidyApprovedItem(app) {
+      if (!isSubsidyEoiScope(app)) return false;
+      const st = (app.status || '').toLowerCase();
+      return app.stage === 'post_approval' || app.stage === 'lease_deed' || app.stage === 'approved' ||
+        st.includes('approved') || st.includes('loa') || st.includes('lease deed');
+    }
+
+    function isSubsidyQueriedItem(app) {
+      if (!isSubsidyEoiScope(app)) return false;
+      const st = (app.status || '').toLowerCase();
+      return app.stage === 'queried_back' || app.stage === 'queried' || st.includes('queried');
+    }
+
+    function getSubsidyStatusBadgeHtml(app) {
+      const st = String(app?.status || '');
+      const isQueriedBack = app?.queriedBackTo === 'SUBSIDY_ADMIN' || app?.stage === 'queried_back' || st.includes('Queried Back');
+      if (isQueriedBack) {
+        return `<span class="inline-flex items-center gap-1 bg-red-100 text-red-900 border border-red-300 font-bold px-2.5 py-0.5 rounded text-[11px] whitespace-nowrap">&#9888; ${escapePlotHtml(st)}</span>`;
+      }
+      if (st.includes('Pending with Subsidy Admin')) {
+        return `<span class="inline-block bg-amber-100 text-amber-900 border border-amber-300 font-bold px-2 py-0.5 rounded text-[11px] whitespace-nowrap">${escapePlotHtml(st)}</span>`;
+      }
+      if (st.includes('Queried')) {
+        return `<span class="inline-block bg-rose-100 text-rose-800 border border-rose-200 font-bold px-2 py-0.5 rounded text-[11px] whitespace-nowrap">${escapePlotHtml(st)}</span>`;
+      }
+      if (st.includes('Approved') || st.includes('LOA')) {
+        return `<span class="inline-block bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold px-2 py-0.5 rounded text-[11px] whitespace-nowrap">${escapePlotHtml(st)}</span>`;
+      }
+      return `<span class="inline-block bg-blue-100 text-blue-900 border border-blue-200 font-bold px-2 py-0.5 rounded text-[11px] whitespace-nowrap">${escapePlotHtml(st)}</span>`;
+    }
+
+    function updateSubsidyKpiActiveState() {
+      ['pending', 'forwarded', 'approved', 'queried', 'all'].forEach(k => {
+        const card = document.getElementById('subsidy-kpi-card-' + k);
+        if (!card) return;
+        card.classList.toggle('active', subsidyActiveKpiFilter === k);
+      });
+      const chip = document.getElementById('subsidy-active-filter-chip');
+      const lbl = document.getElementById('subsidy-active-filter-label');
+      const labels = {
+        pending: 'Showing: Pending Subsidy Admin (incl. Queried Back)',
+        forwarded: 'Showing: Forwarded to Finance / Next Stage',
+        approved: 'Showing: Recommended / Approved',
+        queried: 'Showing: Queried Applications',
+        all: ''
+      };
+      if (chip && lbl) {
+        if (subsidyActiveKpiFilter !== 'all') {
+          lbl.textContent = labels[subsidyActiveKpiFilter] || '';
+          chip.classList.remove('hidden');
+          chip.classList.add('inline-flex');
+        } else {
+          chip.classList.add('hidden');
+          chip.classList.remove('inline-flex');
         }
+      }
+    }
 
-        // =========================================================================
-        // STAGE 2: SUBSIDY ADMIN (SUBSIDY_ADMIN) SCRUTINY & HIGHER AUTHORITY ENGINE
-        // =========================================================================
-        let subsidyActiveKpiFilter = 'pending';
-        let subsidySortKey = 'sno';
-        let subsidySortAsc = true;
-        let currentSubsidyAppNo = null;
-        window.currentAuthorityAppNo = null;
-        window.currentOfficerRole = 'FINANCE_ADMIN';
+    function filterSubsidyByKpi(kpiKey) {
+      subsidyActiveKpiFilter = kpiKey || 'all';
+      updateSubsidyKpiActiveState();
+      renderSubsidyDashboard();
+    }
 
-        function parseCurrencyNum(val) {
-          const n = parseFloat(String(val || '').replace(/[^0-9.-]+/g, ''));
-          return isNaN(n) ? 0 : n;
-        }
+    function filterSubsidyTable() {
+      renderSubsidyDashboard();
+    }
 
-        function formatCurrencyInr(num) {
-          return '₹ ' + Number(num || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
+    function sortSubsidyTable(key) {
+      if (subsidySortKey === key) subsidySortAsc = !subsidySortAsc;
+      else { subsidySortKey = key; subsidySortAsc = true; }
+      document.querySelectorAll('[id^="sub-sort-ind-"]').forEach(el => {
+        el.textContent = '▴';
+        el.className = 'text-[10px] text-slate-400';
+      });
+      const active = document.getElementById('sub-sort-ind-' + key);
+      if (active) {
+        active.textContent = subsidySortAsc ? '▴' : '▾';
+        active.className = 'text-[10px] text-[#3b5998] font-bold';
+      }
+      renderSubsidyDashboard();
+    }
 
-        function computeRebateSlabBreakdown(app) {
-          const acres = Math.max(0, parseFloat(String(app?.plotSizeAcres || '0').replace(/[^0-9.]+/g, '')) || 0.8);
-          const netPayable = parseCurrencyNum(app?.landPremium);
-          const matchedPlot = (oicPlotInventory || []).find(p => p.plotNo === app?.plotNo || p.id === app?.plotNo);
-          const effectiveAcres = (matchedPlot && matchedPlot.sizeAcres) ? Number(matchedPlot.sizeAcres) : acres;
-
-          const s1 = Math.min(effectiveAcres, 0.5);
-          const s2 = effectiveAcres > 0.5 ? Math.min(effectiveAcres - 0.5, 0.5) : 0;
-          const s3 = effectiveAcres > 1.0 ? Math.min(effectiveAcres - 1.0, 4.0) : 0;
-          const s4 = effectiveAcres > 5.0 ? (effectiveAcres - 5.0) : 0;
-
-          const weightedPayableFactor = (s1 * 0.25 + s2 * 0.40 + s3 * 0.50 + s4 * 0.75) / (effectiveAcres || 1);
-          const impliedRatePerAcre = netPayable > 0 && weightedPayableFactor > 0
-            ? Math.round(netPayable / (effectiveAcres * weightedPayableFactor))
-            : 80000000;
-
-          const slabs = [
-            { label: 'Slab 1 (Up to 0.50 Acre)', acres: s1, rebatePct: 75, payPct: 25 },
-            { label: 'Slab 2 (> 0.50 to 1.00 Acre)', acres: s2, rebatePct: 60, payPct: 40 },
-            { label: 'Slab 3 (> 1.00 to 5.00 Acres)', acres: s3, rebatePct: 50, payPct: 50 },
-            { label: 'Slab 4 (> 5.00 Acres)', acres: s4, rebatePct: 25, payPct: 75 }
-          ].filter(s => s.acres > 0).map(s => {
-            const gross = Math.round(s.acres * impliedRatePerAcre);
-            const payable = Math.round(gross * (s.payPct / 100));
-            return { ...s, gross, rebateAmt: gross - payable, payable };
-          });
-
-          const grossGuidelineTotal = slabs.reduce((acc, s) => acc + s.gross, 0);
-          const totalRebateAmt = slabs.reduce((acc, s) => acc + s.rebateAmt, 0);
-          const totalPayableCalc = netPayable > 0 ? netPayable : slabs.reduce((acc, s) => acc + s.payable, 0);
-          const slabSummary = slabs.map(s => `Slab ${s.rebatePct}%`).join(' + ');
-
-          return {
-            acres: effectiveAcres,
-            impliedRatePerAcre,
-            slabs,
-            grossGuidelineTotal,
-            totalRebateAmt,
-            netPayable: totalPayableCalc,
-            advanceEmd25: Math.round(totalPayableCalc * 0.25),
-            slabSummary: app?.rebateSlabLabel || slabSummary
-          };
-        }
-
-        function isSubsidyEoiScope(app) {
-          return !String(app?.applicationType || '').toLowerCase().includes('mega');
-        }
-
-        function isSubsidyPendingItem(app) {
-          return isSubsidyEoiScope(app) && isApplicationAtRole(app, 'SUBSIDY_ADMIN');
-        }
-
-        function isSubsidyForwardedItem(app) {
-          if (!isSubsidyEoiScope(app)) return false;
-          return Boolean(app.subsidyVerifiedAt) ||
-            isApplicationAtRole(app, 'FINANCE_ADMIN') ||
-            isApplicationAtRole(app, 'ED') ||
-            isApplicationAtRole(app, 'MD') ||
-            app.stage === 'finance_scrutiny' ||
-            app.stage === 'ed_scrutiny' ||
-            app.stage === 'md_scrutiny';
-        }
-
-        function isSubsidyApprovedItem(app) {
-          if (!isSubsidyEoiScope(app)) return false;
-          const st = (app.status || '').toLowerCase();
-          return app.stage === 'post_approval' || app.stage === 'lease_deed' || app.stage === 'approved' ||
-            st.includes('approved') || st.includes('loa') || st.includes('lease deed');
-        }
-
-        function isSubsidyQueriedItem(app) {
-          if (!isSubsidyEoiScope(app)) return false;
-          const st = (app.status || '').toLowerCase();
-          return app.stage === 'queried_back' || app.stage === 'queried' || st.includes('queried');
-        }
-
-        function getSubsidyStatusBadgeHtml(app) {
-          const st = String(app?.status || '');
-          const isQueriedBack = app?.queriedBackTo === 'SUBSIDY_ADMIN' || app?.stage === 'queried_back' || st.includes('Queried Back');
-          if (isQueriedBack) {
-            return `<span class="inline-flex items-center gap-1 bg-red-100 text-red-900 border border-red-300 font-bold px-2.5 py-0.5 rounded text-[11px] whitespace-nowrap">&#9888; ${escapePlotHtml(st)}</span>`;
-          }
-          if (st.includes('Pending with Subsidy Admin')) {
-            return `<span class="inline-block bg-amber-100 text-amber-900 border border-amber-300 font-bold px-2 py-0.5 rounded text-[11px] whitespace-nowrap">${escapePlotHtml(st)}</span>`;
-          }
-          if (st.includes('Queried')) {
-            return `<span class="inline-block bg-rose-100 text-rose-800 border border-rose-200 font-bold px-2 py-0.5 rounded text-[11px] whitespace-nowrap">${escapePlotHtml(st)}</span>`;
-          }
-          if (st.includes('Approved') || st.includes('LOA')) {
-            return `<span class="inline-block bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold px-2 py-0.5 rounded text-[11px] whitespace-nowrap">${escapePlotHtml(st)}</span>`;
-          }
-          return `<span class="inline-block bg-blue-100 text-blue-900 border border-blue-200 font-bold px-2 py-0.5 rounded text-[11px] whitespace-nowrap">${escapePlotHtml(st)}</span>`;
-        }
-
-        function updateSubsidyKpiActiveState() {
-          ['pending', 'forwarded', 'approved', 'queried', 'all'].forEach(k => {
-            const card = document.getElementById('subsidy-kpi-card-' + k);
-            if (!card) return;
-            card.classList.toggle('active', subsidyActiveKpiFilter === k);
-          });
-          const chip = document.getElementById('subsidy-active-filter-chip');
-          const lbl = document.getElementById('subsidy-active-filter-label');
-          const labels = {
-            pending: 'Showing: Pending Subsidy Admin (incl. Queried Back)',
-            forwarded: 'Showing: Forwarded to Finance / Next Stage',
-            approved: 'Showing: Recommended / Approved',
-            queried: 'Showing: Queried Applications',
-            all: ''
-          };
-          if (chip && lbl) {
-            if (subsidyActiveKpiFilter !== 'all') {
-              lbl.textContent = labels[subsidyActiveKpiFilter] || '';
-              chip.classList.remove('hidden');
-              chip.classList.add('inline-flex');
-            } else {
-              chip.classList.add('hidden');
-              chip.classList.remove('inline-flex');
-            }
-          }
-        }
-
-        function filterSubsidyByKpi(kpiKey) {
-          subsidyActiveKpiFilter = kpiKey || 'all';
-          updateSubsidyKpiActiveState();
-          renderSubsidyDashboard();
-        }
-
-        function filterSubsidyTable() {
-          renderSubsidyDashboard();
-        }
-
-        function sortSubsidyTable(key) {
-          if (subsidySortKey === key) subsidySortAsc = !subsidySortAsc;
-          else { subsidySortKey = key; subsidySortAsc = true; }
-          document.querySelectorAll('[id^="sub-sort-ind-"]').forEach(el => {
-            el.textContent = '▴';
-            el.className = 'text-[10px] text-slate-400';
-          });
-          const active = document.getElementById('sub-sort-ind-' + key);
-          if (active) {
-            active.textContent = subsidySortAsc ? '▴' : '▾';
-            active.className = 'text-[10px] text-[#3b5998] font-bold';
-          }
-          renderSubsidyDashboard();
-        }
-
-        function renderSubsidyPaymentLedger() {
-          const body = document.getElementById('subsidy-payment-ledger-body');
-          if (!body) return;
-          const scoped = (window.oicLandApplications || []).filter(isSubsidyEoiScope);
-          if (scoped.length === 0) {
-            body.innerHTML = `<div class="text-slate-500 text-center py-4">No EOI Land Allotment payment records available.</div>`;
-            return;
-          }
-          body.innerHTML = `
+    function renderSubsidyPaymentLedger() {
+      const body = document.getElementById('subsidy-payment-ledger-body');
+      if (!body) return;
+      const scoped = (window.oicLandApplications || []).filter(isSubsidyEoiScope);
+      if (scoped.length === 0) {
+        body.innerHTML = `<div class="text-slate-500 text-center py-4">No EOI Land Allotment payment records available.</div>`;
+        return;
+      }
+      body.innerHTML = `
         <table class="w-full text-xs border-collapse border border-slate-200">
           <thead class="bg-[#dfe5f5] text-slate-800 font-semibold">
             <tr>
@@ -11082,75 +11082,75 @@
           </tbody>
         </table>
       `;
-        }
+    }
 
-        function renderSubsidyDashboard() {
-          const scopedApps = (window.oicLandApplications || []).filter(isSubsidyEoiScope);
+    function renderSubsidyDashboard() {
+      const scopedApps = (window.oicLandApplications || []).filter(isSubsidyEoiScope);
 
-          const pendingCount = scopedApps.filter(isSubsidyPendingItem).length;
-          const forwardedCount = scopedApps.filter(isSubsidyForwardedItem).length;
-          const approvedCount = scopedApps.filter(isSubsidyApprovedItem).length;
-          const queriedCount = scopedApps.filter(isSubsidyQueriedItem).length;
-          const allCount = scopedApps.length;
+      const pendingCount = scopedApps.filter(isSubsidyPendingItem).length;
+      const forwardedCount = scopedApps.filter(isSubsidyForwardedItem).length;
+      const approvedCount = scopedApps.filter(isSubsidyApprovedItem).length;
+      const queriedCount = scopedApps.filter(isSubsidyQueriedItem).length;
+      const allCount = scopedApps.length;
 
-          const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-          setTxt('subsidy-kpi-pending', pendingCount);
-          setTxt('subsidy-kpi-forwarded', forwardedCount);
-          setTxt('subsidy-kpi-approved', approvedCount);
-          setTxt('subsidy-kpi-queried', queriedCount);
-          setTxt('subsidy-kpi-all', allCount);
+      const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+      setTxt('subsidy-kpi-pending', pendingCount);
+      setTxt('subsidy-kpi-forwarded', forwardedCount);
+      setTxt('subsidy-kpi-approved', approvedCount);
+      setTxt('subsidy-kpi-queried', queriedCount);
+      setTxt('subsidy-kpi-all', allCount);
 
-          setTxt('subsidy-policy-it-count', scopedApps.filter(a => (a.policyName || '').includes('2023')).length);
-          setTxt('subsidy-policy-special-count', scopedApps.filter(a => !(a.policyName || '').includes('2023')).length);
-          setTxt('subsidy-queried-back-count', scopedApps.filter(a => a.queriedBackTo === 'SUBSIDY_ADMIN' || a.stage === 'queried_back').length);
+      setTxt('subsidy-policy-it-count', scopedApps.filter(a => (a.policyName || '').includes('2023')).length);
+      setTxt('subsidy-policy-special-count', scopedApps.filter(a => !(a.policyName || '').includes('2023')).length);
+      setTxt('subsidy-queried-back-count', scopedApps.filter(a => a.queriedBackTo === 'SUBSIDY_ADMIN' || a.stage === 'queried_back').length);
 
-          updateSubsidyKpiActiveState();
-          if (!document.getElementById('subsidy-payment-panel')?.classList.contains('hidden')) {
-            renderSubsidyPaymentLedger();
-          }
+      updateSubsidyKpiActiveState();
+      if (!document.getElementById('subsidy-payment-panel')?.classList.contains('hidden')) {
+        renderSubsidyPaymentLedger();
+      }
 
-          const tbody = document.getElementById('subsidy-pending-tbody');
-          if (!tbody) return;
+      const tbody = document.getElementById('subsidy-pending-tbody');
+      if (!tbody) return;
 
-          let rows = scopedApps.slice();
-          if (subsidyActiveKpiFilter === 'pending') rows = rows.filter(isSubsidyPendingItem);
-          else if (subsidyActiveKpiFilter === 'forwarded') rows = rows.filter(isSubsidyForwardedItem);
-          else if (subsidyActiveKpiFilter === 'approved') rows = rows.filter(isSubsidyApprovedItem);
-          else if (subsidyActiveKpiFilter === 'queried') rows = rows.filter(isSubsidyQueriedItem);
+      let rows = scopedApps.slice();
+      if (subsidyActiveKpiFilter === 'pending') rows = rows.filter(isSubsidyPendingItem);
+      else if (subsidyActiveKpiFilter === 'forwarded') rows = rows.filter(isSubsidyForwardedItem);
+      else if (subsidyActiveKpiFilter === 'approved') rows = rows.filter(isSubsidyApprovedItem);
+      else if (subsidyActiveKpiFilter === 'queried') rows = rows.filter(isSubsidyQueriedItem);
 
-          const searchBy = document.getElementById('subsidy-search-by')?.value || 'all';
-          const q = (document.getElementById('subsidy-search-query')?.value || '').trim().toLowerCase();
-          if (q) {
-            rows = rows.filter(a => {
-              if (searchBy === 'appNo') return (a.appNo || '').toLowerCase().includes(q);
-              if (searchBy === 'orgName') return (a.orgName || '').toLowerCase().includes(q) || (a.signatory || '').toLowerCase().includes(q);
-              if (searchBy === 'plotDisplay') return (a.plotNo || '').toLowerCase().includes(q) || (a.itPark || '').toLowerCase().includes(q);
-              if (searchBy === 'policy') return (a.policyName || '').toLowerCase().includes(q) || (a.rebateSlabLabel || '').toLowerCase().includes(q);
-              if (searchBy === 'status') return (a.status || '').toLowerCase().includes(q);
-              return JSON.stringify([a.appNo, a.orgName, a.plotNo, a.itPark, a.policyName, a.rebateSlabLabel, a.status, a.applicationAt]).toLowerCase().includes(q);
-            });
-          }
+      const searchBy = document.getElementById('subsidy-search-by')?.value || 'all';
+      const q = (document.getElementById('subsidy-search-query')?.value || '').trim().toLowerCase();
+      if (q) {
+        rows = rows.filter(a => {
+          if (searchBy === 'appNo') return (a.appNo || '').toLowerCase().includes(q);
+          if (searchBy === 'orgName') return (a.orgName || '').toLowerCase().includes(q) || (a.signatory || '').toLowerCase().includes(q);
+          if (searchBy === 'plotDisplay') return (a.plotNo || '').toLowerCase().includes(q) || (a.itPark || '').toLowerCase().includes(q);
+          if (searchBy === 'policy') return (a.policyName || '').toLowerCase().includes(q) || (a.rebateSlabLabel || '').toLowerCase().includes(q);
+          if (searchBy === 'status') return (a.status || '').toLowerCase().includes(q);
+          return JSON.stringify([a.appNo, a.orgName, a.plotNo, a.itPark, a.policyName, a.rebateSlabLabel, a.status, a.applicationAt]).toLowerCase().includes(q);
+        });
+      }
 
-          if (subsidySortKey && subsidySortKey !== 'sno') {
-            rows.sort((a, b) => {
-              const av = String(a[subsidySortKey] || '').toLowerCase();
-              const bv = String(b[subsidySortKey] || '').toLowerCase();
-              if (av < bv) return subsidySortAsc ? -1 : 1;
-              if (av > bv) return subsidySortAsc ? 1 : -1;
-              return 0;
-            });
-          } else if (subsidySortKey === 'sno' && !subsidySortAsc) {
-            rows.reverse();
-          }
+      if (subsidySortKey && subsidySortKey !== 'sno') {
+        rows.sort((a, b) => {
+          const av = String(a[subsidySortKey] || '').toLowerCase();
+          const bv = String(b[subsidySortKey] || '').toLowerCase();
+          if (av < bv) return subsidySortAsc ? -1 : 1;
+          if (av > bv) return subsidySortAsc ? 1 : -1;
+          return 0;
+        });
+      } else if (subsidySortKey === 'sno' && !subsidySortAsc) {
+        rows.reverse();
+      }
 
-          if (rows.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="12" class="p-6 text-center text-slate-500 text-xs">No EOI Land Allotment applications match the selected filter criteria.</td></tr>`;
-          } else {
-            tbody.innerHTML = rows.map((app, idx) => {
-              const slabInfo = computeRebateSlabBreakdown(app);
-              const isQueriedBack = app.queriedBackTo === 'SUBSIDY_ADMIN' || app.stage === 'queried_back' || (app.status || '').includes('Queried Back');
-              const rowHighlight = isQueriedBack ? 'bg-red-50/40 hover:bg-red-50/80' : 'hover:bg-slate-50/90';
-              return `
+      if (rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="12" class="p-6 text-center text-slate-500 text-xs">No EOI Land Allotment applications match the selected filter criteria.</td></tr>`;
+      } else {
+        tbody.innerHTML = rows.map((app, idx) => {
+          const slabInfo = computeRebateSlabBreakdown(app);
+          const isQueriedBack = app.queriedBackTo === 'SUBSIDY_ADMIN' || app.stage === 'queried_back' || (app.status || '').includes('Queried Back');
+          const rowHighlight = isQueriedBack ? 'bg-red-50/40 hover:bg-red-50/80' : 'hover:bg-slate-50/90';
+          return `
             <tr class="${rowHighlight} transition">
               <td class="p-3 text-center font-mono text-slate-600">${idx + 1}</td>
               <td class="p-3 font-semibold text-slate-900">
@@ -11185,101 +11185,101 @@
               </td>
             </tr>
           `;
-            }).join('');
-          }
+        }).join('');
+      }
 
-          setTxt('subsidy-table-footer-count', rows.length === 0 ? 'Showing 0 entries' : `Showing 1 to ${rows.length} of ${rows.length} entries`);
-        }
+      setTxt('subsidy-table-footer-count', rows.length === 0 ? 'Showing 0 entries' : `Showing 1 to ${rows.length} of ${rows.length} entries`);
+    }
 
-        function downloadSubsidyDossier(appNo) {
-          const app = (window.oicLandApplications || []).find(a => a.appNo === appNo) || window.submittedApplicationsMap[appNo];
-          if (!app) {
-            showGlobalToast('Dossier record not found.', 'error');
-            return;
-          }
-          const rebate = computeRebateSlabBreakdown(app);
-          const summaryLines = [
-            'MPSEDC IT INVESTMENT PORTAL 2.0 — EOI LAND ALLOTMENT DOSSIER SUMMARY',
-            '===================================================================',
-            `Application Number : ${app.appNo}`,
-            `Application Type   : EOI Land Allotment (${app.formType || 'Form 1'})`,
-            `Organization       : ${app.orgName}`,
-            `Signatory / CIN    : ${app.signatory} | ${app.cin}`,
-            `Plot & IT Park     : ${app.plotNo} — ${app.itPark} (${app.plotSizeAcres} / ${app.plotSizeSqFt})`,
-            `Policy Category    : ${app.policyName}`,
-            `Rebate Slabs       : ${rebate.slabSummary}`,
-            `Net Land Premium   : ${app.landPremium}`,
-            `25% Advance EMD    : ${app.advanceEmd}`,
-            `Current Status     : ${app.status}`,
-            `Application At     : ${app.applicationAt}`,
-            '',
-            'PROGRESSIVE REBATE SLAB BREAKDOWN:',
-            ...rebate.slabs.map(s => `  - ${s.label}: ${s.acres.toFixed(2)} Ac | ${s.rebatePct}% Rebate => Payable ${formatCurrencyInr(s.payable)}`),
-            '',
-            'SCRUTINY & QUERY AUDIT TRAIL:',
-            ...(app.history || []).map(h => `  [${h.timestamp}] ${h.actor} -> ${h.status}${h.remark ? ' | ' + h.remark : ''}`)
-          ].join('\n');
+    function downloadSubsidyDossier(appNo) {
+      const app = (window.oicLandApplications || []).find(a => a.appNo === appNo) || window.submittedApplicationsMap[appNo];
+      if (!app) {
+        showGlobalToast('Dossier record not found.', 'error');
+        return;
+      }
+      const rebate = computeRebateSlabBreakdown(app);
+      const summaryLines = [
+        'MPSEDC IT INVESTMENT PORTAL 2.0 — EOI LAND ALLOTMENT DOSSIER SUMMARY',
+        '===================================================================',
+        `Application Number : ${app.appNo}`,
+        `Application Type   : EOI Land Allotment (${app.formType || 'Form 1'})`,
+        `Organization       : ${app.orgName}`,
+        `Signatory / CIN    : ${app.signatory} | ${app.cin}`,
+        `Plot & IT Park     : ${app.plotNo} — ${app.itPark} (${app.plotSizeAcres} / ${app.plotSizeSqFt})`,
+        `Policy Category    : ${app.policyName}`,
+        `Rebate Slabs       : ${rebate.slabSummary}`,
+        `Net Land Premium   : ${app.landPremium}`,
+        `25% Advance EMD    : ${app.advanceEmd}`,
+        `Current Status     : ${app.status}`,
+        `Application At     : ${app.applicationAt}`,
+        '',
+        'PROGRESSIVE REBATE SLAB BREAKDOWN:',
+        ...rebate.slabs.map(s => `  - ${s.label}: ${s.acres.toFixed(2)} Ac | ${s.rebatePct}% Rebate => Payable ${formatCurrencyInr(s.payable)}`),
+        '',
+        'SCRUTINY & QUERY AUDIT TRAIL:',
+        ...(app.history || []).map(h => `  [${h.timestamp}] ${h.actor} -> ${h.status}${h.remark ? ' | ' + h.remark : ''}`)
+      ].join('\n');
 
-          try {
-            const blob = new Blob([summaryLines], { type: 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${app.appNo}_EOI_Dossier_Summary.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-          } catch (e) { }
-          showGlobalToast(`Downloaded EOI dossier summary for ${app.appNo}.`, 'success');
-        }
+      try {
+        const blob = new Blob([summaryLines], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${app.appNo}_EOI_Dossier_Summary.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (e) { }
+      showGlobalToast(`Downloaded EOI dossier summary for ${app.appNo}.`, 'success');
+    }
 
-        let subsidyZoomLevel = 1.0;
+    let subsidyZoomLevel = 1.0;
 
-        function adjustSubsidyZoom(delta) {
-          if (delta === 0) subsidyZoomLevel = 1.0;
-          else subsidyZoomLevel = Math.min(1.3, Math.max(0.75, +(subsidyZoomLevel + delta).toFixed(2)));
-          const sheet = document.getElementById('subsidy-doc-sheet');
-          const lbl = document.getElementById('subsidy-zoom-label');
-          if (sheet) sheet.style.transform = `scale(${subsidyZoomLevel})`;
-          if (lbl) lbl.textContent = Math.round(subsidyZoomLevel * 100) + '%';
-        }
+    function adjustSubsidyZoom(delta) {
+      if (delta === 0) subsidyZoomLevel = 1.0;
+      else subsidyZoomLevel = Math.min(1.3, Math.max(0.75, +(subsidyZoomLevel + delta).toFixed(2)));
+      const sheet = document.getElementById('subsidy-doc-sheet');
+      const lbl = document.getElementById('subsidy-zoom-label');
+      if (sheet) sheet.style.transform = `scale(${subsidyZoomLevel})`;
+      if (lbl) lbl.textContent = Math.round(subsidyZoomLevel * 100) + '%';
+    }
 
-        function openSubsidyScrutinyDetail(appNo) {
-          const app = (window.oicLandApplications || []).find(a => a.appNo === appNo) || window.submittedApplicationsMap[appNo];
-          if (!app) {
-            showGlobalToast('Application record not found.', 'error');
-            return;
-          }
-          currentSubsidyAppNo = app.appNo;
-          subsidyZoomLevel = 1.0;
+    function openSubsidyScrutinyDetail(appNo) {
+      const app = (window.oicLandApplications || []).find(a => a.appNo === appNo) || window.submittedApplicationsMap[appNo];
+      if (!app) {
+        showGlobalToast('Application record not found.', 'error');
+        return;
+      }
+      currentSubsidyAppNo = app.appNo;
+      subsidyZoomLevel = 1.0;
 
-          const heroType = document.getElementById('scrutiny-hero-type');
-          const heroAppNo = document.getElementById('scrutiny-hero-appno');
-          const formBadge = document.getElementById('subsidy-form-badge');
-          if (heroType) heroType.textContent = `EOI Land Allotment (${app.formType || 'Form 1'})`;
-          if (heroAppNo) heroAppNo.textContent = app.appNo;
-          if (formBadge) formBadge.textContent = app.formType || 'Form 1';
+      const heroType = document.getElementById('scrutiny-hero-type');
+      const heroAppNo = document.getElementById('scrutiny-hero-appno');
+      const formBadge = document.getElementById('subsidy-form-badge');
+      if (heroType) heroType.textContent = `EOI Land Allotment (${app.formType || 'Form 1'})`;
+      if (heroAppNo) heroAppNo.textContent = app.appNo;
+      if (formBadge) formBadge.textContent = app.formType || 'Form 1';
 
-          document.getElementById('subsidy-pdf-sig-bar')?.classList.remove('hidden');
-          renderSubsidyDocumentSheet(app);
-          renderSubsidyAttachments(app);
-          renderSubsidyActionPanel(app);
-          renderSubsidyHistory(app);
+      document.getElementById('subsidy-pdf-sig-bar')?.classList.remove('hidden');
+      renderSubsidyDocumentSheet(app);
+      renderSubsidyAttachments(app);
+      renderSubsidyActionPanel(app);
+      renderSubsidyHistory(app);
 
-          switchView('subsidy-scrutiny');
-        }
+      switchView('subsidy-scrutiny');
+    }
 
-        function renderSubsidyDocumentSheet(app) {
-          const sheet = document.getElementById('subsidy-doc-sheet');
-          if (!sheet) return;
-          sheet.style.transform = `scale(${subsidyZoomLevel})`;
-          const rebate = computeRebateSlabBreakdown(app);
-          const docsListHtml = (app.attachments || []).map((doc, idx) =>
-            `<li class="text-[11.5px] text-slate-800 py-0.5">${idx + 1}. ${escapePlotHtml(doc.title)}</li>`
-          ).join('');
+    function renderSubsidyDocumentSheet(app) {
+      const sheet = document.getElementById('subsidy-doc-sheet');
+      if (!sheet) return;
+      sheet.style.transform = `scale(${subsidyZoomLevel})`;
+      const rebate = computeRebateSlabBreakdown(app);
+      const docsListHtml = (app.attachments || []).map((doc, idx) =>
+        `<li class="text-[11.5px] text-slate-800 py-0.5">${idx + 1}. ${escapePlotHtml(doc.title)}</li>`
+      ).join('');
 
-          sheet.innerHTML = `
+      sheet.innerHTML = `
         <!-- Official Header with MPSEDC Logo (Left) & MP Govt Seal (Right) -->
         <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding-bottom:10px;">
           <div style="flex-shrink:0;">
@@ -11399,19 +11399,19 @@
 
         </div>
       `;
-        }
+    }
 
-        function renderSubsidyAttachments(app) {
-          const tbody = document.getElementById('subsidy-attachments-tbody');
-          const badge = document.getElementById('subsidy-attachments-badge');
-          const atts = app.attachments || [];
-          if (badge) badge.textContent = `${atts.length} Files`;
-          if (!tbody) return;
-          if (atts.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">No attachments recorded.</td></tr>`;
-            return;
-          }
-          tbody.innerHTML = atts.map((d, i) => `
+    function renderSubsidyAttachments(app) {
+      const tbody = document.getElementById('subsidy-attachments-tbody');
+      const badge = document.getElementById('subsidy-attachments-badge');
+      const atts = app.attachments || [];
+      if (badge) badge.textContent = `${atts.length} Files`;
+      if (!tbody) return;
+      if (atts.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">No attachments recorded.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = atts.map((d, i) => `
         <tr class="hover:bg-slate-50">
           <td class="p-2.5 text-center font-mono">${i + 1}</td>
           <td class="p-2.5">
@@ -11423,30 +11423,30 @@
           <td class="p-2.5 text-center">${d.verified ? '<span class="text-emerald-700 font-bold">&#10003; Verified by OIC</span>' : '<span class="text-amber-700 font-semibold">Pending</span>'}</td>
         </tr>
       `).join('');
-        }
+    }
 
-        function renderSubsidyActionPanel(app) {
-          const incomingBanner = document.getElementById('subsidy-incoming-query-banner');
-          const contextBox = document.getElementById('subsidy-action-context');
-          const formEl = document.getElementById('subsidy-action-form');
-          const selectEl = document.getElementById('subsidy-action-select');
-          const notesEl = document.getElementById('subsidy-rebate-notes');
-          const commentEl = document.getElementById('subsidy-comment-input');
-          const stagePill = document.getElementById('subsidy-stage-pill');
+    function renderSubsidyActionPanel(app) {
+      const incomingBanner = document.getElementById('subsidy-incoming-query-banner');
+      const contextBox = document.getElementById('subsidy-action-context');
+      const formEl = document.getElementById('subsidy-action-form');
+      const selectEl = document.getElementById('subsidy-action-select');
+      const notesEl = document.getElementById('subsidy-rebate-notes');
+      const commentEl = document.getElementById('subsidy-comment-input');
+      const stagePill = document.getElementById('subsidy-stage-pill');
 
-          clearSubsidyValidation('all');
-          if (commentEl) commentEl.value = '';
-          if (notesEl) notesEl.value = app.rebateVerificationNotes || '';
+      clearSubsidyValidation('all');
+      if (commentEl) commentEl.value = '';
+      if (notesEl) notesEl.value = app.rebateVerificationNotes || '';
 
-          const isAtSubsidy = isApplicationAtRole(app, 'SUBSIDY_ADMIN');
-          const isQueriedBack = isAtSubsidy && (app.queriedBackTo === 'SUBSIDY_ADMIN' || app.stage === 'queried_back' || (app.status || '').includes('Queried Back'));
-          const notesWrap = document.getElementById('subsidy-rebate-notes-wrap');
-          if (notesWrap) notesWrap.classList.toggle('hidden', !isQueriedBack);
+      const isAtSubsidy = isApplicationAtRole(app, 'SUBSIDY_ADMIN');
+      const isQueriedBack = isAtSubsidy && (app.queriedBackTo === 'SUBSIDY_ADMIN' || app.stage === 'queried_back' || (app.status || '').includes('Queried Back'));
+      const notesWrap = document.getElementById('subsidy-rebate-notes-wrap');
+      if (notesWrap) notesWrap.classList.toggle('hidden', !isQueriedBack);
 
-          if (incomingBanner) {
-            if (isQueriedBack) {
-              incomingBanner.classList.remove('hidden');
-              incomingBanner.innerHTML = `
+      if (incomingBanner) {
+        if (isQueriedBack) {
+          incomingBanner.classList.remove('hidden');
+          incomingBanner.innerHTML = `
             <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
               <div class="font-bold text-red-900 text-sm flex items-center gap-2">
                 <span>&#9888; Queried Back to Subsidy Admin</span>
@@ -11458,150 +11458,150 @@
               <b>Query Reason / Instructions:</b> ${escapePlotHtml(app.queriedBackReason || app.queryRemarks || 'Higher authority requested policy/rebate clarification.')}
             </div>
           `;
-            } else {
-              incomingBanner.classList.add('hidden');
-              incomingBanner.innerHTML = '';
-            }
-          }
+        } else {
+          incomingBanner.classList.add('hidden');
+          incomingBanner.innerHTML = '';
+        }
+      }
 
-          if (stagePill) {
-            stagePill.textContent = isQueriedBack ? 'Queried Back (Action Needed)' : (isAtSubsidy ? 'Stage 2: Policy & Rebate Check' : (app.status || 'Read-Only'));
-          }
+      if (stagePill) {
+        stagePill.textContent = isQueriedBack ? 'Queried Back (Action Needed)' : (isAtSubsidy ? 'Stage 2: Policy & Rebate Check' : (app.status || 'Read-Only'));
+      }
 
-          if (!isAtSubsidy) {
-            if (formEl) formEl.classList.add('hidden');
-            if (contextBox) {
-              contextBox.classList.remove('hidden');
-              contextBox.className = 'rounded border p-3.5 text-xs bg-blue-50 border-blue-200 text-blue-950 space-y-2';
-              contextBox.innerHTML = `
+      if (!isAtSubsidy) {
+        if (formEl) formEl.classList.add('hidden');
+        if (contextBox) {
+          contextBox.classList.remove('hidden');
+          contextBox.className = 'rounded border p-3.5 text-xs bg-blue-50 border-blue-200 text-blue-950 space-y-2';
+          contextBox.innerHTML = `
             <div class="font-bold text-slate-900">Status: ${escapePlotHtml(app.status)}</div>
             <div>Currently at: <b>${escapePlotHtml(app.applicationAt)}</b></div>
             ${app.rebateVerificationNotes ? `<div class="bg-white border border-blue-100 rounded p-2 text-[11px]"><b>Subsidy Admin Rebate Notes:</b> ${escapePlotHtml(app.rebateVerificationNotes)}</div>` : ''}
             <button type="button" onclick="openScrutinyLogModal('${escapePlotHtml(app.appNo)}')" class="text-blue-700 font-semibold underline cursor-pointer bg-transparent border-0 p-0">View Inspection / Scrutiny Log</button>
           `;
-            }
-            return;
-          }
-
-          if (formEl) formEl.classList.remove('hidden');
-          if (contextBox) {
-            if (isQueriedBack) {
-              contextBox.classList.remove('hidden');
-              contextBox.className = 'rounded border p-3 text-xs bg-red-50 border-red-200 text-red-950';
-              contextBox.innerHTML = `<b>Incoming Query (${escapePlotHtml(app.queriedBackBy || 'Authority')}):</b> ${escapePlotHtml(app.queriedBackReason || app.queryRemarks || '')}`;
-            } else {
-              contextBox.classList.add('hidden');
-            }
-          }
-
-          if (selectEl) {
-            const opts = isQueriedBack
-              ? [
-                { value: 'resolve_reforward_finance', label: 'Resolve Query & Re-forward to Finance Admin' },
-                { value: 'query_oic', label: 'Raise Query to OIC IT Park' }
-              ]
-              : [
-                { value: 'forward_finance', label: 'Verify Policy & Rebate -> Forward to Finance Admin' },
-                { value: 'query_oic', label: 'Raise Query to OIC IT Park' }
-              ];
-            selectEl.innerHTML = `<option value="">-- Please Select --</option>` +
-              opts.map(o => `<option value="${o.value}">${escapePlotHtml(o.label)}</option>`).join('');
-          }
         }
+        return;
+      }
 
-        function clearSubsidyValidation(which) {
-          const keys = which === 'all' ? ['action', 'comment'] : [which];
-          keys.forEach(k => document.getElementById(`subsidy-${k}-err`)?.classList.add('hidden'));
-          if (which === 'all' || which === 'action') document.getElementById('subsidy-action-select')?.classList.remove('border-red-500');
-          if (which === 'all' || which === 'comment') document.getElementById('subsidy-comment-input')?.classList.remove('border-red-500');
+      if (formEl) formEl.classList.remove('hidden');
+      if (contextBox) {
+        if (isQueriedBack) {
+          contextBox.classList.remove('hidden');
+          contextBox.className = 'rounded border p-3 text-xs bg-red-50 border-red-200 text-red-950';
+          contextBox.innerHTML = `<b>Incoming Query (${escapePlotHtml(app.queriedBackBy || 'Authority')}):</b> ${escapePlotHtml(app.queriedBackReason || app.queryRemarks || '')}`;
+        } else {
+          contextBox.classList.add('hidden');
         }
+      }
 
-        function submitSubsidyScrutinyAction(e) {
-          if (e && e.preventDefault) e.preventDefault();
-          const app = (window.oicLandApplications || []).find(a => a.appNo === currentSubsidyAppNo) || window.submittedApplicationsMap[currentSubsidyAppNo];
-          if (!app) return;
+      if (selectEl) {
+        const opts = isQueriedBack
+          ? [
+            { value: 'resolve_reforward_finance', label: 'Resolve Query & Re-forward to Finance Admin' },
+            { value: 'query_oic', label: 'Raise Query to OIC IT Park' }
+          ]
+          : [
+            { value: 'forward_finance', label: 'Verify Policy & Rebate -> Forward to Finance Admin' },
+            { value: 'query_oic', label: 'Raise Query to OIC IT Park' }
+          ];
+        selectEl.innerHTML = `<option value="">-- Please Select --</option>` +
+          opts.map(o => `<option value="${o.value}">${escapePlotHtml(o.label)}</option>`).join('');
+      }
+    }
 
-          const actionEl = document.getElementById('subsidy-action-select');
-          const commentEl = document.getElementById('subsidy-comment-input');
-          const notesEl = document.getElementById('subsidy-rebate-notes');
+    function clearSubsidyValidation(which) {
+      const keys = which === 'all' ? ['action', 'comment'] : [which];
+      keys.forEach(k => document.getElementById(`subsidy-${k}-err`)?.classList.add('hidden'));
+      if (which === 'all' || which === 'action') document.getElementById('subsidy-action-select')?.classList.remove('border-red-500');
+      if (which === 'all' || which === 'comment') document.getElementById('subsidy-comment-input')?.classList.remove('border-red-500');
+    }
 
-          const actionVal = actionEl?.value || '';
-          const commentVal = commentEl?.value?.trim() || '';
-          const rebateNotes = notesEl?.value?.trim() || '';
+    function submitSubsidyScrutinyAction(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      const app = (window.oicLandApplications || []).find(a => a.appNo === currentSubsidyAppNo) || window.submittedApplicationsMap[currentSubsidyAppNo];
+      if (!app) return;
 
-          let ok = true;
-          if (!actionVal) {
-            document.getElementById('subsidy-action-err')?.classList.remove('hidden');
-            actionEl?.classList.add('border-red-500');
-            ok = false;
-          }
-          if (!commentVal) {
-            document.getElementById('subsidy-comment-err')?.classList.remove('hidden');
-            commentEl?.classList.add('border-red-500');
-            ok = false;
-          }
-          if (!ok) return;
+      const actionEl = document.getElementById('subsidy-action-select');
+      const commentEl = document.getElementById('subsidy-comment-input');
+      const notesEl = document.getElementById('subsidy-rebate-notes');
 
-          const ts = formatCurrentOicTimestamp();
-          if (rebateNotes) app.rebateVerificationNotes = rebateNotes;
-          app.history = app.history || [];
+      const actionVal = actionEl?.value || '';
+      const commentVal = commentEl?.value?.trim() || '';
+      const rebateNotes = notesEl?.value?.trim() || '';
 
-          if (actionVal === 'forward_finance' || actionVal === 'resolve_reforward_finance') {
-            app.status = 'Forwarded to Finance Admin';
-            app.applicationAt = 'FINANCE_ADMIN';
-            app.stage = 'finance_scrutiny';
-            app.pendingSince = ts;
-            app.subsidyVerifiedAt = ts;
-            app.queriedBackTo = '';
-            app.queriedBackBy = '';
-            app.queriedBackReason = '';
-            app.history.push({
-              actor: 'Subsidy Admin (SUBSIDY_ADMIN)',
-              timestamp: ts,
-              status: actionVal === 'resolve_reforward_finance' ? 'Query Resolved & Re-forwarded to Finance Admin' : 'Forwarded to Finance Admin',
-              remark: commentVal + (rebateNotes ? ` [Rebate Note: ${rebateNotes}]` : '')
-            });
-            showGlobalToast(`${app.appNo} verified & forwarded to Finance Admin.`, 'success');
-          } else if (actionVal === 'query_oic') {
-            // Strict rule: Subsidy Admin can ONLY query OIC IT Park, never directly to Applicant
-            app.status = 'Queried by Subsidy Admin';
-            app.applicationAt = 'OIC_IT_PARK';
-            app.stage = 'initial_scrutiny';
-            app.pendingSince = ts;
-            app.queriedBy = 'SUBSIDY_ADMIN';
-            app.queriedBackBy = 'SUBSIDY_ADMIN';
-            app.queriedBackTo = 'OIC_IT_PARK';
-            app.queriedBackReason = commentVal;
-            app.queriedBackTimestamp = ts;
-            app.history.push({
-              actor: 'Subsidy Admin (SUBSIDY_ADMIN)',
-              timestamp: ts,
-              status: 'Queried by Subsidy Admin (Routed to OIC IT Park)',
-              remark: commentVal
-            });
-            showGlobalToast(`Query raised to OIC IT Park for ${app.appNo}.`, 'info');
-          }
+      let ok = true;
+      if (!actionVal) {
+        document.getElementById('subsidy-action-err')?.classList.remove('hidden');
+        actionEl?.classList.add('border-red-500');
+        ok = false;
+      }
+      if (!commentVal) {
+        document.getElementById('subsidy-comment-err')?.classList.remove('hidden');
+        commentEl?.classList.add('border-red-500');
+        ok = false;
+      }
+      if (!ok) return;
 
-          window.submittedApplicationsMap[app.appNo] = app;
-          savePersistedApplications();
-          renderSubsidyDashboard();
-          renderSubsidyActionPanel(app);
-          renderSubsidyHistory(app);
-          updateOicStats();
-          updateOicProcessStats();
-          renderOicApplicationsTable();
-          if (typeof renderAuthorityWorkbench === 'function' && window.currentOfficerRole) renderAuthorityWorkbench(window.currentOfficerRole);
-        }
+      const ts = formatCurrentOicTimestamp();
+      if (rebateNotes) app.rebateVerificationNotes = rebateNotes;
+      app.history = app.history || [];
 
-        function renderSubsidyHistory(app) {
-          const container = document.getElementById('subsidy-history-timeline');
-          if (!container) return;
-          const hist = app.history || [];
-          if (hist.length === 0) {
-            container.innerHTML = `<div class="text-xs text-slate-400 italic text-center py-4">No workflow history recorded yet.</div>`;
-            return;
-          }
-          container.innerHTML = hist.map(item => `
+      if (actionVal === 'forward_finance' || actionVal === 'resolve_reforward_finance') {
+        app.status = 'Forwarded to Finance Admin';
+        app.applicationAt = 'FINANCE_ADMIN';
+        app.stage = 'finance_scrutiny';
+        app.pendingSince = ts;
+        app.subsidyVerifiedAt = ts;
+        app.queriedBackTo = '';
+        app.queriedBackBy = '';
+        app.queriedBackReason = '';
+        app.history.push({
+          actor: 'Subsidy Admin (SUBSIDY_ADMIN)',
+          timestamp: ts,
+          status: actionVal === 'resolve_reforward_finance' ? 'Query Resolved & Re-forwarded to Finance Admin' : 'Forwarded to Finance Admin',
+          remark: commentVal + (rebateNotes ? ` [Rebate Note: ${rebateNotes}]` : '')
+        });
+        showGlobalToast(`${app.appNo} verified & forwarded to Finance Admin.`, 'success');
+      } else if (actionVal === 'query_oic') {
+        // Strict rule: Subsidy Admin can ONLY query OIC IT Park, never directly to Applicant
+        app.status = 'Queried by Subsidy Admin';
+        app.applicationAt = 'OIC_IT_PARK';
+        app.stage = 'initial_scrutiny';
+        app.pendingSince = ts;
+        app.queriedBy = 'SUBSIDY_ADMIN';
+        app.queriedBackBy = 'SUBSIDY_ADMIN';
+        app.queriedBackTo = 'OIC_IT_PARK';
+        app.queriedBackReason = commentVal;
+        app.queriedBackTimestamp = ts;
+        app.history.push({
+          actor: 'Subsidy Admin (SUBSIDY_ADMIN)',
+          timestamp: ts,
+          status: 'Queried by Subsidy Admin (Routed to OIC IT Park)',
+          remark: commentVal
+        });
+        showGlobalToast(`Query raised to OIC IT Park for ${app.appNo}.`, 'info');
+      }
+
+      window.submittedApplicationsMap[app.appNo] = app;
+      savePersistedApplications();
+      renderSubsidyDashboard();
+      renderSubsidyActionPanel(app);
+      renderSubsidyHistory(app);
+      updateOicStats();
+      updateOicProcessStats();
+      renderOicApplicationsTable();
+      if (typeof renderAuthorityWorkbench === 'function' && window.currentOfficerRole) renderAuthorityWorkbench(window.currentOfficerRole);
+    }
+
+    function renderSubsidyHistory(app) {
+      const container = document.getElementById('subsidy-history-timeline');
+      if (!container) return;
+      const hist = app.history || [];
+      if (hist.length === 0) {
+        container.innerHTML = `<div class="text-xs text-slate-400 italic text-center py-4">No workflow history recorded yet.</div>`;
+        return;
+      }
+      container.innerHTML = hist.map(item => `
         <div class="space-y-1">
           <div class="flex items-center justify-between gap-2 text-[11.5px] font-semibold text-slate-800">
             <span class="truncate">${escapePlotHtml(item.actor)}</span>
@@ -11613,17 +11613,17 @@
           </div>
         </div>
       `).join('');
-        }
+    }
 
-        function openScrutinyLogModal(appNo) {
-          const app = (window.oicLandApplications || []).find(a => a.appNo === appNo) || window.submittedApplicationsMap[appNo];
-          const modal = document.getElementById('modal-scrutiny-log');
-          const sub = document.getElementById('scrutiny-log-modal-sub');
-          const body = document.getElementById('scrutiny-log-modal-body');
-          if (!app || !modal || !body) return;
-          if (sub) sub.textContent = `${app.appNo} • ${app.orgName}`;
-          const hist = app.history || [];
-          body.innerHTML = `
+    function openScrutinyLogModal(appNo) {
+      const app = (window.oicLandApplications || []).find(a => a.appNo === appNo) || window.submittedApplicationsMap[appNo];
+      const modal = document.getElementById('modal-scrutiny-log');
+      const sub = document.getElementById('scrutiny-log-modal-sub');
+      const body = document.getElementById('scrutiny-log-modal-body');
+      if (!app || !modal || !body) return;
+      if (sub) sub.textContent = `${app.appNo} • ${app.orgName}`;
+      const hist = app.history || [];
+      body.innerHTML = `
         ${app.rebateVerificationNotes ? `<div class="bg-blue-50 border border-blue-200 rounded p-3 text-blue-950"><b>Policy / Rebate Note:</b> ${escapePlotHtml(app.rebateVerificationNotes)}</div>` : ''}
         ${hist.length === 0 ? '<div class="text-slate-400 italic text-center py-4">No scrutiny log entries yet.</div>' : hist.map((h, i) => `
           <div class="bg-white border border-slate-200 rounded p-3 shadow-2xs">
@@ -11636,32 +11636,32 @@
           </div>
         `).join('')}
       `;
-          modal.classList.remove('hidden');
-        }
+      modal.classList.remove('hidden');
+    }
 
-        // Higher Officer Workbench Engine (FINANCE_ADMIN, ED, MD)
-        function renderAuthorityWorkbench(roleKey) {
-          const role = roleKey || window.currentOfficerRole || 'FINANCE_ADMIN';
-          const titleMap = {
-            FINANCE_ADMIN: 'Finance Admin — Fee, 25% Advance EMD & Project Cost Verification',
-            ED: 'Executive Director (ED) — Stage 2 Executive Scrutiny & Recommendation',
-            MD: 'Managing Director (MD) — Final EOI Allotment Approval Authority'
-          };
-          const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-          setTxt('authority-workbench-title', titleMap[role] || 'Authority Queue');
-          setTxt('authority-workbench-role-badge', role);
+    // Higher Officer Workbench Engine (FINANCE_ADMIN, ED, MD)
+    function renderAuthorityWorkbench(roleKey) {
+      const role = roleKey || window.currentOfficerRole || 'FINANCE_ADMIN';
+      const titleMap = {
+        FINANCE_ADMIN: 'Finance Admin — Fee, 25% Advance EMD & Project Cost Verification',
+        ED: 'Executive Director (ED) — Stage 2 Executive Scrutiny & Recommendation',
+        MD: 'Managing Director (MD) — Final EOI Allotment Approval Authority'
+      };
+      const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+      setTxt('authority-workbench-title', titleMap[role] || 'Authority Queue');
+      setTxt('authority-workbench-role-badge', role);
 
-          const scoped = (window.oicLandApplications || []).filter(isSubsidyEoiScope);
-          const pendingMine = scoped.filter(a => isApplicationAtRole(a, role));
-          setTxt('authority-kpi-pending', pendingMine.length);
-          setTxt('authority-kpi-all', scoped.length);
+      const scoped = (window.oicLandApplications || []).filter(isSubsidyEoiScope);
+      const pendingMine = scoped.filter(a => isApplicationAtRole(a, role));
+      setTxt('authority-kpi-pending', pendingMine.length);
+      setTxt('authority-kpi-all', scoped.length);
 
-          const tbody = document.getElementById('authority-queue-tbody');
-          if (!tbody) return;
-          const ordered = [...pendingMine, ...scoped.filter(a => !isApplicationAtRole(a, role))];
-          tbody.innerHTML = ordered.map((app, i) => {
-            const isMine = isApplicationAtRole(app, role);
-            return `
+      const tbody = document.getElementById('authority-queue-tbody');
+      if (!tbody) return;
+      const ordered = [...pendingMine, ...scoped.filter(a => !isApplicationAtRole(a, role))];
+      tbody.innerHTML = ordered.map((app, i) => {
+        const isMine = isApplicationAtRole(app, role);
+        return `
           <tr class="${isMine ? 'bg-amber-50/40 hover:bg-amber-50/80' : 'hover:bg-slate-50'}">
             <td class="p-2.5 text-center font-mono">${i + 1}</td>
             <td class="p-2.5 font-semibold text-slate-900">${escapePlotHtml(app.orgName)}</td>
@@ -11678,29 +11678,29 @@
             </td>
           </tr>
         `;
-          }).join('');
-        }
+      }).join('');
+    }
 
-        function openAuthorityApplication(appNo) {
-          const app = (window.oicLandApplications || []).find(a => a.appNo === appNo) || window.submittedApplicationsMap[appNo];
-          if (!app) return;
-          window.currentAuthorityAppNo = appNo;
-          const role = window.currentOfficerRole || 'FINANCE_ADMIN';
-          const card = document.getElementById('authority-action-card');
-          const heading = document.getElementById('authority-action-heading');
-          const summary = document.getElementById('authority-app-summary');
-          const sel = document.getElementById('authority-action-select');
-          const targetSel = document.getElementById('authority-query-target');
-          const comment = document.getElementById('authority-comment-input');
-          const targetWrap = document.getElementById('authority-query-target-wrap');
+    function openAuthorityApplication(appNo) {
+      const app = (window.oicLandApplications || []).find(a => a.appNo === appNo) || window.submittedApplicationsMap[appNo];
+      if (!app) return;
+      window.currentAuthorityAppNo = appNo;
+      const role = window.currentOfficerRole || 'FINANCE_ADMIN';
+      const card = document.getElementById('authority-action-card');
+      const heading = document.getElementById('authority-action-heading');
+      const summary = document.getElementById('authority-app-summary');
+      const sel = document.getElementById('authority-action-select');
+      const targetSel = document.getElementById('authority-query-target');
+      const comment = document.getElementById('authority-comment-input');
+      const targetWrap = document.getElementById('authority-query-target-wrap');
 
-          if (card) card.classList.remove('hidden');
-          if (heading) heading.textContent = `${role} Scrutiny — ${app.appNo} (${app.orgName})`;
-          if (comment) comment.value = '';
-          if (targetWrap) targetWrap.classList.add('hidden');
+      if (card) card.classList.remove('hidden');
+      if (heading) heading.textContent = `${role} Scrutiny — ${app.appNo} (${app.orgName})`;
+      if (comment) comment.value = '';
+      if (targetWrap) targetWrap.classList.add('hidden');
 
-          if (summary) {
-            summary.innerHTML = `
+      if (summary) {
+        summary.innerHTML = `
           <div><b>Organization:</b> ${escapePlotHtml(app.orgName)} (${escapePlotHtml(app.cin)})</div>
           <div><b>Plot &amp; Track:</b> ${escapePlotHtml(app.plotNo)} &bull; ${escapePlotHtml(app.itPark)} (${escapePlotHtml(app.plotSizeAcres)})</div>
           <div><b>Policy / Rebate:</b> ${escapePlotHtml(app.policyName)} (${escapePlotHtml(computeRebateSlabBreakdown(app).slabSummary)})</div>
@@ -11709,167 +11709,167 @@
           ${app.rebateVerificationNotes ? `<div class="bg-blue-50 border border-blue-200 rounded p-2"><b>Subsidy Admin Verification Note:</b> ${escapePlotHtml(app.rebateVerificationNotes)}</div>` : ''}
           <div><b>Current Location:</b> <span class="font-mono font-bold">${escapePlotHtml(app.applicationAt)}</span> &bull; <b>Status:</b> ${escapePlotHtml(app.status)}</div>
         `;
-          }
+      }
 
-          const lowerMap = {
-            FINANCE_ADMIN: [
-              { value: 'SUBSIDY_ADMIN', label: 'Subsidy Admin (SUBSIDY_ADMIN)' },
-              { value: 'OIC_IT_PARK', label: 'OIC IT Park (OIC_IT_PARK)' }
-            ],
-            ED: [
-              { value: 'FINANCE_ADMIN', label: 'Finance Admin (FINANCE_ADMIN)' },
-              { value: 'SUBSIDY_ADMIN', label: 'Subsidy Admin (SUBSIDY_ADMIN)' },
-              { value: 'OIC_IT_PARK', label: 'OIC IT Park (OIC_IT_PARK)' }
-            ],
-            MD: [
-              { value: 'ED', label: 'Executive Director (ED)' },
-              { value: 'FINANCE_ADMIN', label: 'Finance Admin (FINANCE_ADMIN)' },
-              { value: 'SUBSIDY_ADMIN', label: 'Subsidy Admin (SUBSIDY_ADMIN)' },
-              { value: 'OIC_IT_PARK', label: 'OIC IT Park (OIC_IT_PARK)' }
-            ]
-          };
-          if (targetSel) {
-            targetSel.innerHTML = (lowerMap[role] || lowerMap.FINANCE_ADMIN).map(o => `<option value="${o.value}">${escapePlotHtml(o.label)}</option>`).join('');
-          }
+      const lowerMap = {
+        FINANCE_ADMIN: [
+          { value: 'SUBSIDY_ADMIN', label: 'Subsidy Admin (SUBSIDY_ADMIN)' },
+          { value: 'OIC_IT_PARK', label: 'OIC IT Park (OIC_IT_PARK)' }
+        ],
+        ED: [
+          { value: 'FINANCE_ADMIN', label: 'Finance Admin (FINANCE_ADMIN)' },
+          { value: 'SUBSIDY_ADMIN', label: 'Subsidy Admin (SUBSIDY_ADMIN)' },
+          { value: 'OIC_IT_PARK', label: 'OIC IT Park (OIC_IT_PARK)' }
+        ],
+        MD: [
+          { value: 'ED', label: 'Executive Director (ED)' },
+          { value: 'FINANCE_ADMIN', label: 'Finance Admin (FINANCE_ADMIN)' },
+          { value: 'SUBSIDY_ADMIN', label: 'Subsidy Admin (SUBSIDY_ADMIN)' },
+          { value: 'OIC_IT_PARK', label: 'OIC IT Park (OIC_IT_PARK)' }
+        ]
+      };
+      if (targetSel) {
+        targetSel.innerHTML = (lowerMap[role] || lowerMap.FINANCE_ADMIN).map(o => `<option value="${o.value}">${escapePlotHtml(o.label)}</option>`).join('');
+      }
 
-          if (sel) {
-            const isMine = isApplicationAtRole(app, role);
-            const forwardLabel = role === 'FINANCE_ADMIN'
-              ? 'Verify Fee, 25% EMD & Outlay -> Forward to ED'
-              : role === 'ED'
-                ? 'Recommend Allotment -> Forward to MD'
-                : 'Approve EOI Allotment -> Route to OIC IT Park (LOA / Stage 3)';
-            sel.innerHTML = isMine
-              ? `<option value="">-- Select Action --</option><option value="forward">${forwardLabel}</option><option value="query_back">Raise Query Back to Lower Officer</option>`
-              : `<option value="">-- File currently at ${escapePlotHtml(app.applicationAt)} --</option><option value="query_back">Raise Query Back to Lower Officer (Override)</option>`;
-          }
-          card?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      if (sel) {
+        const isMine = isApplicationAtRole(app, role);
+        const forwardLabel = role === 'FINANCE_ADMIN'
+          ? 'Verify Fee, 25% EMD & Outlay -> Forward to ED'
+          : role === 'ED'
+            ? 'Recommend Allotment -> Forward to MD'
+            : 'Approve EOI Allotment -> Route to OIC IT Park (LOA / Stage 3)';
+        sel.innerHTML = isMine
+          ? `<option value="">-- Select Action --</option><option value="forward">${forwardLabel}</option><option value="query_back">Raise Query Back to Lower Officer</option>`
+          : `<option value="">-- File currently at ${escapePlotHtml(app.applicationAt)} --</option><option value="query_back">Raise Query Back to Lower Officer (Override)</option>`;
+      }
+      card?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function handleAuthorityActionSelectChange() {
+      const val = document.getElementById('authority-action-select')?.value;
+      const wrap = document.getElementById('authority-query-target-wrap');
+      if (wrap) wrap.classList.toggle('hidden', val !== 'query_back');
+    }
+
+    function submitAuthorityWorkbenchAction(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      const app = (window.oicLandApplications || []).find(a => a.appNo === window.currentAuthorityAppNo) || window.submittedApplicationsMap[window.currentAuthorityAppNo];
+      if (!app) return;
+      const role = window.currentOfficerRole || 'FINANCE_ADMIN';
+      const actionVal = document.getElementById('authority-action-select')?.value || '';
+      const targetRole = document.getElementById('authority-query-target')?.value || 'SUBSIDY_ADMIN';
+      const commentVal = document.getElementById('authority-comment-input')?.value?.trim() || '';
+
+      if (!actionVal || !commentVal) {
+        showGlobalToast('Please select an Action and enter Scrutiny / Query Remarks.', 'error');
+        return;
+      }
+
+      const ts = formatCurrentOicTimestamp();
+      app.history = app.history || [];
+
+      if (actionVal === 'forward') {
+        if (role === 'FINANCE_ADMIN') {
+          app.status = 'Forwarded to Executive Director (ED)';
+          app.applicationAt = 'ED';
+          app.stage = 'ed_scrutiny';
+          app.history.push({ actor: 'Finance Admin (FINANCE_ADMIN)', timestamp: ts, status: 'Forwarded to Executive Director (ED)', remark: commentVal });
+        } else if (role === 'ED') {
+          app.status = 'Pending with Managing Director (MD)';
+          app.applicationAt = 'MD';
+          app.stage = 'md_scrutiny';
+          app.history.push({ actor: 'Executive Director (ED)', timestamp: ts, status: 'Forwarded to Managing Director (MD)', remark: commentVal });
+        } else if (role === 'MD') {
+          app.status = 'Approved by MD';
+          app.applicationAt = 'OIC_IT_PARK';
+          app.stage = 'post_approval';
+          app.history.push({ actor: 'Managing Director (MD)', timestamp: ts, status: 'Approved by MD', remark: commentVal });
         }
-
-        function handleAuthorityActionSelectChange() {
-          const val = document.getElementById('authority-action-select')?.value;
-          const wrap = document.getElementById('authority-query-target-wrap');
-          if (wrap) wrap.classList.toggle('hidden', val !== 'query_back');
+        showGlobalToast(`${app.appNo} forwarded by ${role}.`, 'success');
+      } else if (actionVal === 'query_back') {
+        app.queriedBackBy = role;
+        app.queriedBackTo = targetRole;
+        app.queriedBackReason = commentVal;
+        app.queriedBackTimestamp = ts;
+        app.queryRemarks = commentVal;
+        app.pendingSince = ts;
+        app.applicationAt = targetRole;
+        if (targetRole === 'SUBSIDY_ADMIN') {
+          app.status = 'Queried Back (Subsidy Admin)';
+          app.stage = 'queried_back';
+        } else if (targetRole === 'OIC_IT_PARK') {
+          app.status = `Queried Back (OIC IT Park) by ${role}`;
+          app.stage = 'initial_scrutiny';
+          app.queriedBy = role;
+        } else if (targetRole === 'FINANCE_ADMIN') {
+          app.status = `Queried Back (Finance Admin) by ${role}`;
+          app.stage = 'finance_scrutiny';
+        } else {
+          app.status = `Queried Back (${targetRole}) by ${role}`;
+          app.stage = 'ed_scrutiny';
         }
-
-        function submitAuthorityWorkbenchAction(e) {
-          if (e && e.preventDefault) e.preventDefault();
-          const app = (window.oicLandApplications || []).find(a => a.appNo === window.currentAuthorityAppNo) || window.submittedApplicationsMap[window.currentAuthorityAppNo];
-          if (!app) return;
-          const role = window.currentOfficerRole || 'FINANCE_ADMIN';
-          const actionVal = document.getElementById('authority-action-select')?.value || '';
-          const targetRole = document.getElementById('authority-query-target')?.value || 'SUBSIDY_ADMIN';
-          const commentVal = document.getElementById('authority-comment-input')?.value?.trim() || '';
-
-          if (!actionVal || !commentVal) {
-            showGlobalToast('Please select an Action and enter Scrutiny / Query Remarks.', 'error');
-            return;
-          }
-
-          const ts = formatCurrentOicTimestamp();
-          app.history = app.history || [];
-
-          if (actionVal === 'forward') {
-            if (role === 'FINANCE_ADMIN') {
-              app.status = 'Forwarded to Executive Director (ED)';
-              app.applicationAt = 'ED';
-              app.stage = 'ed_scrutiny';
-              app.history.push({ actor: 'Finance Admin (FINANCE_ADMIN)', timestamp: ts, status: 'Forwarded to Executive Director (ED)', remark: commentVal });
-            } else if (role === 'ED') {
-              app.status = 'Pending with Managing Director (MD)';
-              app.applicationAt = 'MD';
-              app.stage = 'md_scrutiny';
-              app.history.push({ actor: 'Executive Director (ED)', timestamp: ts, status: 'Forwarded to Managing Director (MD)', remark: commentVal });
-            } else if (role === 'MD') {
-              app.status = 'Approved by MD';
-              app.applicationAt = 'OIC_IT_PARK';
-              app.stage = 'post_approval';
-              app.history.push({ actor: 'Managing Director (MD)', timestamp: ts, status: 'Approved by MD', remark: commentVal });
-            }
-            showGlobalToast(`${app.appNo} forwarded by ${role}.`, 'success');
-          } else if (actionVal === 'query_back') {
-            app.queriedBackBy = role;
-            app.queriedBackTo = targetRole;
-            app.queriedBackReason = commentVal;
-            app.queriedBackTimestamp = ts;
-            app.queryRemarks = commentVal;
-            app.pendingSince = ts;
-            app.applicationAt = targetRole;
-            if (targetRole === 'SUBSIDY_ADMIN') {
-              app.status = 'Queried Back (Subsidy Admin)';
-              app.stage = 'queried_back';
-            } else if (targetRole === 'OIC_IT_PARK') {
-              app.status = `Queried Back (OIC IT Park) by ${role}`;
-              app.stage = 'initial_scrutiny';
-              app.queriedBy = role;
-            } else if (targetRole === 'FINANCE_ADMIN') {
-              app.status = `Queried Back (Finance Admin) by ${role}`;
-              app.stage = 'finance_scrutiny';
-            } else {
-              app.status = `Queried Back (${targetRole}) by ${role}`;
-              app.stage = 'ed_scrutiny';
-            }
-            app.history.push({
-              actor: `${getRoleDisplayLabel(role)} (${role})`,
-              timestamp: ts,
-              status: app.status,
-              remark: commentVal
-            });
-            showGlobalToast(`${app.appNo} queried back to ${targetRole}.`, 'info');
-          }
-
-          window.submittedApplicationsMap[app.appNo] = app;
-          savePersistedApplications();
-          document.getElementById('authority-action-card')?.classList.add('hidden');
-          renderAuthorityWorkbench(role);
-          renderSubsidyDashboard();
-          updateOicStats();
-          updateOicProcessStats();
-          renderOicApplicationsTable();
-          renderInvestorDashboard();
-        }
-
-        // Initialize state on DOM ready (Load all persisted plots, drafts, applications & restore view)
-        window.addEventListener('DOMContentLoaded', () => {
-          setDefaultEoiDates();
-          renderOicPlotTable();
-          syncPlotsWithInvestorView();
-          updateOicStats();
-          updateOicProcessStats();
-          updateKpiCardActiveState();
-          renderOicApplicationsTable();
-          renderSubsidyDashboard();
-          renderInvestorDashboard();
-          renderDocuments();
-          initEoiFormStepper();
-          applyIncDateRestrictions();
-          setupTextareaCharCounters();
-
-          try {
-            const savedView = localStorage.getItem(STORAGE_KEYS.VIEW);
-            const savedRole = localStorage.getItem(STORAGE_KEYS.ROLE);
-            const savedScrutinyApp = localStorage.getItem(STORAGE_KEYS.SCRUTINY_APP);
-            const savedSubsidyApp = localStorage.getItem(STORAGE_KEYS.SUBSIDY_APP);
-            const savedRectifyApp = localStorage.getItem(STORAGE_KEYS.RECTIFY_APP);
-            const savedActivePlot = localStorage.getItem(STORAGE_KEYS.ACTIVE_PLOT);
-
-            if (savedRole === 'FINANCE_ADMIN' || savedRole === 'ED' || savedRole === 'MD') {
-              window.currentOfficerRole = savedRole;
-            }
-
-            if (savedView === 'oic-scrutiny-detail' && savedScrutinyApp && window.submittedApplicationsMap[savedScrutinyApp]) {
-              openOicScrutinyDetail(savedScrutinyApp);
-            } else if (savedView === 'subsidy-scrutiny' && savedSubsidyApp && window.submittedApplicationsMap[savedSubsidyApp]) {
-              openSubsidyScrutinyDetail(savedSubsidyApp);
-            } else if (savedView === 'eoi-form' && savedRectifyApp && window.submittedApplicationsMap[savedRectifyApp]) {
-              openApplicantQueryRectification(savedRectifyApp);
-            } else if (savedView === 'eoi-form' && savedActivePlot && (plotsDatabase[savedActivePlot] || oicPlotInventory.some(p => p.id === savedActivePlot || p.plotNo === savedActivePlot))) {
-              openEoiFormForPlot(savedActivePlot);
-            } else if (savedView && savedView !== 'eoi-form' && savedView !== 'eoi-preview' && savedView !== 'oic-scrutiny-detail' && savedView !== 'subsidy-scrutiny') {
-              switchView(savedView);
-            }
-          } catch (e) { }
+        app.history.push({
+          actor: `${getRoleDisplayLabel(role)} (${role})`,
+          timestamp: ts,
+          status: app.status,
+          remark: commentVal
         });
+        showGlobalToast(`${app.appNo} queried back to ${targetRole}.`, 'info');
+      }
+
+      window.submittedApplicationsMap[app.appNo] = app;
+      savePersistedApplications();
+      document.getElementById('authority-action-card')?.classList.add('hidden');
+      renderAuthorityWorkbench(role);
+      renderSubsidyDashboard();
+      updateOicStats();
+      updateOicProcessStats();
+      renderOicApplicationsTable();
+      renderInvestorDashboard();
+    }
+
+    // Initialize state on DOM ready (Load all persisted plots, drafts, applications & restore view)
+    window.addEventListener('DOMContentLoaded', () => {
+      setDefaultEoiDates();
+      renderOicPlotTable();
+      syncPlotsWithInvestorView();
+      updateOicStats();
+      updateOicProcessStats();
+      updateKpiCardActiveState();
+      renderOicApplicationsTable();
+      renderSubsidyDashboard();
+      renderInvestorDashboard();
+      renderDocuments();
+      initEoiFormStepper();
+      applyIncDateRestrictions();
+      setupTextareaCharCounters();
+
+      try {
+        const savedView = localStorage.getItem(STORAGE_KEYS.VIEW);
+        const savedRole = localStorage.getItem(STORAGE_KEYS.ROLE);
+        const savedScrutinyApp = localStorage.getItem(STORAGE_KEYS.SCRUTINY_APP);
+        const savedSubsidyApp = localStorage.getItem(STORAGE_KEYS.SUBSIDY_APP);
+        const savedRectifyApp = localStorage.getItem(STORAGE_KEYS.RECTIFY_APP);
+        const savedActivePlot = localStorage.getItem(STORAGE_KEYS.ACTIVE_PLOT);
+
+        if (savedRole === 'FINANCE_ADMIN' || savedRole === 'ED' || savedRole === 'MD') {
+          window.currentOfficerRole = savedRole;
+        }
+
+        if (savedView === 'oic-scrutiny-detail' && savedScrutinyApp && window.submittedApplicationsMap[savedScrutinyApp]) {
+          openOicScrutinyDetail(savedScrutinyApp);
+        } else if (savedView === 'subsidy-scrutiny' && savedSubsidyApp && window.submittedApplicationsMap[savedSubsidyApp]) {
+          openSubsidyScrutinyDetail(savedSubsidyApp);
+        } else if (savedView === 'eoi-form' && savedRectifyApp && window.submittedApplicationsMap[savedRectifyApp]) {
+          openApplicantQueryRectification(savedRectifyApp);
+        } else if (savedView === 'eoi-form' && savedActivePlot && (plotsDatabase[savedActivePlot] || oicPlotInventory.some(p => p.id === savedActivePlot || p.plotNo === savedActivePlot))) {
+          openEoiFormForPlot(savedActivePlot);
+        } else if (savedView && savedView !== 'eoi-form' && savedView !== 'eoi-preview' && savedView !== 'oic-scrutiny-detail' && savedView !== 'subsidy-scrutiny') {
+          switchView(savedView);
+        }
+      } catch (e) { }
+    });
   </script>
   <!-- Modal: Confirmation for Plot Publish / Unpublish Toggle -->
   <div id="plot-toggle-modal"
