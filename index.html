@@ -81,8 +81,10 @@
       DRAFTS: 'mpsedc_eoi_drafts_v1',
       VIEW: 'mpsedc_active_view_v1',
       SCRUTINY_APP: 'mpsedc_active_scrutiny_app_v1',
+      SUBSIDY_APP: 'mpsedc_active_subsidy_app_v1',
       RECTIFY_APP: 'mpsedc_active_rectification_app_v1',
-      ACTIVE_PLOT: 'mpsedc_active_plot_key_v1'
+      ACTIVE_PLOT: 'mpsedc_active_plot_key_v1',
+      ROLE: 'mpsedc_active_role_v1'
     };
 
     let eoiDraftMemory = {};
@@ -3215,6 +3217,18 @@
         <b>Oicitpark</b>
         <small style="color:#4267b2;font-weight:700">OIC IT Park</small>
       </div>
+      <!-- User Profile Box: Subsidy Admin -->
+      <div class="user hidden" id="user-box-subsidy" data-role="SUBSIDY_ADMIN">
+        <div class="av" style="background:#e0f2fe;color:#0369a1;">&#128100;</div>
+        <b>SubsidyAdmin</b>
+        <small style="color:#0369a1;font-weight:700">Subsidy Admin (SUBSIDY_ADMIN)</small>
+      </div>
+      <!-- User Profile Box: Higher Authority Officers (Finance Admin / ED / MD) -->
+      <div class="user hidden" id="user-box-officer">
+        <div class="av" style="background:#ede9fe;color:#5b21b6;">&#128100;</div>
+        <b id="officer-box-username">FinanceAdmin</b>
+        <small id="officer-box-role" style="color:#5b21b6;font-weight:700">Finance Admin</small>
+      </div>
       <!-- Navigation: Investor Portal (100% Intact) -->
       <nav id="nav-investor">
         <a class="on" href="javascript:void(0)" onclick="switchView('dashboard')" id="nav-dashboard"><span
@@ -3231,6 +3245,57 @@
         <a href="javascript:void(0)"><span class="i">&#9776;</span>Applied Applications</a>
         <a href="javascript:void(0)"><span class="i">&#9776;</span>Inspection Form</a>
         <a href="javascript:void(0)"><span class="i">&#10148;</span>Appeal (Form 23)</a>
+      </nav>
+      <!-- Navigation: Subsidy Admin (SUBSIDY_ADMIN) -->
+      <nav id="nav-subsidy" class="hidden">
+        <a class="on" href="javascript:void(0)" onclick="toggleSubsidySidebarGroup('authority')"
+          id="nav-subsidy-authority">
+          <span class="i">&#9638;</span>
+          <span>Authority Dashboard</span>
+          <span class="c" id="nav-subsidy-chev-authority">&#8964;</span>
+        </a>
+        <div id="nav-subsidy-group-authority">
+          <a href="javascript:void(0)" onclick="switchView('subsidy-dashboard')" id="nav-subsidy-portal-2"
+            style="padding-left:28px;background:#fafbfc;position:relative;font-weight:700;color:#1e3a8a">
+            <span
+              style="position:absolute;left:14px;top:10px;bottom:10px;width:3px;background:#4267b2;border-radius:2px"></span>
+            <span style="font-size:13px">Portal 2.0</span>
+          </a>
+          <a href="javascript:void(0)"
+            onclick="showGlobalToast('Portal 1.0 legacy archive is read-only. Active EOI Policy &amp; Rebate scrutiny runs on Portal 2.0.', 'info')"
+            id="nav-subsidy-portal-1" style="padding-left:28px;background:#fafbfc;position:relative">
+            <span
+              style="position:absolute;left:14px;top:10px;bottom:10px;width:3px;background:#94a3b8;border-radius:2px"></span>
+            <span style="font-size:13px">Portal 1.0</span>
+          </a>
+        </div>
+        <a href="javascript:void(0)" onclick="switchView('subsidy-dashboard'); filterSubsidyByKpi('all');"
+          id="nav-subsidy-tiles"><span class="i">&#9776;</span><span>Tiles Dashboard</span></a>
+        <a href="javascript:void(0)" onclick="openSubsidyPaymentView()" id="nav-subsidy-payment"><span
+            class="i">&#8377;</span><span>Payment</span></a>
+        <a href="javascript:void(0)" onclick="openAuthorityControlPanel()" id="nav-subsidy-control"><span
+            class="i">&#9881;</span><span>Control Panel</span></a>
+        <a href="javascript:void(0)" onclick="selectRoleView('dashboard')"
+          style="margin-top:14px;border-top:1px dashed #cbd5e1;color:#4267b2;font-weight:700">
+          <span class="i">&#8592;</span><span>Investor Dashboard</span>
+        </a>
+      </nav>
+      <!-- Navigation: Higher Authority Officers (FINANCE_ADMIN / ED / MD) -->
+      <nav id="nav-officer" class="hidden">
+        <a class="on" href="javascript:void(0)" onclick="switchView('authority-workbench')" id="nav-officer-dashboard">
+          <span class="i">&#9638;</span><span>Authority Dashboard</span>
+        </a>
+        <a href="javascript:void(0)"
+          onclick="renderAuthorityWorkbench(window.currentOfficerRole || 'FINANCE_ADMIN'); showGlobalToast('Authority Queue refreshed from persisted state.', 'info');">
+          <span class="i">&#9776;</span><span>Scrutiny Queue</span>
+        </a>
+        <a href="javascript:void(0)" onclick="openAuthorityControlPanel()">
+          <span class="i">&#9881;</span><span>Control Panel</span>
+        </a>
+        <a href="javascript:void(0)" onclick="selectRoleView('dashboard')"
+          style="margin-top:14px;border-top:1px dashed #cbd5e1;color:#4267b2;font-weight:700">
+          <span class="i">&#8592;</span><span>Investor Dashboard</span>
+        </a>
       </nav>
       <!-- Navigation: OIC IT Park (Exact from Attached Screenshot) -->
       <nav id="nav-oic" class="hidden">
@@ -3312,8 +3377,12 @@
               class="hidden bg-white/15 hover:bg-white/25 border border-white/30 text-white text-xs font-bold px-3 py-1.5 rounded flex items-center gap-1.5 transition cursor-pointer">
               <span>&larr;</span><span>Back to Pending List</span>
             </button>
+            <button type="button" id="hero-back-subsidy-btn" onclick="switchView('subsidy-dashboard')"
+              class="hidden bg-white/15 hover:bg-white/25 border border-white/30 text-white text-xs font-bold px-3 py-1.5 rounded flex items-center gap-1.5 transition cursor-pointer">
+              <span>&larr;</span><span>Back to Dashboard</span>
+            </button>
           </div>
-          <!-- Header Dropdown Trigger ("World123" / "OIC IT Park") -->
+          <!-- Header Dropdown Trigger ("World123" / "OIC IT Park" / "Subsidy Admin") -->
           <div class="relative" style="position: relative; display: inline-block;">
             <span class="pill" id="user-menu-btn" onclick="toggleUserDropdown(event)"
               style="cursor: pointer; user-select: none;">
@@ -3322,20 +3391,48 @@
             </span>
             <!-- Dropdown Menu Container -->
             <div id="user-dropdown-menu" class="hidden"
-              style="position: absolute; right: 0; top: calc(100% + 8px); width: 190px; background: #ffffff; border-radius: 6px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.25), 0 8px 10px -6px rgba(0,0,0,0.15); border: 1px solid #e5e7eb; z-index: 1000; overflow: hidden; padding: 4px 0; color: #2b2f38;">
+              style="position: absolute; right: 0; top: calc(100% + 8px); width: 235px; background: #ffffff; border-radius: 6px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.25), 0 8px 10px -6px rgba(0,0,0,0.15); border: 1px solid #e5e7eb; z-index: 1000; overflow: hidden; padding: 4px 0; color: #2b2f38;">
               <div
                 style="padding: 8px 14px; border-bottom: 1px solid #f1f5f9; font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
                 Switch Portal View</div>
-              <a href="javascript:void(0)" onclick="selectRoleView('oic-it-park')" class="dropdown-item"
-                style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; color: #1e293b; text-decoration: none; font-size: 13px; font-weight: 600;">
-                <span style="width: 8px; height: 8px; border-radius: 50%; background: #3b82f6;"></span>
-                <span>OIC IT Park</span>
-              </a>
               <a href="javascript:void(0)" onclick="selectRoleView('dashboard')" class="dropdown-item"
-                style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; color: #1e293b; text-decoration: none; font-size: 13px; font-weight: 600;">
+                style="display: flex; align-items: center; gap: 8px; padding: 9px 14px; color: #1e293b; text-decoration: none; font-size: 13px; font-weight: 600;">
                 <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></span>
-                <span>Investor Dashboard</span>
+                <span>Investor Dashboard (World123)</span>
               </a>
+              <a href="javascript:void(0)" onclick="selectRoleView('oic-it-park')" class="dropdown-item"
+                style="display: flex; align-items: center; gap: 8px; padding: 9px 14px; color: #1e293b; text-decoration: none; font-size: 13px; font-weight: 600;">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background: #3b82f6;"></span>
+                <span>OIC IT Park (Oicitpark)</span>
+              </a>
+              <a href="javascript:void(0)" onclick="selectRoleView('subsidy-dashboard')" class="dropdown-item"
+                id="role-opt-subsidy-admin"
+                style="display: flex; align-items: center; gap: 8px; padding: 9px 14px; color: #1e293b; text-decoration: none; font-size: 13px; font-weight: 600;">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background: #0284c7;"></span>
+                <span>Subsidy Admin (SubsidyAdmin)</span>
+              </a>
+              <div style="border-top: 1px solid #f1f5f9; margin: 2px 0;"></div>
+              <a href="javascript:void(0)" onclick="selectRoleView('FINANCE_ADMIN')" class="dropdown-item"
+                style="display: flex; align-items: center; gap: 8px; padding: 8px 14px; color: #334155; text-decoration: none; font-size: 12.5px; font-weight: 600;">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background: #7c3aed;"></span>
+                <span>Finance Admin</span>
+              </a>
+              <a href="javascript:void(0)" onclick="selectRoleView('ED')" class="dropdown-item"
+                style="display: flex; align-items: center; gap: 8px; padding: 8px 14px; color: #334155; text-decoration: none; font-size: 12.5px; font-weight: 600;">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background: #d97706;"></span>
+                <span>Executive Director (ED)</span>
+              </a>
+              <a href="javascript:void(0)" onclick="selectRoleView('MD')" class="dropdown-item"
+                style="display: flex; align-items: center; gap: 8px; padding: 8px 14px; color: #334155; text-decoration: none; font-size: 12.5px; font-weight: 600;">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background: #059669;"></span>
+                <span>Managing Director (MD)</span>
+              </a>
+              <div style="border-top: 1px solid #e2e8f0; margin-top: 4px; padding: 6px 12px; background: #f8fafc;">
+                <button type="button" onclick="resetDemoState()"
+                  style="width: 100%; text-align: left; font-size: 11.5px; font-weight: 700; color: #b91c1c; background: transparent; border: none; cursor: pointer; padding: 3px 2px;">
+                  &#8634; Reset Demo State
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -5841,6 +5938,522 @@
         </div>
       </div>
 
+      <!-- ========================================================================= -->
+      <!-- VIEW 7: SUBSIDY ADMIN AUTHORITY DASHBOARD (#view-subsidy-dashboard)       -->
+      <!-- Stage 2 EOI Scrutiny: Policy & Progressive Rebate Verification            -->
+      <!-- ========================================================================= -->
+      <div id="view-subsidy-dashboard" class="hidden px-6 md:px-8 py-6 flex-1"
+        style="margin-top: 0; padding-top: 20px;">
+        <div class="space-y-5">
+
+          <!-- Contextual Payment / Advance EMD Verification Drawer (shown when Payment nav clicked) -->
+          <div id="subsidy-payment-panel"
+            class="hidden bg-white border border-sky-200 rounded-lg shadow-sm overflow-hidden">
+            <div class="px-5 py-3 bg-[#2b579a] text-white flex items-center justify-between">
+              <div class="font-bold text-xs uppercase tracking-wide flex items-center gap-2">
+                <span>&#8377;</span>
+                <span>EOI Land Allotment — Fee, 25% Advance EMD &amp; Rebate Payment Ledger</span>
+              </div>
+              <button type="button" onclick="document.getElementById('subsidy-payment-panel')?.classList.add('hidden')"
+                class="text-white/80 hover:text-white text-base font-bold px-2 cursor-pointer">&times;</button>
+            </div>
+            <div id="subsidy-payment-ledger-body" class="p-4 text-xs overflow-x-auto"></div>
+          </div>
+
+          <!-- Accordion 1: Subsidy Approval Dashboard (#3b5998 header) -->
+          <div class="border border-slate-200 rounded overflow-hidden shadow-sm">
+            <button type="button" onclick="toggleAccordion('subsidy-approval-dash')"
+              class="w-full flex items-center justify-between px-5 py-3.5 bg-[#3b5998] hover:bg-[#324c82] text-white font-bold text-sm tracking-wide transition select-none cursor-pointer">
+              <span>Subsidy Approval Dashboard</span>
+              <span id="chevron-subsidy-approval-dash"
+                class="text-base font-mono transition-transform duration-200">&#9662;</span>
+            </button>
+            <div id="content-subsidy-approval-dash" class="hidden p-5 bg-[#f7f9fc] border-t border-slate-200">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white border border-slate-200 rounded-md p-4 shadow-xs">
+                  <div class="text-xs text-slate-600 font-semibold">MP IT, ITeS &amp; ESDM Policy 2023</div>
+                  <div class="text-2xl font-bold font-mono text-[#3b5998] mt-1.5" id="subsidy-policy-it-count">0</div>
+                  <div class="text-[11px] text-slate-500 mt-1">Progressive Rebate Slabs (25%–75%)</div>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-md p-4 shadow-xs">
+                  <div class="text-xs text-slate-600 font-semibold">GCC / AVGC-XR / Semiconductor 2025</div>
+                  <div class="text-2xl font-bold font-mono text-indigo-700 mt-1.5" id="subsidy-policy-special-count">0
+                  </div>
+                  <div class="text-[11px] text-slate-500 mt-1">Special Policy Incentive Tracks</div>
+                </div>
+                <div
+                  class="bg-white border border-slate-200 rounded-md p-4 shadow-xs cursor-pointer hover:border-red-400 transition"
+                  onclick="filterSubsidyByKpi('queried')">
+                  <div class="text-xs text-red-700 font-semibold">Queried Back to Subsidy Admin</div>
+                  <div class="text-2xl font-bold font-mono text-red-600 mt-1.5" id="subsidy-queried-back-count">0</div>
+                  <div class="text-[11px] text-slate-500 mt-1">Returned by Finance / ED / MD</div>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-md p-4 shadow-xs">
+                  <div class="text-xs text-emerald-700 font-semibold">Active Stage 2 Role</div>
+                  <div class="text-sm font-bold text-slate-900 mt-2">SubsidyAdmin (SUBSIDY_ADMIN)</div>
+                  <div class="text-[11px] text-slate-500 mt-1">OIC IT Park &rarr; Subsidy Admin &rarr; Finance Admin
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Accordion 2: Process Dashboard (OPEN BY DEFAULT, #3b5998 header) -->
+          <div class="border border-slate-200 rounded overflow-hidden shadow-sm">
+            <button type="button" onclick="toggleAccordion('subsidy-process-dash')"
+              class="w-full flex items-center justify-between px-5 py-3.5 bg-[#3b5998] hover:bg-[#324c82] text-white font-bold text-sm tracking-wide transition select-none cursor-pointer">
+              <span>Process Dashboard</span>
+              <span id="chevron-subsidy-process-dash"
+                class="text-base font-mono transition-transform duration-200">&#9652;</span>
+            </button>
+            <div id="content-subsidy-process-dash" class="p-5 bg-[#f7f9fc] border-t border-slate-200">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                <!-- Card 1: Pending -->
+                <div id="subsidy-kpi-card-pending" onclick="filterSubsidyByKpi('pending')"
+                  class="oic-kpi-card active flex flex-col justify-between">
+                  <div class="flex items-start justify-between">
+                    <span class="text-[13px] font-bold text-slate-800 leading-snug">Pending<br><span
+                        class="text-[10.5px] font-normal text-slate-500">Incl. Queried Back</span></span>
+                    <svg class="w-6 h-6 text-[#3b5998] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor"
+                      stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div class="text-3xl font-bold text-[#f59e0b] font-sans mt-2" id="subsidy-kpi-pending">0</div>
+                </div>
+
+                <!-- Card 2: Forwarded to Finance / Next Stage -->
+                <div id="subsidy-kpi-card-forwarded" onclick="filterSubsidyByKpi('forwarded')"
+                  class="oic-kpi-card flex flex-col justify-between">
+                  <div class="flex items-start justify-between">
+                    <span class="text-[13px] font-bold text-slate-800 leading-snug">Forwarded to Finance / Next
+                      Stage</span>
+                    <svg class="w-6 h-6 text-[#3b5998] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor"
+                      stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </div>
+                  <div class="text-3xl font-bold text-[#2563eb] font-sans mt-2" id="subsidy-kpi-forwarded">0</div>
+                </div>
+
+                <!-- Card 3: Recommended / Approved -->
+                <div id="subsidy-kpi-card-approved" onclick="filterSubsidyByKpi('approved')"
+                  class="oic-kpi-card flex flex-col justify-between">
+                  <div class="flex items-start justify-between">
+                    <span class="text-[13px] font-bold text-slate-800 leading-snug">Recommended / Approved</span>
+                    <svg class="w-6 h-6 text-[#3b5998] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor"
+                      stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div class="text-3xl font-bold text-[#10b981] font-sans mt-2" id="subsidy-kpi-approved">0</div>
+                </div>
+
+                <!-- Card 4: Queried -->
+                <div id="subsidy-kpi-card-queried" onclick="filterSubsidyByKpi('queried')"
+                  class="oic-kpi-card flex flex-col justify-between">
+                  <div class="flex items-start justify-between">
+                    <span class="text-[13px] font-bold text-slate-800 leading-snug">Queried</span>
+                    <svg class="w-6 h-6 text-[#3b5998] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor"
+                      stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div class="text-3xl font-bold text-[#ef4444] font-sans mt-2" id="subsidy-kpi-queried">0</div>
+                </div>
+
+                <!-- Card 5: All Applications -->
+                <div id="subsidy-kpi-card-all" onclick="filterSubsidyByKpi('all')"
+                  class="oic-kpi-card flex flex-col justify-between">
+                  <div class="flex items-start justify-between">
+                    <span class="text-[13px] font-bold text-slate-800 leading-snug">All Applications</span>
+                    <svg class="w-6 h-6 text-[#3b5998] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor"
+                      stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <div class="text-3xl font-bold text-[#22c55e] font-sans mt-2" id="subsidy-kpi-all">0</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Accordion 3: Pending Application List (OPEN BY DEFAULT, #3b5998 header) -->
+          <div class="border border-slate-200 rounded overflow-hidden shadow-sm">
+            <button type="button" onclick="toggleAccordion('subsidy-pending-list')"
+              class="w-full flex items-center justify-between px-5 py-3.5 bg-[#3b5998] hover:bg-[#324c82] text-white font-bold text-sm tracking-wide transition select-none cursor-pointer">
+              <span>Pending Application List</span>
+              <span id="chevron-subsidy-pending-list"
+                class="text-base font-mono transition-transform duration-200">&#9652;</span>
+            </button>
+            <div id="content-subsidy-pending-list" class="p-5 bg-white border-t border-slate-200 space-y-4">
+
+              <!-- Search By Filter Bar -->
+              <div class="flex flex-wrap items-end justify-between gap-4">
+                <div class="space-y-1.5">
+                  <label for="subsidy-search-by" class="text-xs font-bold text-[#3b5998] block">Search By:</label>
+                  <div class="flex flex-wrap items-center gap-2.5">
+                    <select id="subsidy-search-by" onchange="filterSubsidyTable()"
+                      class="border border-slate-300 rounded px-3 py-1.5 text-xs text-slate-700 bg-white min-w-[210px] focus:outline-none focus:border-[#3b5998]">
+                      <option value="all" selected>All</option>
+                      <option value="appNo">Application Number</option>
+                      <option value="orgName">Applicant / Organization Name</option>
+                      <option value="plotDisplay">Plot / IT Park</option>
+                      <option value="policy">Policy / Rebate Category</option>
+                      <option value="status">Status</option>
+                    </select>
+                    <input type="text" id="subsidy-search-query" placeholder="Enter search value..."
+                      onkeydown="if(event.key==='Enter'){event.preventDefault();filterSubsidyTable();}"
+                      class="border border-slate-300 rounded px-3 py-1.5 text-xs text-slate-700 bg-white min-w-[210px] focus:outline-none focus:border-[#3b5998]">
+                    <button type="button" onclick="filterSubsidyTable()"
+                      class="bg-[#3b5998] hover:bg-[#2b4c8a] text-white text-xs font-semibold px-4 py-1.5 rounded flex items-center gap-1.5 shadow-sm transition cursor-pointer">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                      </svg>
+                      <span>Search</span>
+                    </button>
+                  </div>
+                </div>
+                <div id="subsidy-active-filter-chip"
+                  class="hidden items-center gap-2 text-xs bg-blue-50 border border-blue-200 text-blue-900 px-3 py-1.5 rounded-full font-semibold">
+                  <span id="subsidy-active-filter-label">Showing: Pending</span>
+                  <button type="button" onclick="filterSubsidyByKpi('all')"
+                    class="text-blue-700 hover:text-blue-950 font-bold ml-1 cursor-pointer">&times; Show All</button>
+                </div>
+              </div>
+
+              <!-- Sortable 12-Column Data Table (#dfe5f5 Header) -->
+              <div class="overflow-x-auto border border-slate-200 rounded">
+                <table class="w-full text-xs text-left border-collapse min-w-[1420px]">
+                  <thead class="bg-[#dfe5f5] text-slate-800 font-semibold border-b border-slate-300 select-none">
+                    <tr>
+                      <th onclick="sortSubsidyTable('sno')" class="oic-sortable-th p-2.5 whitespace-nowrap text-center">
+                        S No. <span id="sub-sort-ind-sno" class="text-[10px] text-slate-500">▴</span></th>
+                      <th onclick="sortSubsidyTable('orgName')" class="oic-sortable-th p-2.5 whitespace-nowrap">
+                        Applicant Name<br>(Organization Name) <span id="sub-sort-ind-orgName"
+                          class="text-[10px] text-slate-400">▴</span></th>
+                      <th onclick="sortSubsidyTable('applicationType')" class="oic-sortable-th p-2.5 whitespace-nowrap">
+                        Application Type <span id="sub-sort-ind-applicationType"
+                          class="text-[10px] text-slate-400">▴</span></th>
+                      <th onclick="sortSubsidyTable('policyName')" class="oic-sortable-th p-2.5 whitespace-nowrap">
+                        Policy / Rebate Slab <span id="sub-sort-ind-policyName"
+                          class="text-[10px] text-slate-400">▴</span></th>
+                      <th onclick="sortSubsidyTable('plotDisplay')" class="oic-sortable-th p-2.5 whitespace-nowrap">Plot
+                        / IT Park <span id="sub-sort-ind-plotDisplay" class="text-[10px] text-slate-400">▴</span></th>
+                      <th onclick="sortSubsidyTable('appNo')" class="oic-sortable-th p-2.5 whitespace-nowrap">
+                        Application Number <span id="sub-sort-ind-appNo" class="text-[10px] text-slate-400">▴</span>
+                      </th>
+                      <th onclick="sortSubsidyTable('appDate')" class="oic-sortable-th p-2.5 whitespace-nowrap">
+                        Application Date <span id="sub-sort-ind-appDate" class="text-[10px] text-slate-400">▴</span>
+                      </th>
+                      <th onclick="sortSubsidyTable('status')" class="oic-sortable-th p-2.5 whitespace-nowrap">
+                        Application Status <span id="sub-sort-ind-status" class="text-[10px] text-slate-400">▴</span>
+                      </th>
+                      <th onclick="sortSubsidyTable('applicationAt')" class="oic-sortable-th p-2.5 whitespace-nowrap">
+                        Application At <span id="sub-sort-ind-applicationAt" class="text-[10px] text-slate-400">▴</span>
+                      </th>
+                      <th onclick="sortSubsidyTable('pendingSince')" class="oic-sortable-th p-2.5 whitespace-nowrap">
+                        Pending Since <span id="sub-sort-ind-pendingSince" class="text-[10px] text-slate-400">▴</span>
+                      </th>
+                      <th class="p-2.5 whitespace-nowrap text-center">Download Documents</th>
+                      <th class="p-2.5 whitespace-nowrap text-center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="subsidy-pending-tbody" class="divide-y divide-slate-200 font-medium text-slate-700">
+                    <!-- Populated dynamically by renderSubsidyDashboard() -->
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="flex items-center justify-between text-xs text-slate-500 pt-2">
+                <div id="subsidy-table-footer-count">Showing 0 entries</div>
+                <div class="flex items-center gap-1">
+                  <button type="button"
+                    class="px-2.5 py-1 border rounded bg-slate-50 text-slate-400 cursor-not-allowed">Previous</button>
+                  <button type="button" class="px-2.5 py-1 border rounded bg-[#4267b2] text-white font-bold">1</button>
+                  <button type="button"
+                    class="px-2.5 py-1 border rounded bg-slate-50 text-slate-400 cursor-not-allowed">Next</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- VIEW 8: SUBSIDY ADMIN APPLICATION SCRUTINY & ACTION (#view-subsidy-scrutiny) -->
+      <!-- ========================================================================= -->
+      <div id="view-subsidy-scrutiny" class="hidden px-6 md:px-8 py-6 flex-1" style="margin-top: 0; padding-top: 20px;">
+        <div id="subsidy-incoming-query-banner"
+          class="hidden mb-5 rounded-lg border-2 border-red-300 bg-red-50/95 p-4 shadow-sm"></div>
+
+        <div class="flex flex-col lg:flex-row gap-6 items-start">
+
+          <!-- LEFT COLUMN (68%): Application & Policy/Rebate Preview + Attachments -->
+          <div class="w-full lg:w-[68%] space-y-4">
+
+            <!-- Accordion 1: Application & Policy/Rebate Preview (Open by default) -->
+            <div class="border border-slate-200 rounded overflow-hidden shadow-sm bg-white">
+              <button type="button" onclick="toggleAccordion('subsidy-preview')"
+                class="w-full flex items-center justify-between px-5 py-3 bg-[#3b5998] hover:bg-[#324c82] text-white font-bold text-sm tracking-wide transition select-none cursor-pointer">
+                <span>Application &amp; Policy/Rebate Preview</span>
+                <span id="chevron-subsidy-preview"
+                  class="text-base font-mono transition-transform duration-200">&#9652;</span>
+              </button>
+              <div id="content-subsidy-preview" class="p-4 bg-[#f3f5f9] border-t border-slate-200 space-y-4">
+
+                <!-- Progressive Rebate Slab & Policy Eligibility Verification Card -->
+                <div id="subsidy-rebate-preview"
+                  class="bg-white border border-blue-200 rounded-lg p-4 shadow-2xs space-y-3 text-xs">
+                  <!-- Populated dynamically by renderSubsidyRebateCard(app) -->
+                </div>
+
+                <!-- Official Application Form Document Viewer -->
+                <div class="oic-doc-viewer-frame">
+                  <div
+                    class="bg-[#323639] text-slate-200 px-4 py-2 flex items-center justify-between text-xs border-b border-[#202325]">
+                    <div class="flex items-center gap-3">
+                      <span class="font-semibold text-white">Official EOI Land Allotment Dossier</span>
+                      <span id="subsidy-form-badge"
+                        class="bg-blue-600/80 text-white px-2 py-0.5 rounded text-[10px] font-bold">Form 1</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <button type="button" onclick="downloadSubsidyDossier(currentSubsidyAppNo)"
+                        class="px-2.5 py-1 rounded bg-[#4267b2] hover:bg-[#3557a0] text-white text-[11px] font-semibold cursor-pointer inline-flex items-center gap-1">
+                        <span>&#11015;</span><span>Download Summary</span>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="p-3 sm:p-5 overflow-x-auto max-h-[780px] overflow-y-auto bg-[#525659]">
+                    <div id="subsidy-doc-sheet" class="oic-doc-sheet origin-top transition-transform duration-150">
+                      <!-- Populated dynamically -->
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Accordion 2: Attachments -->
+            <div class="border border-slate-200 rounded overflow-hidden shadow-sm bg-white">
+              <button type="button" onclick="toggleAccordion('subsidy-attachments')"
+                class="w-full flex items-center justify-between px-5 py-3 bg-[#3b5998] hover:bg-[#324c82] text-white font-bold text-sm tracking-wide transition select-none cursor-pointer">
+                <div class="flex items-center gap-3">
+                  <span>Attached Documents</span>
+                  <span id="subsidy-attachments-badge"
+                    class="bg-white/20 text-white text-[11px] px-2 py-0.5 rounded-full font-semibold">0 Files</span>
+                </div>
+                <span id="chevron-subsidy-attachments"
+                  class="text-base font-mono transition-transform duration-200">&#9662;</span>
+              </button>
+              <div id="content-subsidy-attachments" class="hidden p-5 bg-white border-t border-slate-200">
+                <div class="overflow-x-auto border border-slate-200 rounded">
+                  <table class="w-full text-xs text-left border-collapse">
+                    <thead class="bg-[#dfe5f5] text-slate-800 font-semibold border-b border-slate-300">
+                      <tr>
+                        <th class="p-3 text-center w-16">S No.</th>
+                        <th class="p-3">File Name / Document Title</th>
+                        <th class="p-3 text-center w-36">Mandatory/Optional</th>
+                        <th class="p-3 text-center w-32">OIC Verified</th>
+                      </tr>
+                    </thead>
+                    <tbody id="subsidy-attachments-tbody" class="divide-y divide-slate-200"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- RIGHT COLUMN (32% Sticky Action & History Sidebar) -->
+          <div class="w-full lg:w-[32%] space-y-5 lg:sticky lg:top-5 self-start">
+
+            <!-- Card 1: Action -->
+            <div class="border border-slate-200 rounded overflow-hidden shadow-sm bg-white">
+              <div
+                class="px-5 py-3 bg-[#3b5998] text-white font-bold text-sm tracking-wide flex items-center justify-between">
+                <span>Action</span>
+                <span id="subsidy-stage-pill" class="text-[10px] bg-white/20 px-2 py-0.5 rounded font-semibold">Stage 2
+                  Scrutiny</span>
+              </div>
+              <div class="p-5 space-y-4">
+
+                <div id="subsidy-action-context" class="hidden rounded border p-3 text-xs"></div>
+
+                <form id="subsidy-action-form" onsubmit="submitSubsidyScrutinyAction(event)" class="space-y-4"
+                  novalidate>
+                  <!-- Policy / Rebate Verification Notes -->
+                  <div>
+                    <label for="subsidy-rebate-notes" class="block text-xs font-bold text-slate-700 mb-1">
+                      Policy &amp; Progressive Rebate Verification Note
+                    </label>
+                    <input type="text" id="subsidy-rebate-notes"
+                      placeholder="e.g., Verified 75%/60% progressive slab & MP IT Policy 2023 eligibility"
+                      class="w-full border border-slate-300 rounded px-3 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-[#4267b2]">
+                  </div>
+
+                  <!-- Action Taken * -->
+                  <div>
+                    <label for="subsidy-action-select" class="block text-xs font-bold text-slate-700 mb-1.5">
+                      Action Taken<span class="text-red-600 ml-0.5">*</span>
+                    </label>
+                    <select id="subsidy-action-select" onchange="clearSubsidyValidation('action')"
+                      class="w-full border border-slate-300 rounded px-3 py-2 text-xs text-slate-800 bg-white focus:outline-none focus:border-[#4267b2]">
+                      <option value="">-- Please Select --</option>
+                    </select>
+                    <div id="subsidy-action-err" class="hidden text-red-600 text-[11px] font-semibold mt-1">Please
+                      select an Action Taken option.</div>
+                  </div>
+
+                  <!-- Comment * -->
+                  <div>
+                    <label for="subsidy-comment-input" class="block text-xs font-bold text-slate-700 mb-1.5">
+                      Comment<span class="text-red-600 ml-0.5">*</span>
+                    </label>
+                    <textarea id="subsidy-comment-input" rows="4"
+                      placeholder="Enter policy eligibility, rebate verification, or OIC IT Park query remarks..."
+                      oninput="clearSubsidyValidation('comment')"
+                      class="w-full border border-slate-300 rounded px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-[#4267b2] resize-y"></textarea>
+                    <div id="subsidy-comment-err" class="hidden text-red-600 text-[11px] font-semibold mt-1">Comment is
+                      mandatory before submitting an action.</div>
+                  </div>
+
+                  <div class="flex items-center justify-between pt-1">
+                    <button type="button" onclick="openScrutinyLogModal(currentSubsidyAppNo)"
+                      class="text-xs font-semibold text-[#3b5998] hover:text-[#1e3a8a] underline cursor-pointer bg-transparent border-0 p-0">
+                      &#128220; View Inspection / Scrutiny Log
+                    </button>
+                    <button type="submit" id="subsidy-submit-btn"
+                      class="bg-[#4267b2] hover:bg-[#3557a0] text-white font-bold text-xs px-5 py-2 rounded shadow-sm transition cursor-pointer">
+                      Submit
+                    </button>
+                  </div>
+                </form>
+
+              </div>
+            </div>
+
+            <!-- Card 2: Application History -->
+            <div class="border border-slate-200 rounded overflow-hidden shadow-sm bg-white">
+              <div
+                class="px-5 py-3 bg-[#3b5998] text-white font-bold text-sm tracking-wide flex items-center justify-between">
+                <span>Application History</span>
+                <button type="button" onclick="openScrutinyLogModal(currentSubsidyAppNo)"
+                  class="text-[11px] text-blue-100 hover:text-white underline cursor-pointer bg-transparent border-0">Full
+                  Log</button>
+              </div>
+              <div id="subsidy-history-timeline" class="p-4 bg-[#f8fafc] space-y-4 max-h-[380px] overflow-y-auto">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- VIEW 9: HIGHER AUTHORITY WORKBENCH (#view-authority-workbench)            -->
+      <!-- Supports FINANCE_ADMIN, ED, MD Stage 2/3 Verification & Query-Back Flow  -->
+      <!-- ========================================================================= -->
+      <div id="view-authority-workbench" class="hidden px-6 md:px-8 py-6 flex-1"
+        style="margin-top: 0; padding-top: 20px;">
+        <div class="space-y-5">
+          <div class="border border-slate-200 rounded overflow-hidden shadow-sm bg-white">
+            <div
+              class="px-5 py-3.5 bg-[#3b5998] text-white font-bold text-sm tracking-wide flex items-center justify-between">
+              <span id="authority-workbench-title">Authority Queue</span>
+              <span id="authority-workbench-role-badge"
+                class="text-[11px] bg-white/20 px-2.5 py-0.5 rounded font-mono">FINANCE_ADMIN</span>
+            </div>
+            <div class="p-5 space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-[#f8fafc] border border-slate-200 rounded-md p-4">
+                  <div class="text-xs font-semibold text-slate-600">Pending My Action</div>
+                  <div class="text-2xl font-bold text-[#f59e0b] mt-1 font-mono" id="authority-kpi-pending">0</div>
+                </div>
+                <div class="bg-[#f8fafc] border border-slate-200 rounded-md p-4">
+                  <div class="text-xs font-semibold text-slate-600">All EOI Applications</div>
+                  <div class="text-2xl font-bold text-[#3b5998] mt-1 font-mono" id="authority-kpi-all">0</div>
+                </div>
+                <div class="bg-[#f8fafc] border border-slate-200 rounded-md p-4">
+                  <div class="text-xs font-semibold text-slate-600">Active Hierarchy Chain</div>
+                  <div class="text-[11.5px] font-bold text-slate-800 mt-2">OIC IT Park &rarr; Subsidy Admin &rarr;
+                    Finance Admin &rarr; ED &rarr; MD</div>
+                </div>
+              </div>
+
+              <div class="overflow-x-auto border border-slate-200 rounded">
+                <table class="w-full text-xs text-left border-collapse min-w-[1050px]">
+                  <thead class="bg-[#dfe5f5] text-slate-800 font-semibold border-b border-slate-300">
+                    <tr>
+                      <th class="p-2.5 text-center">S No.</th>
+                      <th class="p-2.5">Applicant Name</th>
+                      <th class="p-2.5">Plot &amp; IT Park</th>
+                      <th class="p-2.5">Application No.</th>
+                      <th class="p-2.5">Policy &amp; Financials</th>
+                      <th class="p-2.5">Application Status</th>
+                      <th class="p-2.5">Application At</th>
+                      <th class="p-2.5 text-center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="authority-queue-tbody" class="divide-y divide-slate-200"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Inline Selected File Action Card -->
+          <div id="authority-action-card"
+            class="hidden border border-slate-200 rounded overflow-hidden shadow-sm bg-white">
+            <div class="px-5 py-3 bg-[#2b579a] text-white font-bold text-sm flex items-center justify-between">
+              <span id="authority-action-heading">Review Application</span>
+              <button type="button" onclick="document.getElementById('authority-action-card')?.classList.add('hidden')"
+                class="text-xs bg-white/15 hover:bg-white/25 px-2.5 py-1 rounded cursor-pointer">&times; Close</button>
+            </div>
+            <div class="p-5 grid grid-cols-1 lg:grid-cols-2 gap-6 text-xs">
+              <div id="authority-app-summary" class="space-y-3 bg-slate-50 border border-slate-200 rounded p-4"></div>
+              <form onsubmit="submitAuthorityWorkbenchAction(event)" class="space-y-3.5" novalidate>
+                <div>
+                  <label for="authority-action-select" class="block font-bold text-slate-700 mb-1">Action Taken <span
+                      class="text-red-600">*</span></label>
+                  <select id="authority-action-select" onchange="handleAuthorityActionSelectChange()"
+                    class="w-full border border-slate-300 rounded px-3 py-2 text-xs bg-white text-slate-800"></select>
+                </div>
+                <div id="authority-query-target-wrap" class="hidden">
+                  <label for="authority-query-target" class="block font-bold text-slate-700 mb-1">Target Lower Officer
+                    to Query Back <span class="text-red-600">*</span></label>
+                  <select id="authority-query-target"
+                    class="w-full border border-slate-300 rounded px-3 py-2 text-xs bg-white text-slate-800"></select>
+                </div>
+                <div>
+                  <label for="authority-comment-input" class="block font-bold text-slate-700 mb-1">Scrutiny / Query
+                    Remarks <span class="text-red-600">*</span></label>
+                  <textarea id="authority-comment-input" rows="3"
+                    placeholder="Enter financial/policy remarks or specific query instructions..."
+                    class="w-full border border-slate-300 rounded px-3 py-2 text-xs text-slate-800"></textarea>
+                </div>
+                <div class="flex items-center justify-between pt-1">
+                  <button type="button" onclick="openScrutinyLogModal(window.currentAuthorityAppNo)"
+                    class="text-xs font-semibold text-[#3b5998] underline cursor-pointer bg-transparent border-0 p-0">View
+                    Inspection / Scrutiny Log</button>
+                  <button type="submit"
+                    class="bg-[#4267b2] hover:bg-[#3557a0] text-white font-bold text-xs px-5 py-2 rounded shadow-sm cursor-pointer">Submit
+                    Action</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </main>
   </div>
 
@@ -5849,14 +6462,69 @@
     // Master Database for EOI Selected Plot Details (Populated dynamically from persisted OIC Inventory)
     const plotsDatabase = {};
 
+    function getDefaultSeededPlots() {
+      return [
+        {
+          id: 'ITP-IND-201', itPark: 'Crystal IT Park, Indore', park: 'Crystal IT Park, Indore', plotNo: 'ITP-IND-201',
+          purpose: 'IT/ITeS/ESDM/Data Centre/Edge Data Centre', landUse: 'IT/ITeS/ESDM/Data Centre/Edge Data Centre',
+          landType: 'EOI Allotment', sizeAcres: 0.80, acres: 0.80, sizeSqFt: 34848, sqft: 34848,
+          premium: 24500000, payablePremium: 24500000, dev: 7000000, devCharges: 7000000, maint: 500000, maintCharges: 500000,
+          lease: 245000, leaseRent: 245000, appCharges: 10000, totalLandAmount: 32245000, total: 32245000,
+          advance: 6125000, emd: 6125000, secDep: 490000, startDate: '01/11/2026 10:00', endDate: '30/11/2026 17:00', published: true
+        },
+        {
+          id: 'ITP-SIN-114', itPark: 'IT Park Sinhasa, Indore', park: 'IT Park Sinhasa, Indore', plotNo: 'ITP-SIN-114',
+          purpose: 'IT/ITeS/ESDM/Data Centre/Edge Data Centre, Semiconductor Manufacturing & Design',
+          landUse: 'IT/ITeS/ESDM/Data Centre/Edge Data Centre, Semiconductor Manufacturing & Design',
+          landType: 'EOI Allotment', sizeAcres: 1.40, acres: 1.40, sizeSqFt: 60984, sqft: 60984,
+          premium: 39200000, payablePremium: 39200000, dev: 9800000, devCharges: 9800000, maint: 650000, maintCharges: 650000,
+          lease: 392000, leaseRent: 392000, appCharges: 10000, totalLandAmount: 50042000, total: 50042000,
+          advance: 9800000, emd: 9800000, secDep: 784000, startDate: '01/11/2026 10:00', endDate: '30/11/2026 17:00', published: true
+        },
+        {
+          id: 'ITP-BHP-108', itPark: 'IT Park Badwai, Bhopal', park: 'IT Park Badwai, Bhopal', plotNo: 'ITP-BHP-108',
+          purpose: 'Edge Data Centre / Cloud Infrastructure', landUse: 'Edge Data Centre / Cloud Infrastructure',
+          landType: 'EOI Allotment', sizeAcres: 0.45, acres: 0.45, sizeSqFt: 19602, sqft: 19602,
+          premium: 11250000, payablePremium: 11250000, dev: 3200000, devCharges: 3200000, maint: 250000, maintCharges: 250000,
+          lease: 112500, leaseRent: 112500, appCharges: 10000, totalLandAmount: 14812500, total: 14812500,
+          advance: 2812500, emd: 2812500, secDep: 250000, startDate: '01/11/2026 10:00', endDate: '30/11/2026 17:00', published: true
+        },
+        {
+          id: 'ITP-JBP-019', itPark: 'IT Park Purva, Jabalpur', park: 'IT Park Purva, Jabalpur', plotNo: 'ITP-JBP-019',
+          purpose: 'Global Capability Centre (GCC)', landUse: 'Global Capability Centre (GCC)',
+          landType: 'EOI Allotment', sizeAcres: 0.75, acres: 0.75, sizeSqFt: 32670, sqft: 32670,
+          premium: 16200000, payablePremium: 16200000, dev: 4500000, devCharges: 4500000, maint: 325000, maintCharges: 325000,
+          lease: 162000, leaseRent: 162000, appCharges: 10000, totalLandAmount: 21187000, total: 21187000,
+          advance: 4050000, emd: 4050000, secDep: 324000, startDate: '01/11/2026 10:00', endDate: '30/11/2026 17:00', published: true
+        },
+        {
+          id: 'ITP-GWL-008', itPark: 'IT Park Ganga Malanpur, Gwalior', park: 'IT Park Ganga Malanpur, Gwalior', plotNo: 'ITP-GWL-008',
+          purpose: 'IT/ITeS/ESDM/Data Centre/Edge Data Centre', landUse: 'IT/ITeS/ESDM/Data Centre/Edge Data Centre',
+          landType: 'EOI Allotment', sizeAcres: 0.50, acres: 0.50, sizeSqFt: 21780, sqft: 21780,
+          premium: 10500000, payablePremium: 10500000, dev: 2800000, devCharges: 2800000, maint: 225000, maintCharges: 225000,
+          lease: 105000, leaseRent: 105000, appCharges: 10000, totalLandAmount: 13630000, total: 13630000,
+          advance: 2625000, emd: 2625000, secDep: 225000, startDate: '01/11/2026 10:00', endDate: '30/11/2026 17:00', published: true
+        }
+      ];
+    }
+
     function loadPersistedPlots() {
       try {
         const raw = localStorage.getItem(STORAGE_KEYS.PLOTS);
-        if (!raw) return [];
+        if (raw === null) {
+          const seeded = getDefaultSeededPlots();
+          localStorage.setItem(STORAGE_KEYS.PLOTS, JSON.stringify(seeded));
+          return seeded;
+        }
         const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length === 0 && !localStorage.getItem('mpsedc_eoi_seed_v2')) {
+          const seeded = getDefaultSeededPlots();
+          localStorage.setItem(STORAGE_KEYS.PLOTS, JSON.stringify(seeded));
+          return seeded;
+        }
         return Array.isArray(parsed) ? parsed : [];
       } catch (e) {
-        return [];
+        return getDefaultSeededPlots();
       }
     }
 
@@ -6820,6 +7488,9 @@
       const oicScrutiny = document.getElementById('view-oic-scrutiny-detail');
       const oicVacant = document.getElementById('view-oic-vacant-list') || document.getElementById('view-oic-fill-plot');
       const oicAdd = document.getElementById('view-oic-add-plot');
+      const subsidyDash = document.getElementById('view-subsidy-dashboard');
+      const subsidyScrutiny = document.getElementById('view-subsidy-scrutiny');
+      const authWorkbench = document.getElementById('view-authority-workbench');
       const mainHero = document.getElementById('main-hero') || document.querySelector('.hero');
 
       const navDash = document.getElementById('nav-dashboard');
@@ -6829,39 +7500,45 @@
       const heroStandard = document.getElementById('hero-standard-content');
       const heroScrutiny = document.getElementById('hero-scrutiny-content');
       const heroBackPendingBtn = document.getElementById('hero-back-pending-btn');
+      const heroBackSubsidyBtn = document.getElementById('hero-back-subsidy-btn');
       const userPillName = document.getElementById('user-pill-name');
       const userBoxInvestor = document.getElementById('user-box-investor');
       const userBoxOic = document.getElementById('user-box-oic');
+      const userBoxSubsidy = document.getElementById('user-box-subsidy');
+      const userBoxOfficer = document.getElementById('user-box-officer');
       const navInvestor = document.getElementById('nav-investor');
       const navOic = document.getElementById('nav-oic');
+      const navSubsidy = document.getElementById('nav-subsidy');
+      const navOfficer = document.getElementById('nav-officer');
       const navOicAuth = document.getElementById('nav-oic-authority');
       const navOicPortal2 = document.getElementById('nav-oic-portal-2');
       const navOicVacant = document.getElementById('nav-oic-vacant-list') || document.getElementById('nav-oic-vacant-plot');
       const navOicAdd = document.getElementById('nav-oic-add-plot');
 
-      if (dash) dash.classList.add('hidden');
-      if (land) land.classList.add('hidden');
-      if (eoi) eoi.classList.add('hidden');
-      if (eoiPreview) eoiPreview.classList.add('hidden');
-      if (oic) oic.classList.add('hidden');
-      if (oicScrutiny) oicScrutiny.classList.add('hidden');
-      if (oicVacant) oicVacant.classList.add('hidden');
-      if (oicAdd) oicAdd.classList.add('hidden');
+      [dash, land, eoi, eoiPreview, oic, oicScrutiny, oicVacant, oicAdd, subsidyDash, subsidyScrutiny, authWorkbench].forEach(v => {
+        if (v) v.classList.add('hidden');
+      });
 
       if (heroStandard) heroStandard.classList.remove('hidden');
       if (heroScrutiny) heroScrutiny.classList.add('hidden');
       if (heroBackPendingBtn) heroBackPendingBtn.classList.add('hidden');
+      if (heroBackSubsidyBtn) heroBackSubsidyBtn.classList.add('hidden');
+
+      [userBoxInvestor, userBoxOic, userBoxSubsidy, userBoxOfficer].forEach(b => { if (b) b.classList.add('hidden'); });
+      [navInvestor, navOic, navSubsidy, navOfficer].forEach(n => { if (n) n.classList.add('hidden'); });
 
       // Reset sidebar nav links
       document.querySelectorAll('aside nav a').forEach(a => {
         a.classList.remove('on');
       });
 
+      const isAuthorityView = viewName.startsWith('oic-') || viewName.startsWith('subsidy-') || viewName === 'authority-workbench';
+
       // Adjust hero bottom padding & background
       if (mainHero) {
         if (viewName === 'dashboard') {
           mainHero.classList.remove('hero-compact', 'oic-hero-bg');
-        } else if (viewName.startsWith('oic-')) {
+        } else if (isAuthorityView) {
           mainHero.classList.add('hero-compact', 'oic-hero-bg');
         } else {
           mainHero.classList.add('hero-compact');
@@ -6875,6 +7552,9 @@
           if (viewName === 'oic-scrutiny-detail' && currentScrutinyAppNo) {
             localStorage.setItem(STORAGE_KEYS.SCRUTINY_APP, currentScrutinyAppNo);
           }
+          if (viewName === 'subsidy-scrutiny' && typeof currentSubsidyAppNo !== 'undefined' && currentSubsidyAppNo) {
+            localStorage.setItem(STORAGE_KEYS.SUBSIDY_APP, currentSubsidyAppNo);
+          }
           if (viewName !== 'eoi-form' && viewName !== 'eoi-preview' && typeof clearApplicantQueryRectificationMode === 'function') {
             clearApplicantQueryRectificationMode(true);
           }
@@ -6882,39 +7562,37 @@
       } catch (e) { }
 
       if (viewName === 'dashboard') {
+        window.currentActiveRole = 'APPLICANT';
         if (dash) dash.classList.remove('hidden');
         if (navDash) navDash.classList.add('on');
         if (heroSub) heroSub.innerHTML = '<span>Investor Dashboard</span><span>&#8681; Investment Policy, 2023</span>';
         if (heroH1) heroH1.textContent = 'IT Investment Portal 2.0';
         if (userPillName) userPillName.textContent = 'World123';
         if (userBoxInvestor) userBoxInvestor.classList.remove('hidden');
-        if (userBoxOic) userBoxOic.classList.add('hidden');
         if (navInvestor) navInvestor.classList.remove('hidden');
-        if (navOic) navOic.classList.add('hidden');
         if (typeof renderInvestorDashboard === 'function') renderInvestorDashboard();
       } else if (viewName === 'land-allotment') {
+        window.currentActiveRole = 'APPLICANT';
         if (land) land.classList.remove('hidden');
         if (navLand) navLand.classList.add('on');
         if (heroSub) heroSub.innerHTML = '<span>Apply for EOI - Land Plot Selection</span><span>&#8681; Investment Policy, 2023</span>';
         if (heroH1) heroH1.textContent = 'IT Investment Portal 2.0';
         if (userPillName) userPillName.textContent = 'World123';
         if (userBoxInvestor) userBoxInvestor.classList.remove('hidden');
-        if (userBoxOic) userBoxOic.classList.add('hidden');
         if (navInvestor) navInvestor.classList.remove('hidden');
-        if (navOic) navOic.classList.add('hidden');
         syncPlotsWithInvestorView();
       } else if (viewName === 'eoi-preview') {
+        window.currentActiveRole = 'APPLICANT';
         if (eoiPreview) eoiPreview.classList.remove('hidden');
         if (navLand) navLand.classList.add('on');
         if (heroSub) heroSub.innerHTML = '<span>EOI Application Form Preview (Tender MPSEDC:ITIA:ALLOT:2026:674)</span><span>&#8681; Investment Policy, 2023</span>';
         if (heroH1) heroH1.textContent = 'IT Investment Portal 2.0';
         if (userPillName) userPillName.textContent = 'World123';
         if (userBoxInvestor) userBoxInvestor.classList.remove('hidden');
-        if (userBoxOic) userBoxOic.classList.add('hidden');
         if (navInvestor) navInvestor.classList.remove('hidden');
-        if (navOic) navOic.classList.add('hidden');
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (viewName === 'eoi-form') {
+        window.currentActiveRole = 'APPLICANT';
         if (eoi) eoi.classList.remove('hidden');
         applyIncDateRestrictions();
         setupTextareaCharCounters();
@@ -6923,17 +7601,14 @@
         if (heroH1) heroH1.textContent = 'IT Investment Portal 2.0';
         if (userPillName) userPillName.textContent = 'World123';
         if (userBoxInvestor) userBoxInvestor.classList.remove('hidden');
-        if (userBoxOic) userBoxOic.classList.add('hidden');
         if (navInvestor) navInvestor.classList.remove('hidden');
-        if (navOic) navOic.classList.add('hidden');
       } else if (viewName === 'oic-it-park') {
+        window.currentActiveRole = 'OIC_IT_PARK';
         if (oic) oic.classList.remove('hidden');
         if (heroSub) heroSub.innerHTML = '<span>Authority Dashboard &bull; Land Allotment Module</span><span>&#8681; OIC IT Park Administration</span>';
         if (heroH1) heroH1.textContent = 'Authority Dashboard';
         if (userPillName) userPillName.textContent = 'OIC IT Park';
-        if (userBoxInvestor) userBoxInvestor.classList.add('hidden');
         if (userBoxOic) userBoxOic.classList.remove('hidden');
-        if (navInvestor) navInvestor.classList.add('hidden');
         if (navOic) navOic.classList.remove('hidden');
         if (navOicAuth) navOicAuth.classList.add('on');
         if (navOicPortal2) navOicPortal2.style.fontWeight = '700';
@@ -6941,41 +7616,83 @@
         updateOicProcessStats();
         renderOicApplicationsTable();
       } else if (viewName === 'oic-scrutiny-detail') {
+        window.currentActiveRole = 'OIC_IT_PARK';
         if (oicScrutiny) oicScrutiny.classList.remove('hidden');
         if (heroStandard) heroStandard.classList.add('hidden');
         if (heroScrutiny) heroScrutiny.classList.remove('hidden');
         if (heroBackPendingBtn) heroBackPendingBtn.classList.remove('hidden');
         if (userPillName) userPillName.textContent = 'OIC IT Park';
-        if (userBoxInvestor) userBoxInvestor.classList.add('hidden');
         if (userBoxOic) userBoxOic.classList.remove('hidden');
-        if (navInvestor) navInvestor.classList.add('hidden');
         if (navOic) navOic.classList.remove('hidden');
         if (navOicAuth) navOicAuth.classList.add('on');
       } else if (viewName === 'oic-vacant-list' || viewName === 'oic-fill-plot') {
+        window.currentActiveRole = 'OIC_IT_PARK';
         if (oicVacant) oicVacant.classList.remove('hidden');
         if (heroSub) heroSub.innerHTML = '<span>Plot Management &gt;&gt; Vacant Plot List</span><span>&#8681; Land Inventory Management</span>';
         if (heroH1) heroH1.textContent = 'Authority Dashboard - Vacant Plot List';
         if (userPillName) userPillName.textContent = 'OIC IT Park';
-        if (userBoxInvestor) userBoxInvestor.classList.add('hidden');
         if (userBoxOic) userBoxOic.classList.remove('hidden');
-        if (navInvestor) navInvestor.classList.add('hidden');
         if (navOic) navOic.classList.remove('hidden');
         if (navOicVacant) navOicVacant.classList.add('on');
         renderOicPlotTable();
         updateOicStats();
       } else if (viewName === 'oic-add-plot') {
+        window.currentActiveRole = 'OIC_IT_PARK';
         if (oicAdd) oicAdd.classList.remove('hidden');
         if (heroSub) heroSub.innerHTML = '<span>Plot Management &gt;&gt; Configure Plot for EOI</span><span>&#8681; Land Inventory Registration</span>';
         if (heroH1) heroH1.textContent = 'Authority Dashboard - Configure Plot for EOI';
         if (userPillName) userPillName.textContent = 'OIC IT Park';
-        if (userBoxInvestor) userBoxInvestor.classList.add('hidden');
         if (userBoxOic) userBoxOic.classList.remove('hidden');
-        if (navInvestor) navInvestor.classList.add('hidden');
         if (navOic) navOic.classList.remove('hidden');
         if (navOicAdd) navOicAdd.classList.add('on');
         setDefaultEoiDates();
         updateFinancialCalculations();
+      } else if (viewName === 'subsidy-dashboard') {
+        window.currentActiveRole = 'SUBSIDY_ADMIN';
+        if (subsidyDash) subsidyDash.classList.remove('hidden');
+        if (heroSub) heroSub.innerHTML = '<span>Authority Dashboard &bull; Stage 2 EOI Scrutiny</span><span>&#8681; Subsidy Admin (SUBSIDY_ADMIN)</span>';
+        if (heroH1) heroH1.textContent = 'Authority Dashboard';
+        if (userPillName) userPillName.textContent = 'Subsidy Admin';
+        if (userBoxSubsidy) userBoxSubsidy.classList.remove('hidden');
+        if (navSubsidy) navSubsidy.classList.remove('hidden');
+        document.getElementById('nav-subsidy-authority')?.classList.add('on');
+        if (typeof renderSubsidyDashboard === 'function') renderSubsidyDashboard();
+      } else if (viewName === 'subsidy-scrutiny') {
+        window.currentActiveRole = 'SUBSIDY_ADMIN';
+        if (subsidyScrutiny) subsidyScrutiny.classList.remove('hidden');
+        if (heroStandard) heroStandard.classList.add('hidden');
+        if (heroScrutiny) heroScrutiny.classList.remove('hidden');
+        if (heroBackSubsidyBtn) heroBackSubsidyBtn.classList.remove('hidden');
+        if (userPillName) userPillName.textContent = 'Subsidy Admin';
+        if (userBoxSubsidy) userBoxSubsidy.classList.remove('hidden');
+        if (navSubsidy) navSubsidy.classList.remove('hidden');
+        document.getElementById('nav-subsidy-authority')?.classList.add('on');
+      } else if (viewName === 'authority-workbench') {
+        const activeRole = window.currentOfficerRole || 'FINANCE_ADMIN';
+        window.currentActiveRole = activeRole;
+        const roleMeta = {
+          FINANCE_ADMIN: { user: 'FinanceAdmin', label: 'Finance Admin', sub: 'Stage 2 Finance & EMD Verification' },
+          ED: { user: 'ExecutiveDirector', label: 'Executive Director (ED)', sub: 'Stage 2 Executive Review & LOA Signatory' },
+          MD: { user: 'ManagingDirector', label: 'Managing Director (MD)', sub: 'Final Authority Allotment Sanction' }
+        }[activeRole] || { user: 'FinanceAdmin', label: 'Finance Admin', sub: 'Stage 2 Scrutiny' };
+        if (authWorkbench) authWorkbench.classList.remove('hidden');
+        if (heroSub) heroSub.innerHTML = `<span>Authority Dashboard &bull; ${roleMeta.sub}</span><span>&#8681; ${roleMeta.label}</span>`;
+        if (heroH1) heroH1.textContent = 'Authority Dashboard';
+        if (userPillName) userPillName.textContent = roleMeta.label;
+        const obUser = document.getElementById('officer-box-username');
+        const obRole = document.getElementById('officer-box-role');
+        if (obUser) obUser.textContent = roleMeta.user;
+        if (obRole) obRole.textContent = `${roleMeta.label} (${activeRole})`;
+        if (userBoxOfficer) userBoxOfficer.classList.remove('hidden');
+        if (navOfficer) navOfficer.classList.remove('hidden');
+        document.getElementById('nav-officer-dashboard')?.classList.add('on');
+        if (typeof renderAuthorityWorkbench === 'function') renderAuthorityWorkbench(activeRole);
       }
+      try {
+        if (typeof STORAGE_KEYS !== 'undefined' && window.currentActiveRole) {
+          localStorage.setItem(STORAGE_KEYS.ROLE, window.currentActiveRole);
+        }
+      } catch (e) { }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -7025,10 +7742,71 @@
       if (menu) menu.classList.toggle('hidden');
     }
 
-    function selectRoleView(viewName) {
+    function getRoleDisplayLabel(roleOrAt) {
+      const map = {
+        OIC_IT_PARK: 'OIC IT Park',
+        SUBSIDY_ADMIN: 'SUBSIDY_ADMIN',
+        FINANCE_ADMIN: 'FINANCE_ADMIN',
+        ED: 'ED',
+        MD: 'MD',
+        APPLICANT: 'Applicant',
+        OIC_IP: 'OIC IP'
+      };
+      return map[roleOrAt] || roleOrAt || '—';
+    }
+
+    function isApplicationAtRole(app, roleKey) {
+      const raw = String(app?.applicationAt || '').trim();
+      if (roleKey === 'SUBSIDY_ADMIN') return raw === 'SUBSIDY_ADMIN' || raw === 'Subsidy Admin';
+      if (roleKey === 'OIC_IT_PARK') return raw === 'OIC_IT_PARK' || raw === 'OIC IT Park';
+      if (roleKey === 'FINANCE_ADMIN') return raw === 'FINANCE_ADMIN' || raw === 'Finance Admin';
+      if (roleKey === 'ED') return raw === 'ED' || raw === 'Executive Director (ED)';
+      if (roleKey === 'MD') return raw === 'MD' || raw === 'Managing Director (MD)';
+      if (roleKey === 'APPLICANT') return raw === 'APPLICANT' || raw === 'Applicant';
+      return raw === roleKey;
+    }
+
+    function selectRoleView(roleOrView) {
       const menu = document.getElementById('user-dropdown-menu');
       if (menu) menu.classList.add('hidden');
-      switchView(viewName);
+      if (roleOrView === 'SUBSIDY_ADMIN' || roleOrView === 'subsidy-dashboard') {
+        switchView('subsidy-dashboard');
+      } else if (roleOrView === 'FINANCE_ADMIN' || roleOrView === 'ED' || roleOrView === 'MD') {
+        window.currentOfficerRole = roleOrView;
+        switchView('authority-workbench');
+      } else if (roleOrView === 'OIC_IT_PARK') {
+        switchView('oic-it-park');
+      } else {
+        switchView(roleOrView);
+      }
+    }
+
+    function toggleSubsidySidebarGroup(groupKey) {
+      const grp = document.getElementById('nav-subsidy-group-' + groupKey);
+      const chev = document.getElementById('nav-subsidy-chev-' + groupKey);
+      if (!grp) return;
+      const hidden = grp.classList.toggle('hidden');
+      if (chev) chev.innerHTML = hidden ? '&#8250;' : '&#8964;';
+    }
+
+    function openSubsidyPaymentView() {
+      switchView('subsidy-dashboard');
+      const panel = document.getElementById('subsidy-payment-panel');
+      if (panel) panel.classList.remove('hidden');
+      renderSubsidyPaymentLedger();
+      showGlobalToast('Showing EOI Fee, 25% Advance EMD & Progressive Rebate Payment Ledger.', 'info');
+    }
+
+    function openAuthorityControlPanel() {
+      const modal = document.getElementById('modal-control-panel');
+      if (!modal) return;
+      const roleEl = document.getElementById('cp-active-role');
+      const appEl = document.getElementById('cp-app-count');
+      const plotEl = document.getElementById('cp-plot-count');
+      if (roleEl) roleEl.textContent = window.currentActiveRole || 'SUBSIDY_ADMIN';
+      if (appEl) appEl.textContent = (window.oicLandApplications || []).length;
+      if (plotEl) plotEl.textContent = (oicPlotInventory || []).length;
+      modal.classList.remove('hidden');
     }
 
     document.addEventListener('click', function (e) {
@@ -7887,14 +8665,472 @@
     let scrutinyMapZoomLevel = 1.0;
     let pendingOicActionPayload = null;
 
+    function getDefaultSeededApplications() {
+      return [
+        {
+          appNo: 'APP-2026-EOI-101',
+          orgName: 'Narmada CloudTech Systems Pvt Ltd',
+          signatory: 'Raghavendra Tiwari',
+          designation: 'Managing Director',
+          mobile: '+91 98261 44510',
+          email: 'raghav@narmadacloud.in',
+          cin: 'U72900MP2022PTC059812',
+          incDate: '2022-04-18',
+          pan: 'AABCN8421K',
+          gstin: '23AABCN8421K1Z8',
+          regAddress: '402, Sapphire Corporate Towers, Vijay Nagar, Indore - 452010',
+          consortiumStatus: 'No (Single Entity)',
+          entityConstitution: 'Company under Companies Act',
+          applicationType: 'EOI Allotment',
+          policyName: 'MP IT, ITeS & ESDM Policy 2023',
+          rebateSlabLabel: 'Slab 1 (75%) + Slab 2 (60%)',
+          formType: 'Form 1',
+          itPark: 'Crystal IT Park, Indore',
+          plotNo: 'ITP-IND-201',
+          plotKey: 'ITP-IND-201',
+          plotDisplay: 'ITP-IND-201 • Crystal IT Park, Indore',
+          plotSizeAcres: '0.80 Acre',
+          plotSizeSqFt: '34,848 Sq.Ft.',
+          purpose: 'IT/ITeS/ESDM/Data Centre/Edge Data Centre',
+          businessDomain: 'IT/ITeS/ESDM/Data Centre/Edge Data Centre',
+          currentEmployees: '215 Professionals',
+          turnover3FY: '₹ 44.80 Cr',
+          pastInvestment: '₹ 16.50 Cr',
+          projTitle: 'Cloud-Native SaaS & AI Engineering Campus',
+          timeline: 'Civil completion in 12 months; commercial launch in 20 months.',
+          headcount: '420 Direct Tech Professionals over 3 years',
+          landPremium: '₹ 2,45,00,000.00',
+          devCharges: '₹ 70,00,000.00',
+          maintCharges: '₹ 5,00,000.00',
+          leaseRent: '₹ 2,45,000.00',
+          totalLandAmount: '₹ 3,22,45,000.00',
+          appFee: '₹ 10,000.00',
+          advanceEmd: '₹ 61,25,000.00',
+          totalCost: '₹ 12,40,00,000.00',
+          meansOfFinance: '₹ 12,40,00,000.00 (65% Equity / 35% Term Loan)',
+          appDate: '16/11/2026',
+          pendingSince: '21/11/2026 11:30:00 AM',
+          status: 'Pending with Subsidy Admin',
+          applicationAt: 'SUBSIDY_ADMIN',
+          stage: 'subsidy_scrutiny',
+          bidCount: 'single',
+          queryRemarks: '',
+          rebateVerificationNotes: '',
+          directors: [],
+          attachments: [
+            { title: 'Entity Registration Certificate (RoC / Registrar of Firms)', fileName: 'narmada_roc_cert.pdf', mandatory: true, verified: true },
+            { title: 'Memorandum & Articles of Association (MoA & AoA)', fileName: 'narmada_moa_aoa.pdf', mandatory: true, verified: true },
+            { title: 'CA Certificate for Annual Turnover & Net Worth (with UDIN)', fileName: 'narmada_ca_udin.pdf', mandatory: true, verified: true },
+            { title: 'Detailed Project Report (DPR) & Implementation Phasing Plan', fileName: 'narmada_cloud_dpr.pdf', mandatory: true, verified: true },
+            { title: 'Form-2 Undertaking', fileName: 'narmada_form2_signed.pdf', mandatory: true, verified: true }
+          ],
+          history: [
+            { actor: 'Narmada CloudTech Systems Pvt Ltd', timestamp: '16-11-2026 10:15 AM', status: 'Submitted to OIC IT Park', remark: 'EOI Land Allotment application digitally signed and submitted.' },
+            { actor: 'OIC IT Park', timestamp: '21-11-2026 11:30 AM', status: 'Verified By OIC IT Park - Forwarded to Subsidy Admin', remark: 'Initial parcel availability and statutory KYC documents verified. Routed to Subsidy Admin for MP IT Policy 2023 eligibility & progressive rebate check.' }
+          ]
+        },
+        {
+          appNo: 'APP-2026-EOI-102',
+          orgName: 'Malwa Semiconductor & VLSI Labs Pvt Ltd',
+          signatory: 'Siddharth Deshmukh',
+          designation: 'Chief Operating Officer',
+          mobile: '+91 98262 77319',
+          email: 'siddharth@malwasemi.in',
+          cin: 'U32109MP2021PTC057410',
+          incDate: '2021-07-09',
+          pan: 'AADCM5419N',
+          gstin: '23AADCM5419N1Z4',
+          regAddress: 'Plot 21, Super Corridor Tech Hub, Indore - 453112',
+          consortiumStatus: 'No (Single Entity)',
+          entityConstitution: 'Company under Companies Act',
+          applicationType: 'EOI Allotment',
+          policyName: 'MP Semiconductor Policy 2025',
+          rebateSlabLabel: 'Slab 1 (75%) + Slab 2 (60%) + Slab 3 (50%)',
+          formType: 'Form 1',
+          itPark: 'IT Park Sinhasa, Indore',
+          plotNo: 'ITP-SIN-114',
+          plotKey: 'ITP-SIN-114',
+          plotDisplay: 'ITP-SIN-114 • IT Park Sinhasa, Indore',
+          plotSizeAcres: '1.40 Acres',
+          plotSizeSqFt: '60,984 Sq.Ft.',
+          purpose: 'Semiconductor Manufacturing & Design, IT/ITeS/ESDM',
+          businessDomain: 'Semiconductor Design & VLSI Verification',
+          currentEmployees: '185 Engineers',
+          turnover3FY: '₹ 58.40 Cr',
+          pastInvestment: '₹ 24.10 Cr',
+          projTitle: 'FAB-less RISC-V SoC Verification & EDA Center',
+          timeline: 'Cleanroom lab & EDA cluster setup in 16 months.',
+          headcount: '550 Semiconductor & Embedded Engineers over 3 years',
+          landPremium: '₹ 3,92,00,000.00',
+          devCharges: '₹ 98,00,000.00',
+          maintCharges: '₹ 6,50,000.00',
+          leaseRent: '₹ 3,92,000.00',
+          totalLandAmount: '₹ 5,00,42,000.00',
+          appFee: '₹ 10,000.00',
+          advanceEmd: '₹ 98,00,000.00',
+          totalCost: '₹ 21,50,00,000.00',
+          meansOfFinance: '₹ 21,50,00,000.00 (70% Equity / 30% Bank Loan)',
+          appDate: '12/11/2026',
+          pendingSince: '24/11/2026 04:15:00 PM',
+          status: 'Queried Back (Subsidy Admin)',
+          applicationAt: 'SUBSIDY_ADMIN',
+          stage: 'queried_back',
+          queriedBackTo: 'SUBSIDY_ADMIN',
+          queriedBackBy: 'FINANCE_ADMIN',
+          queriedBackReason: 'Confirm 3-slab progressive rebate computation (0.50 + 0.50 + 0.40 Acres) against ₹ 98.00 Lakh 25% EMD challan reconciliation before Finance sign-off.',
+          queriedBackTimestamp: '24-11-2026 04:15 PM',
+          subsidyVerifiedAt: '19-11-2026 02:10 PM',
+          rebateVerificationNotes: 'Pending re-confirmation of Slab 3 (50% rebate) calculation for 0.40 Acre portion.',
+          bidCount: 'single',
+          queryRemarks: 'Confirm 3-slab progressive rebate computation against ₹ 98.00 Lakh 25% EMD challan reconciliation.',
+          directors: [],
+          attachments: [
+            { title: 'Entity Registration Certificate (RoC / Registrar of Firms)', fileName: 'malwa_semi_roc.pdf', mandatory: true, verified: true },
+            { title: 'CA Certificate for Annual Turnover & Net Worth (with UDIN)', fileName: 'malwa_semi_ca_udin.pdf', mandatory: true, verified: true },
+            { title: 'Detailed Project Report (DPR) & VLSI Cluster Plan', fileName: 'malwa_semi_dpr.pdf', mandatory: true, verified: true },
+            { title: 'Form-2 Undertaking', fileName: 'malwa_semi_form2.pdf', mandatory: true, verified: true }
+          ],
+          history: [
+            { actor: 'Malwa Semiconductor & VLSI Labs Pvt Ltd', timestamp: '12-11-2026 09:40 AM', status: 'Submitted to OIC IT Park', remark: 'EOI submitted under MP Semiconductor Policy 2025.' },
+            { actor: 'OIC IT Park', timestamp: '15-11-2026 01:20 PM', status: 'Verified By OIC IT Park - Forwarded to Subsidy Admin', remark: 'Plot ITP-SIN-114 survey and KYC validated.' },
+            { actor: 'Subsidy Admin (SUBSIDY_ADMIN)', timestamp: '19-11-2026 02:10 PM', status: 'Forwarded to Finance Admin', remark: 'Policy eligibility verified. Forwarded for financial scrutiny.' },
+            { actor: 'Finance Admin (FINANCE_ADMIN)', timestamp: '24-11-2026 04:15 PM', status: 'Queried Back (Subsidy Admin)', remark: 'Confirm 3-slab progressive rebate computation (0.50 + 0.50 + 0.40 Acres) against ₹ 98.00 Lakh 25% EMD challan reconciliation before Finance sign-off.' }
+          ]
+        },
+        {
+          appNo: 'APP-2026-EOI-103',
+          orgName: 'Bhojpur Edge Data Infrastructure LLP',
+          signatory: 'Anirudh Saxena',
+          designation: 'Designated Partner',
+          mobile: '+91 94250 61209',
+          email: 'anirudh@bhojpuredge.in',
+          cin: 'AAK-8842-MP2023',
+          incDate: '2023-02-14',
+          pan: 'ABCFB3310P',
+          gstin: '23ABCFB3310P1Z2',
+          regAddress: 'E-4/18 Arera Colony, Bhopal - 462016',
+          consortiumStatus: 'No (Single Entity)',
+          entityConstitution: 'Limited Liability Partnership (LLP)',
+          applicationType: 'EOI Allotment',
+          policyName: 'MP IT, ITeS & ESDM Policy 2023',
+          rebateSlabLabel: 'Slab 1 (75% Rebate)',
+          formType: 'Form 1',
+          itPark: 'IT Park Badwai, Bhopal',
+          plotNo: 'ITP-BHP-108',
+          plotKey: 'ITP-BHP-108',
+          plotDisplay: 'ITP-BHP-108 • IT Park Badwai, Bhopal',
+          plotSizeAcres: '0.45 Acre',
+          plotSizeSqFt: '19,602 Sq.Ft.',
+          purpose: 'Edge Data Centre / Cloud Infrastructure',
+          businessDomain: 'Tier-III Edge Data Centre Hosting',
+          currentEmployees: '78 Engineers',
+          turnover3FY: '₹ 19.60 Cr',
+          pastInvestment: '₹ 8.40 Cr',
+          projTitle: 'Bhopal Low-Latency Edge Colocation Facility (2 MW)',
+          timeline: '14 months to Tier-III certification & commissioning.',
+          headcount: '160 Data Centre & NOC Specialists over 3 years',
+          landPremium: '₹ 1,12,50,000.00',
+          devCharges: '₹ 32,00,000.00',
+          maintCharges: '₹ 2,50,000.00',
+          leaseRent: '₹ 1,12,500.00',
+          totalLandAmount: '₹ 1,48,12,500.00',
+          appFee: '₹ 10,000.00',
+          advanceEmd: '₹ 28,12,500.00',
+          totalCost: '₹ 16,20,00,000.00',
+          meansOfFinance: '₹ 16,20,00,000.00 (50% Equity / 50% Term Debt)',
+          appDate: '22/11/2026',
+          pendingSince: '22/11/2026 03:45:00 PM',
+          status: 'Submitted - Pending OIC IT Park Scrutiny',
+          applicationAt: 'OIC_IT_PARK',
+          stage: 'initial_scrutiny',
+          bidCount: 'single',
+          queryRemarks: '',
+          directors: [],
+          attachments: [
+            { title: 'Entity Registration Certificate (RoC / Registrar of Firms)', fileName: 'bhojpur_llp_cert.pdf', mandatory: true, verified: false },
+            { title: 'CA Certificate for Annual Turnover & Net Worth (with UDIN)', fileName: 'bhojpur_ca_udin.pdf', mandatory: true, verified: false },
+            { title: 'Form-2 Undertaking', fileName: 'bhojpur_form2.pdf', mandatory: true, verified: false }
+          ],
+          history: [
+            { actor: 'Bhojpur Edge Data Infrastructure LLP', timestamp: '22-11-2026 03:45 PM', status: 'Submitted to OIC IT Park', remark: 'Digitally signed via Class-3 DSC for Plot ITP-BHP-108.' }
+          ]
+        },
+        {
+          appNo: 'APP-2026-EOI-104',
+          orgName: 'Mahakoshal GCC Analytics Pvt Ltd',
+          signatory: 'Meenakshi Shrivastava',
+          designation: 'Director (India Ops)',
+          mobile: '+91 94251 88320',
+          email: 'meenakshi@mahakoshalgcc.com',
+          cin: 'U72200MP2020PTC051290',
+          incDate: '2020-06-04',
+          pan: 'AADCM7731Q',
+          gstin: '23AADCM7731Q1Z9',
+          regAddress: 'Civic Centre Tech Plaza, Jabalpur - 482002',
+          consortiumStatus: 'No (Single Entity)',
+          entityConstitution: 'Company under Companies Act',
+          applicationType: 'EOI Allotment',
+          policyName: 'MP GCC Policy 2025',
+          rebateSlabLabel: 'Slab 1 (75%) + Slab 2 (60%)',
+          formType: 'Form 1',
+          itPark: 'IT Park Purva, Jabalpur',
+          plotNo: 'ITP-JBP-019',
+          plotKey: 'ITP-JBP-019',
+          plotDisplay: 'ITP-JBP-019 • IT Park Purva, Jabalpur',
+          plotSizeAcres: '0.75 Acre',
+          plotSizeSqFt: '32,670 Sq.Ft.',
+          purpose: 'Global Capability Centre (GCC)',
+          businessDomain: 'Global Capability Centre (GCC)',
+          currentEmployees: '310 Professionals',
+          turnover3FY: '₹ 64.10 Cr',
+          pastInvestment: '₹ 22.80 Cr',
+          projTitle: 'MP GCC Digital Twin & Cloud Analytics Center',
+          timeline: 'Campus fit-out completed in 14 months.',
+          headcount: '650 Direct GCC Professionals over 3 years',
+          landPremium: '₹ 1,62,00,000.00',
+          devCharges: '₹ 45,00,000.00',
+          maintCharges: '₹ 3,25,000.00',
+          leaseRent: '₹ 1,62,000.00',
+          totalLandAmount: '₹ 2,11,87,000.00',
+          appFee: '₹ 10,000.00',
+          advanceEmd: '₹ 40,50,000.00',
+          totalCost: '₹ 14,80,00,000.00',
+          meansOfFinance: '₹ 14,80,00,000.00 (100% Internal Accruals)',
+          appDate: '10/11/2026',
+          pendingSince: '20/11/2026 05:10:00 PM',
+          status: 'Forwarded to Finance Admin',
+          applicationAt: 'FINANCE_ADMIN',
+          stage: 'finance_scrutiny',
+          subsidyVerifiedAt: '20-11-2026 05:10 PM',
+          rebateVerificationNotes: 'MP GCC Policy 2025 & 0.75 Acre progressive slab rebate (75%/60%) certified.',
+          bidCount: 'single',
+          queryRemarks: '',
+          directors: [],
+          attachments: [
+            { title: 'Entity Registration Certificate (RoC / Registrar of Firms)', fileName: 'mahakoshal_roc.pdf', mandatory: true, verified: true },
+            { title: 'CA Certificate for Annual Turnover & Net Worth (with UDIN)', fileName: 'mahakoshal_ca_udin.pdf', mandatory: true, verified: true },
+            { title: 'Form-2 Undertaking', fileName: 'mahakoshal_form2.pdf', mandatory: true, verified: true }
+          ],
+          history: [
+            { actor: 'Mahakoshal GCC Analytics Pvt Ltd', timestamp: '10-11-2026 11:00 AM', status: 'Submitted to OIC IT Park', remark: 'EOI submitted.' },
+            { actor: 'OIC IT Park', timestamp: '14-11-2026 02:15 PM', status: 'Verified By OIC IT Park - Forwarded to Subsidy Admin', remark: 'Initial verification done.' },
+            { actor: 'Subsidy Admin (SUBSIDY_ADMIN)', timestamp: '20-11-2026 05:10 PM', status: 'Forwarded to Finance Admin', remark: 'Verified policy eligibility & 0.75 Acre rebate slab breakdown. Forwarded for Finance fee & EMD verification.' }
+          ]
+        },
+        {
+          appNo: 'APP-2026-EOI-105',
+          orgName: 'Avanti AVGC-XR Studios Pvt Ltd',
+          signatory: 'Kabir Malhotra',
+          designation: 'Co-Founder & CEO',
+          mobile: '+91 99264 55190',
+          email: 'kabir@avantixr.in',
+          cin: 'U72900MP2023PTC064112',
+          incDate: '2023-01-22',
+          pan: 'AAECA9912R',
+          gstin: '23AAECA9912R1Z1',
+          regAddress: 'Orbit Business Park, AB Road, Indore - 452001',
+          consortiumStatus: 'No (Single Entity)',
+          entityConstitution: 'Company under Companies Act',
+          applicationType: 'EOI Allotment',
+          policyName: 'MP AVGC-XR Policy 2025',
+          rebateSlabLabel: 'Slab 1 (75%) + Slab 2 (60%)',
+          formType: 'Form 1',
+          itPark: 'Crystal IT Park, Indore',
+          plotNo: 'ITP-IND-201',
+          plotKey: 'ITP-IND-201',
+          plotDisplay: 'ITP-IND-201 • Crystal IT Park, Indore',
+          plotSizeAcres: '0.60 Acre',
+          plotSizeSqFt: '26,136 Sq.Ft.',
+          purpose: 'AVGC-XR (Animation, VFX, Gaming & Comics)',
+          businessDomain: 'Spatial Computing & VFX Studio',
+          currentEmployees: '140 Professionals',
+          turnover3FY: '₹ 21.30 Cr',
+          pastInvestment: '₹ 9.60 Cr',
+          projTitle: 'Immersive VFX Render Farm & Gaming Studio',
+          timeline: '15 months to studio operations.',
+          headcount: '380 Direct AVGC-XR Artists & Engineers over 3 years',
+          landPremium: '₹ 1,95,00,000.00',
+          devCharges: '₹ 52,00,000.00',
+          maintCharges: '₹ 4,10,000.00',
+          leaseRent: '₹ 1,95,000.00',
+          totalLandAmount: '₹ 2,53,05,000.00',
+          appFee: '₹ 10,000.00',
+          advanceEmd: '₹ 48,75,000.00',
+          totalCost: '₹ 11,20,00,000.00',
+          meansOfFinance: '₹ 11,20,00,000.00 (70% Equity / 30% Loan)',
+          appDate: '07/11/2026',
+          pendingSince: '21/11/2026 04:05:00 PM',
+          status: 'Forwarded to Executive Director (ED)',
+          applicationAt: 'ED',
+          stage: 'ed_scrutiny',
+          subsidyVerifiedAt: '16-11-2026 03:20 PM',
+          rebateVerificationNotes: 'MP AVGC-XR Policy 2025 certified by Subsidy Admin.',
+          bidCount: 'single',
+          queryRemarks: '',
+          directors: [],
+          attachments: [
+            { title: 'Entity Registration Certificate (RoC / Registrar of Firms)', fileName: 'avantixr_roc.pdf', mandatory: true, verified: true },
+            { title: 'CA Certificate for Annual Turnover & Net Worth (with UDIN)', fileName: 'avantixr_ca_udin.pdf', mandatory: true, verified: true },
+            { title: 'Form-2 Undertaking', fileName: 'avantixr_form2.pdf', mandatory: true, verified: true }
+          ],
+          history: [
+            { actor: 'Avanti AVGC-XR Studios Pvt Ltd', timestamp: '07-11-2026 12:15 PM', status: 'Submitted to OIC IT Park', remark: 'EOI submitted.' },
+            { actor: 'OIC IT Park', timestamp: '11-11-2026 03:00 PM', status: 'Verified By OIC IT Park - Forwarded to Subsidy Admin', remark: 'Verified.' },
+            { actor: 'Subsidy Admin (SUBSIDY_ADMIN)', timestamp: '16-11-2026 03:20 PM', status: 'Forwarded to Finance Admin', remark: 'AVGC-XR Policy 2025 & rebate verified.' },
+            { actor: 'Finance Admin (FINANCE_ADMIN)', timestamp: '21-11-2026 04:05 PM', status: 'Forwarded to Executive Director (ED)', remark: 'Fee ₹10,000 & 25% EMD ₹48,75,000 reconciled with treasury challan.' }
+          ]
+        },
+        {
+          appNo: 'APP-2026-EOI-106',
+          orgName: 'Vindhya Fintech Systems Ltd',
+          signatory: 'Prashant Kulkarni',
+          designation: 'Executive Director',
+          mobile: '+91 98270 11840',
+          email: 'pkulkarni@vindhyafintech.com',
+          cin: 'U72900MP2019PLC048210',
+          incDate: '2019-09-11',
+          pan: 'AAACV6204E',
+          gstin: '23AAACV6204E1Z6',
+          regAddress: 'MP Nagar Zone II, Bhopal - 462011',
+          consortiumStatus: 'No (Single Entity)',
+          entityConstitution: 'Company under Companies Act',
+          applicationType: 'EOI Allotment',
+          policyName: 'MP IT, ITeS & ESDM Policy 2023',
+          rebateSlabLabel: 'Slab 1 (75%) + Slab 2 (60%) + Slab 3 (50%)',
+          formType: 'Form 1',
+          itPark: 'IT Park Badwai, Bhopal',
+          plotNo: 'ITP-BHP-108',
+          plotKey: 'ITP-BHP-108',
+          plotDisplay: 'ITP-BHP-108 • IT Park Badwai, Bhopal',
+          plotSizeAcres: '1.80 Acres',
+          plotSizeSqFt: '78,408 Sq.Ft.',
+          purpose: 'IT/ITeS/ESDM/Data Centre/Edge Data Centre',
+          businessDomain: 'Digital Payments & Core Banking Cloud',
+          currentEmployees: '420 Professionals',
+          turnover3FY: '₹ 89.00 Cr',
+          pastInvestment: '₹ 34.00 Cr',
+          projTitle: 'Vindhya Sovereign Payment & UPI Clearing Campus',
+          timeline: '18 months commercial rollout.',
+          headcount: '900 Direct Tech Engineers over 3 years',
+          landPremium: '₹ 4,48,00,000.00',
+          devCharges: '₹ 1,10,00,000.00',
+          maintCharges: '₹ 7,20,000.00',
+          leaseRent: '₹ 4,48,000.00',
+          totalLandAmount: '₹ 5,69,68,000.00',
+          appFee: '₹ 10,000.00',
+          advanceEmd: '₹ 1,12,00,000.00',
+          totalCost: '₹ 24,00,00,000.00',
+          meansOfFinance: '₹ 24,00,00,000.00 (80% Equity / 20% Bank Facility)',
+          appDate: '04/11/2026',
+          pendingSince: '22/11/2026 06:10:00 PM',
+          status: 'Pending with Managing Director (MD)',
+          applicationAt: 'MD',
+          stage: 'md_scrutiny',
+          subsidyVerifiedAt: '12-11-2026 04:00 PM',
+          rebateVerificationNotes: '3-slab progressive rebate & MP IT Policy 2023 eligibility cleared.',
+          bidCount: 'single',
+          queryRemarks: '',
+          directors: [],
+          attachments: [
+            { title: 'Entity Registration Certificate (RoC / Registrar of Firms)', fileName: 'vindhya_roc.pdf', mandatory: true, verified: true },
+            { title: 'CA Certificate for Annual Turnover & Net Worth (with UDIN)', fileName: 'vindhya_ca_udin.pdf', mandatory: true, verified: true },
+            { title: 'Form-2 Undertaking', fileName: 'vindhya_form2.pdf', mandatory: true, verified: true }
+          ],
+          history: [
+            { actor: 'Vindhya Fintech Systems Ltd', timestamp: '04-11-2026 11:10 AM', status: 'Submitted to OIC IT Park', remark: 'EOI submitted.' },
+            { actor: 'OIC IT Park', timestamp: '08-11-2026 02:30 PM', status: 'Verified By OIC IT Park - Forwarded to Subsidy Admin', remark: 'Initial verification cleared.' },
+            { actor: 'Subsidy Admin (SUBSIDY_ADMIN)', timestamp: '12-11-2026 04:00 PM', status: 'Forwarded to Finance Admin', remark: 'Policy & progressive rebate verified.' },
+            { actor: 'Finance Admin (FINANCE_ADMIN)', timestamp: '17-11-2026 01:45 PM', status: 'Forwarded to Executive Director (ED)', remark: '25% Advance EMD & means of finance verified.' },
+            { actor: 'Executive Director (ED)', timestamp: '22-11-2026 06:10 PM', status: 'Forwarded to Managing Director (MD)', remark: 'Recommended for final EOI allotment sanction.' }
+          ]
+        },
+        {
+          appNo: 'APP-2026-EOI-107',
+          orgName: 'Chambal Photonics & Cloud India Pvt Ltd',
+          signatory: 'Devendra Singh Tomar',
+          designation: 'Chief Executive Officer',
+          mobile: '+91 98270 33108',
+          email: 'dtomar@chambalphotonics.com',
+          cin: 'U64202MP2018PTC045910',
+          incDate: '2018-07-27',
+          pan: 'AABCG5502L',
+          gstin: '23AABCG5502L1Z7',
+          regAddress: 'City Centre Tech Enclave, Gwalior - 474011',
+          consortiumStatus: 'No (Single Entity)',
+          entityConstitution: 'Company under Companies Act',
+          applicationType: 'EOI Allotment',
+          policyName: 'MP IT, ITeS & ESDM Policy 2023',
+          rebateSlabLabel: 'Slab 1 (75% Rebate)',
+          formType: 'Form 1',
+          itPark: 'IT Park Ganga Malanpur, Gwalior',
+          plotNo: 'ITP-GWL-008',
+          plotKey: 'ITP-GWL-008',
+          plotDisplay: 'ITP-GWL-008 • IT Park Ganga Malanpur, Gwalior',
+          plotSizeAcres: '0.50 Acre',
+          plotSizeSqFt: '21,780 Sq.Ft.',
+          purpose: 'IT/ITeS/ESDM/Data Centre/Edge Data Centre',
+          businessDomain: 'Optical Networking & Cloud Systems',
+          currentEmployees: '165 Engineers',
+          turnover3FY: '₹ 38.90 Cr',
+          pastInvestment: '₹ 14.10 Cr',
+          projTitle: 'Optical Transceiver & Edge Networking Lab',
+          timeline: '12 months implementation.',
+          headcount: '310 Engineers over 3 years',
+          landPremium: '₹ 1,05,00,000.00',
+          devCharges: '₹ 28,00,000.00',
+          maintCharges: '₹ 2,25,000.00',
+          leaseRent: '₹ 1,05,000.00',
+          totalLandAmount: '₹ 1,36,30,000.00',
+          appFee: '₹ 10,000.00',
+          advanceEmd: '₹ 26,25,000.00',
+          totalCost: '₹ 9,80,00,000.00',
+          meansOfFinance: '₹ 9,80,00,000.00 (60% Equity / 40% Loan)',
+          appDate: '01/11/2026',
+          pendingSince: '23/11/2026 05:30:00 PM',
+          status: 'Approved by MD',
+          applicationAt: 'OIC_IT_PARK',
+          stage: 'post_approval',
+          subsidyVerifiedAt: '09-11-2026 03:00 PM',
+          rebateVerificationNotes: '75% first-slab rebate verified under MP IT Policy 2023.',
+          bidCount: 'single',
+          queryRemarks: '',
+          directors: [],
+          attachments: [
+            { title: 'Entity Registration Certificate (RoC / Registrar of Firms)', fileName: 'chambal_roc.pdf', mandatory: true, verified: true },
+            { title: 'CA Certificate for Annual Turnover & Net Worth (with UDIN)', fileName: 'chambal_ca_udin.pdf', mandatory: true, verified: true },
+            { title: 'Form-2 Undertaking', fileName: 'chambal_form2.pdf', mandatory: true, verified: true }
+          ],
+          history: [
+            { actor: 'Chambal Photonics & Cloud India Pvt Ltd', timestamp: '01-11-2026 10:30 AM', status: 'Submitted to OIC IT Park', remark: 'EOI submitted.' },
+            { actor: 'OIC IT Park', timestamp: '05-11-2026 04:00 PM', status: 'Verified By OIC IT Park - Forwarded to Subsidy Admin', remark: 'Initial verification passed.' },
+            { actor: 'Subsidy Admin (SUBSIDY_ADMIN)', timestamp: '09-11-2026 03:00 PM', status: 'Forwarded to Finance Admin', remark: 'Policy & 75% slab rebate confirmed.' },
+            { actor: 'Finance Admin (FINANCE_ADMIN)', timestamp: '14-11-2026 11:45 AM', status: 'Forwarded to Executive Director (ED)', remark: 'Fee & 25% EMD reconciled.' },
+            { actor: 'Executive Director (ED)', timestamp: '19-11-2026 02:20 PM', status: 'Forwarded to Managing Director (MD)', remark: 'Recommended for single-bid EOI allotment.' },
+            { actor: 'Managing Director (MD)', timestamp: '23-11-2026 05:30 PM', status: 'Approved by MD', remark: 'Approved for Stage 3 LOA generation (15-Day Payment SLA) via OIC IT Park & ED DSC.' }
+          ]
+        }
+      ];
+    }
+
     function loadPersistedApplications() {
       try {
         const raw = localStorage.getItem(STORAGE_KEYS.APPS);
-        if (!raw) return [];
+        if (raw === null) {
+          const seeded = getDefaultSeededApplications();
+          localStorage.setItem(STORAGE_KEYS.APPS, JSON.stringify(seeded));
+          localStorage.setItem('mpsedc_eoi_seed_v2', '1');
+          return seeded;
+        }
         const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length === 0 && !localStorage.getItem('mpsedc_eoi_seed_v2')) {
+          const seeded = getDefaultSeededApplications();
+          localStorage.setItem(STORAGE_KEYS.APPS, JSON.stringify(seeded));
+          localStorage.setItem('mpsedc_eoi_seed_v2', '1');
+          return seeded;
+        }
         return Array.isArray(parsed) ? parsed : [];
       } catch (e) {
-        return [];
+        return getDefaultSeededApplications();
       }
     }
 
@@ -7903,6 +9139,35 @@
       try {
         localStorage.setItem(STORAGE_KEYS.APPS, JSON.stringify(window.oicLandApplications || []));
       } catch (e) { }
+    }
+
+    function resetDemoState() {
+      try {
+        localStorage.removeItem(STORAGE_KEYS.DRAFTS);
+        localStorage.removeItem(STORAGE_KEYS.RECTIFY_APP);
+        localStorage.removeItem(STORAGE_KEYS.ACTIVE_PLOT);
+        localStorage.removeItem('mpsedc_eoi_draft');
+        sessionStorage.removeItem('mpsedc_eoi_draft');
+        localStorage.setItem('mpsedc_eoi_seed_v2', '1');
+      } catch (e) { }
+      if (typeof clearApplicantQueryRectificationMode === 'function') clearApplicantQueryRectificationMode(true);
+      oicPlotInventory = getDefaultSeededPlots();
+      window.plotMasterDB = oicPlotInventory;
+      savePersistedPlots();
+      window.oicLandApplications = getDefaultSeededApplications();
+      window.submittedApplicationsMap = {};
+      window.oicLandApplications.forEach(a => { window.submittedApplicationsMap[a.appNo] = a; });
+      savePersistedApplications();
+      eoiDraftMemory = {};
+      renderOicPlotTable();
+      syncPlotsWithInvestorView();
+      updateOicStats();
+      updateOicProcessStats();
+      renderOicApplicationsTable();
+      renderInvestorDashboard();
+      if (typeof renderSubsidyDashboard === 'function') renderSubsidyDashboard();
+      if (typeof renderAuthorityWorkbench === 'function' && window.currentOfficerRole) renderAuthorityWorkbench(window.currentOfficerRole);
+      showGlobalToast('Demo state reset to realistic seeded EOI workflow records.', 'success');
     }
 
     // Real Land Allotment Applications (Starts empty; populated from Investor submissions & persisted in localStorage)
@@ -8588,7 +9853,7 @@
             <td class="p-3 font-mono font-bold text-[#3b5998]">${escapePlotHtml(app.appNo)}</td>
             <td class="p-3 font-mono text-slate-700 whitespace-nowrap">${escapePlotHtml(app.appDate)}</td>
             <td class="p-3">${getOicStatusBadgeHtml(app)}</td>
-            <td class="p-3 font-semibold text-slate-800 whitespace-nowrap">${escapePlotHtml(app.applicationAt)}</td>
+            <td class="p-3 font-semibold text-slate-800 whitespace-nowrap">${escapePlotHtml(getRoleDisplayLabel(app.applicationAt))}</td>
             <td class="p-3 font-mono text-[11px] text-slate-600 whitespace-nowrap">${escapePlotHtml(app.pendingSince)}</td>
             <td class="p-3 text-center">
               <button type="button" onclick="downloadOicDossierBundle('${escapePlotHtml(app.appNo)}')"
@@ -9129,6 +10394,10 @@
             contextBox.innerHTML = app.stage === 'post_approval'
               ? `<b>Post-Approval Action:</b> ${app.applicationType === 'Mega Project Allotment' ? 'Sanctioned by Principal Secretary (PS). Generate Direct Allotment LOA for ED2 DSC.' : (app.bidCount === 'multiple' ? 'Approved by MD with >1 EOI applications. Push to MP Tender E-Bidding or confirm H1 Winner to generate LOA.' : 'Approved by MD (Single EOI). Generate 15-Day SLA LOA for ED DSC.')}`
               : `<b>Lease Deed Verification:</b> Registered Lease Deed & balance payment submitted. Verify and forward to ${app.applicationType === 'Mega Project Allotment' ? 'ED2' : 'ED'}.`;
+          } else if (app.queriedBy || (app.status || '').includes('Queried')) {
+            contextBox.classList.remove('hidden');
+            contextBox.className = 'rounded border p-3 text-xs bg-red-50 border-red-200 text-red-950';
+            contextBox.innerHTML = `<div class="font-bold text-red-800 mb-1">&#9888; ${escapePlotHtml(app.status)}</div><div class="text-[11.5px] leading-relaxed">${escapePlotHtml(app.queriedBackReason || app.queryRemarks || 'Returned for OIC IT Park verification.')}</div>`;
           } else {
             contextBox.classList.add('hidden');
           }
@@ -9260,9 +10529,9 @@
         newStage = 'queried';
         historyStatus = 'Query Raised to Applicant';
       } else if (actionVal === 'forward_subsidy_admin') {
-        newStatus = 'Verified by OIC IT Park - Forwarded to Subsidy Admin';
-        newAt = 'Subsidy Admin';
-        newStage = 'forwarded';
+        newStatus = 'Pending with Subsidy Admin';
+        newAt = 'SUBSIDY_ADMIN';
+        newStage = 'subsidy_scrutiny';
         historyStatus = 'Verified By OIC IT Park - Forwarded to Subsidy Admin';
       } else if (actionVal === 'forward_oic_ip') {
         newStatus = 'Verified by OIC IT Park - Forwarded to OIC IP';
@@ -9334,6 +10603,11 @@
       app.pendingSince = p.timestamp;
       if (p.actionVal === 'query_applicant' || p.newStage === 'queried') {
         app.queryRemarks = p.commentVal || '';
+      } else if (p.actionVal === 'forward_subsidy_admin') {
+        app.queriedBy = '';
+        app.queriedBackBy = '';
+        app.queriedBackReason = '';
+        app.queriedBackTo = '';
       }
       app.history = app.history || [];
       app.history.push({
@@ -9343,7 +10617,6 @@
         remark: p.commentVal
       });
 
-      // Synchronize status back to Investor Dashboard table if present
       // Synchronize status back to Investor Dashboard table & localStorage
       if (window.submittedApplicationsMap[app.appNo]) {
         window.submittedApplicationsMap[app.appNo].status = app.status;
@@ -9364,6 +10637,8 @@
       updateOicStats();
       updateOicProcessStats();
       renderOicApplicationsTable();
+      if (typeof renderSubsidyDashboard === 'function') renderSubsidyDashboard();
+      if (typeof renderAuthorityWorkbench === 'function' && window.currentOfficerRole) renderAuthorityWorkbench(window.currentOfficerRole);
       renderScrutinyActionPanel(app);
       renderScrutinyHistory(app);
       showGlobalToast(`Status updated: ${p.historyStatus}`, 'success');
@@ -9415,7 +10690,870 @@
       `).join('');
     }
 
-    // Initialize state on DOM ready
+    // =========================================================================
+    // STAGE 2: SUBSIDY ADMIN (SUBSIDY_ADMIN) SCRUTINY & HIGHER AUTHORITY ENGINE
+    // =========================================================================
+    let subsidyActiveKpiFilter = 'pending';
+    let subsidySortKey = 'sno';
+    let subsidySortAsc = true;
+    let currentSubsidyAppNo = null;
+    window.currentAuthorityAppNo = null;
+    window.currentOfficerRole = 'FINANCE_ADMIN';
+
+    function parseCurrencyNum(val) {
+      const n = parseFloat(String(val || '').replace(/[^0-9.-]+/g, ''));
+      return isNaN(n) ? 0 : n;
+    }
+
+    function formatCurrencyInr(num) {
+      return '₹ ' + Number(num || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function computeRebateSlabBreakdown(app) {
+      const acres = Math.max(0, parseFloat(String(app?.plotSizeAcres || '0').replace(/[^0-9.]+/g, '')) || 0.8);
+      const netPayable = parseCurrencyNum(app?.landPremium);
+      const matchedPlot = (oicPlotInventory || []).find(p => p.plotNo === app?.plotNo || p.id === app?.plotNo);
+      const effectiveAcres = (matchedPlot && matchedPlot.sizeAcres) ? Number(matchedPlot.sizeAcres) : acres;
+
+      const s1 = Math.min(effectiveAcres, 0.5);
+      const s2 = effectiveAcres > 0.5 ? Math.min(effectiveAcres - 0.5, 0.5) : 0;
+      const s3 = effectiveAcres > 1.0 ? Math.min(effectiveAcres - 1.0, 4.0) : 0;
+      const s4 = effectiveAcres > 5.0 ? (effectiveAcres - 5.0) : 0;
+
+      const weightedPayableFactor = (s1 * 0.25 + s2 * 0.40 + s3 * 0.50 + s4 * 0.75) / (effectiveAcres || 1);
+      const impliedRatePerAcre = netPayable > 0 && weightedPayableFactor > 0
+        ? Math.round(netPayable / (effectiveAcres * weightedPayableFactor))
+        : 80000000;
+
+      const slabs = [
+        { label: 'Slab 1 (Up to 0.50 Acre)', acres: s1, rebatePct: 75, payPct: 25 },
+        { label: 'Slab 2 (> 0.50 to 1.00 Acre)', acres: s2, rebatePct: 60, payPct: 40 },
+        { label: 'Slab 3 (> 1.00 to 5.00 Acres)', acres: s3, rebatePct: 50, payPct: 50 },
+        { label: 'Slab 4 (> 5.00 Acres)', acres: s4, rebatePct: 25, payPct: 75 }
+      ].filter(s => s.acres > 0).map(s => {
+        const gross = Math.round(s.acres * impliedRatePerAcre);
+        const payable = Math.round(gross * (s.payPct / 100));
+        return { ...s, gross, rebateAmt: gross - payable, payable };
+      });
+
+      const grossGuidelineTotal = slabs.reduce((acc, s) => acc + s.gross, 0);
+      const totalRebateAmt = slabs.reduce((acc, s) => acc + s.rebateAmt, 0);
+      const totalPayableCalc = netPayable > 0 ? netPayable : slabs.reduce((acc, s) => acc + s.payable, 0);
+      const slabSummary = slabs.map(s => `Slab ${s.rebatePct}%`).join(' + ');
+
+      return {
+        acres: effectiveAcres,
+        impliedRatePerAcre,
+        slabs,
+        grossGuidelineTotal,
+        totalRebateAmt,
+        netPayable: totalPayableCalc,
+        advanceEmd25: Math.round(totalPayableCalc * 0.25),
+        slabSummary: app?.rebateSlabLabel || slabSummary
+      };
+    }
+
+    function isSubsidyEoiScope(app) {
+      return !String(app?.applicationType || '').toLowerCase().includes('mega');
+    }
+
+    function isSubsidyPendingItem(app) {
+      return isSubsidyEoiScope(app) && isApplicationAtRole(app, 'SUBSIDY_ADMIN');
+    }
+
+    function isSubsidyForwardedItem(app) {
+      if (!isSubsidyEoiScope(app)) return false;
+      return Boolean(app.subsidyVerifiedAt) ||
+        isApplicationAtRole(app, 'FINANCE_ADMIN') ||
+        isApplicationAtRole(app, 'ED') ||
+        isApplicationAtRole(app, 'MD') ||
+        app.stage === 'finance_scrutiny' ||
+        app.stage === 'ed_scrutiny' ||
+        app.stage === 'md_scrutiny';
+    }
+
+    function isSubsidyApprovedItem(app) {
+      if (!isSubsidyEoiScope(app)) return false;
+      const st = (app.status || '').toLowerCase();
+      return app.stage === 'post_approval' || app.stage === 'lease_deed' || app.stage === 'approved' ||
+        st.includes('approved') || st.includes('loa') || st.includes('lease deed');
+    }
+
+    function isSubsidyQueriedItem(app) {
+      if (!isSubsidyEoiScope(app)) return false;
+      const st = (app.status || '').toLowerCase();
+      return app.stage === 'queried_back' || app.stage === 'queried' || st.includes('queried');
+    }
+
+    function getSubsidyStatusBadgeHtml(app) {
+      const st = String(app?.status || '');
+      const isQueriedBack = app?.queriedBackTo === 'SUBSIDY_ADMIN' || app?.stage === 'queried_back' || st.includes('Queried Back');
+      if (isQueriedBack) {
+        return `<span class="inline-flex items-center gap-1 bg-red-100 text-red-900 border border-red-300 font-bold px-2.5 py-0.5 rounded text-[11px] whitespace-nowrap">&#9888; ${escapePlotHtml(st)}</span>`;
+      }
+      if (st.includes('Pending with Subsidy Admin')) {
+        return `<span class="inline-block bg-amber-100 text-amber-900 border border-amber-300 font-bold px-2 py-0.5 rounded text-[11px] whitespace-nowrap">${escapePlotHtml(st)}</span>`;
+      }
+      if (st.includes('Queried')) {
+        return `<span class="inline-block bg-rose-100 text-rose-800 border border-rose-200 font-bold px-2 py-0.5 rounded text-[11px] whitespace-nowrap">${escapePlotHtml(st)}</span>`;
+      }
+      if (st.includes('Approved') || st.includes('LOA')) {
+        return `<span class="inline-block bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold px-2 py-0.5 rounded text-[11px] whitespace-nowrap">${escapePlotHtml(st)}</span>`;
+      }
+      return `<span class="inline-block bg-blue-100 text-blue-900 border border-blue-200 font-bold px-2 py-0.5 rounded text-[11px] whitespace-nowrap">${escapePlotHtml(st)}</span>`;
+    }
+
+    function updateSubsidyKpiActiveState() {
+      ['pending', 'forwarded', 'approved', 'queried', 'all'].forEach(k => {
+        const card = document.getElementById('subsidy-kpi-card-' + k);
+        if (!card) return;
+        card.classList.toggle('active', subsidyActiveKpiFilter === k);
+      });
+      const chip = document.getElementById('subsidy-active-filter-chip');
+      const lbl = document.getElementById('subsidy-active-filter-label');
+      const labels = {
+        pending: 'Showing: Pending Subsidy Admin (incl. Queried Back)',
+        forwarded: 'Showing: Forwarded to Finance / Next Stage',
+        approved: 'Showing: Recommended / Approved',
+        queried: 'Showing: Queried Applications',
+        all: ''
+      };
+      if (chip && lbl) {
+        if (subsidyActiveKpiFilter !== 'all') {
+          lbl.textContent = labels[subsidyActiveKpiFilter] || '';
+          chip.classList.remove('hidden');
+          chip.classList.add('inline-flex');
+        } else {
+          chip.classList.add('hidden');
+          chip.classList.remove('inline-flex');
+        }
+      }
+    }
+
+    function filterSubsidyByKpi(kpiKey) {
+      subsidyActiveKpiFilter = kpiKey || 'all';
+      updateSubsidyKpiActiveState();
+      renderSubsidyDashboard();
+    }
+
+    function filterSubsidyTable() {
+      renderSubsidyDashboard();
+    }
+
+    function sortSubsidyTable(key) {
+      if (subsidySortKey === key) subsidySortAsc = !subsidySortAsc;
+      else { subsidySortKey = key; subsidySortAsc = true; }
+      document.querySelectorAll('[id^="sub-sort-ind-"]').forEach(el => {
+        el.textContent = '▴';
+        el.className = 'text-[10px] text-slate-400';
+      });
+      const active = document.getElementById('sub-sort-ind-' + key);
+      if (active) {
+        active.textContent = subsidySortAsc ? '▴' : '▾';
+        active.className = 'text-[10px] text-[#3b5998] font-bold';
+      }
+      renderSubsidyDashboard();
+    }
+
+    function renderSubsidyPaymentLedger() {
+      const body = document.getElementById('subsidy-payment-ledger-body');
+      if (!body) return;
+      const scoped = (window.oicLandApplications || []).filter(isSubsidyEoiScope);
+      if (scoped.length === 0) {
+        body.innerHTML = `<div class="text-slate-500 text-center py-4">No EOI Land Allotment payment records available.</div>`;
+        return;
+      }
+      body.innerHTML = `
+        <table class="w-full text-xs border-collapse border border-slate-200">
+          <thead class="bg-[#dfe5f5] text-slate-800 font-semibold">
+            <tr>
+              <th class="p-2 text-left">Application No.</th>
+              <th class="p-2 text-left">Applicant</th>
+              <th class="p-2 text-right">Net Land Premium</th>
+              <th class="p-2 text-right">25% Advance EMD</th>
+              <th class="p-2 text-right">App Fee</th>
+              <th class="p-2 text-left">Stage</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200">
+            ${scoped.map(a => `
+              <tr class="hover:bg-slate-50">
+                <td class="p-2 font-mono font-bold text-[#3b5998]">${escapePlotHtml(a.appNo)}</td>
+                <td class="p-2 font-semibold">${escapePlotHtml(a.orgName)}</td>
+                <td class="p-2 text-right font-mono">${escapePlotHtml(a.landPremium)}</td>
+                <td class="p-2 text-right font-mono font-bold text-emerald-700">${escapePlotHtml(a.advanceEmd)}</td>
+                <td class="p-2 text-right font-mono">${escapePlotHtml(a.appFee || '₹ 10,000.00')}</td>
+                <td class="p-2">${getSubsidyStatusBadgeHtml(a)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderSubsidyDashboard() {
+      const scopedApps = (window.oicLandApplications || []).filter(isSubsidyEoiScope);
+
+      const pendingCount = scopedApps.filter(isSubsidyPendingItem).length;
+      const forwardedCount = scopedApps.filter(isSubsidyForwardedItem).length;
+      const approvedCount = scopedApps.filter(isSubsidyApprovedItem).length;
+      const queriedCount = scopedApps.filter(isSubsidyQueriedItem).length;
+      const allCount = scopedApps.length;
+
+      const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+      setTxt('subsidy-kpi-pending', pendingCount);
+      setTxt('subsidy-kpi-forwarded', forwardedCount);
+      setTxt('subsidy-kpi-approved', approvedCount);
+      setTxt('subsidy-kpi-queried', queriedCount);
+      setTxt('subsidy-kpi-all', allCount);
+
+      setTxt('subsidy-policy-it-count', scopedApps.filter(a => (a.policyName || '').includes('2023')).length);
+      setTxt('subsidy-policy-special-count', scopedApps.filter(a => !(a.policyName || '').includes('2023')).length);
+      setTxt('subsidy-queried-back-count', scopedApps.filter(a => a.queriedBackTo === 'SUBSIDY_ADMIN' || a.stage === 'queried_back').length);
+
+      updateSubsidyKpiActiveState();
+      if (!document.getElementById('subsidy-payment-panel')?.classList.contains('hidden')) {
+        renderSubsidyPaymentLedger();
+      }
+
+      const tbody = document.getElementById('subsidy-pending-tbody');
+      if (!tbody) return;
+
+      let rows = scopedApps.slice();
+      if (subsidyActiveKpiFilter === 'pending') rows = rows.filter(isSubsidyPendingItem);
+      else if (subsidyActiveKpiFilter === 'forwarded') rows = rows.filter(isSubsidyForwardedItem);
+      else if (subsidyActiveKpiFilter === 'approved') rows = rows.filter(isSubsidyApprovedItem);
+      else if (subsidyActiveKpiFilter === 'queried') rows = rows.filter(isSubsidyQueriedItem);
+
+      const searchBy = document.getElementById('subsidy-search-by')?.value || 'all';
+      const q = (document.getElementById('subsidy-search-query')?.value || '').trim().toLowerCase();
+      if (q) {
+        rows = rows.filter(a => {
+          if (searchBy === 'appNo') return (a.appNo || '').toLowerCase().includes(q);
+          if (searchBy === 'orgName') return (a.orgName || '').toLowerCase().includes(q) || (a.signatory || '').toLowerCase().includes(q);
+          if (searchBy === 'plotDisplay') return (a.plotNo || '').toLowerCase().includes(q) || (a.itPark || '').toLowerCase().includes(q);
+          if (searchBy === 'policy') return (a.policyName || '').toLowerCase().includes(q) || (a.rebateSlabLabel || '').toLowerCase().includes(q);
+          if (searchBy === 'status') return (a.status || '').toLowerCase().includes(q);
+          return JSON.stringify([a.appNo, a.orgName, a.plotNo, a.itPark, a.policyName, a.rebateSlabLabel, a.status, a.applicationAt]).toLowerCase().includes(q);
+        });
+      }
+
+      if (subsidySortKey && subsidySortKey !== 'sno') {
+        rows.sort((a, b) => {
+          const av = String(a[subsidySortKey] || '').toLowerCase();
+          const bv = String(b[subsidySortKey] || '').toLowerCase();
+          if (av < bv) return subsidySortAsc ? -1 : 1;
+          if (av > bv) return subsidySortAsc ? 1 : -1;
+          return 0;
+        });
+      } else if (subsidySortKey === 'sno' && !subsidySortAsc) {
+        rows.reverse();
+      }
+
+      if (rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="12" class="p-6 text-center text-slate-500 text-xs">No EOI Land Allotment applications match the selected filter criteria.</td></tr>`;
+      } else {
+        tbody.innerHTML = rows.map((app, idx) => {
+          const slabInfo = computeRebateSlabBreakdown(app);
+          const isQueriedBack = app.queriedBackTo === 'SUBSIDY_ADMIN' || app.stage === 'queried_back' || (app.status || '').includes('Queried Back');
+          const rowHighlight = isQueriedBack ? 'bg-red-50/40 hover:bg-red-50/80' : 'hover:bg-slate-50/90';
+          return `
+            <tr class="${rowHighlight} transition">
+              <td class="p-3 text-center font-mono text-slate-600">${idx + 1}</td>
+              <td class="p-3 font-semibold text-slate-900">
+                <div>${escapePlotHtml(app.orgName)}</div>
+                <div class="text-[11px] text-slate-500 font-normal">${escapePlotHtml(app.signatory)} (${escapePlotHtml(app.formType || 'Form 1')})</div>
+              </td>
+              <td class="p-3"><span class="inline-block bg-blue-50 text-blue-800 border border-blue-200 px-2 py-0.5 rounded text-[11px] font-semibold whitespace-nowrap">EOI Land Allotment</span></td>
+              <td class="p-3 text-[11.5px] text-slate-700">
+                <div class="font-semibold text-slate-900">${escapePlotHtml(app.policyName)}</div>
+                <div class="text-[10.5px] text-emerald-700 font-semibold">${escapePlotHtml(slabInfo.slabSummary)}</div>
+              </td>
+              <td class="p-3">
+                <div class="font-semibold text-slate-800">${escapePlotHtml(app.plotNo)}</div>
+                <div class="text-[11px] text-slate-500">${escapePlotHtml(app.itPark)} (${escapePlotHtml(app.plotSizeAcres)})</div>
+              </td>
+              <td class="p-3 font-mono font-bold text-[#3b5998]">${escapePlotHtml(app.appNo)}</td>
+              <td class="p-3 font-mono text-slate-700 whitespace-nowrap">${escapePlotHtml(app.appDate)}</td>
+              <td class="p-3">${getSubsidyStatusBadgeHtml(app)}</td>
+              <td class="p-3 font-semibold text-slate-800 whitespace-nowrap">${escapePlotHtml(app.applicationAt)}</td>
+              <td class="p-3 font-mono text-[11px] text-slate-600 whitespace-nowrap">${escapePlotHtml(app.pendingSince)}</td>
+              <td class="p-3 text-center">
+                <button type="button" onclick="downloadSubsidyDossier('${escapePlotHtml(app.appNo)}')"
+                  class="bg-[#3557a0] hover:bg-[#2b4c8a] text-white text-[11px] font-semibold px-3 py-1.5 rounded inline-flex items-center gap-1 shadow-sm transition cursor-pointer whitespace-nowrap">
+                  <span>&#11015;</span><span>Download</span>
+                </button>
+              </td>
+              <td class="p-3 text-center">
+                <button type="button" onclick="openSubsidyScrutinyDetail('${escapePlotHtml(app.appNo)}')"
+                  class="bg-[#22c55e] hover:bg-[#16a34a] text-white text-[11px] font-bold px-3.5 py-1.5 rounded shadow-sm transition cursor-pointer">
+                  View
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      setTxt('subsidy-table-footer-count', rows.length === 0 ? 'Showing 0 entries' : `Showing 1 to ${rows.length} of ${rows.length} entries`);
+    }
+
+    function downloadSubsidyDossier(appNo) {
+      const app = (window.oicLandApplications || []).find(a => a.appNo === appNo) || window.submittedApplicationsMap[appNo];
+      if (!app) {
+        showGlobalToast('Dossier record not found.', 'error');
+        return;
+      }
+      const rebate = computeRebateSlabBreakdown(app);
+      const summaryLines = [
+        'MPSEDC IT INVESTMENT PORTAL 2.0 — EOI LAND ALLOTMENT DOSSIER SUMMARY',
+        '===================================================================',
+        `Application Number : ${app.appNo}`,
+        `Application Type   : EOI Land Allotment (${app.formType || 'Form 1'})`,
+        `Organization       : ${app.orgName}`,
+        `Signatory / CIN    : ${app.signatory} | ${app.cin}`,
+        `Plot & IT Park     : ${app.plotNo} — ${app.itPark} (${app.plotSizeAcres} / ${app.plotSizeSqFt})`,
+        `Policy Category    : ${app.policyName}`,
+        `Rebate Slabs       : ${rebate.slabSummary}`,
+        `Net Land Premium   : ${app.landPremium}`,
+        `25% Advance EMD    : ${app.advanceEmd}`,
+        `Current Status     : ${app.status}`,
+        `Application At     : ${app.applicationAt}`,
+        '',
+        'PROGRESSIVE REBATE SLAB BREAKDOWN:',
+        ...rebate.slabs.map(s => `  - ${s.label}: ${s.acres.toFixed(2)} Ac | ${s.rebatePct}% Rebate => Payable ${formatCurrencyInr(s.payable)}`),
+        '',
+        'SCRUTINY & QUERY AUDIT TRAIL:',
+        ...(app.history || []).map(h => `  [${h.timestamp}] ${h.actor} -> ${h.status}${h.remark ? ' | ' + h.remark : ''}`)
+      ].join('\n');
+
+      try {
+        const blob = new Blob([summaryLines], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${app.appNo}_EOI_Dossier_Summary.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (e) { }
+      showGlobalToast(`Downloaded EOI dossier summary for ${app.appNo}.`, 'success');
+    }
+
+    function openSubsidyScrutinyDetail(appNo) {
+      const app = (window.oicLandApplications || []).find(a => a.appNo === appNo) || window.submittedApplicationsMap[appNo];
+      if (!app) {
+        showGlobalToast('Application record not found.', 'error');
+        return;
+      }
+      currentSubsidyAppNo = app.appNo;
+
+      const heroType = document.getElementById('scrutiny-hero-type');
+      const heroAppNo = document.getElementById('scrutiny-hero-appno');
+      const formBadge = document.getElementById('subsidy-form-badge');
+      if (heroType) heroType.textContent = 'EOI Land Allotment';
+      if (heroAppNo) heroAppNo.textContent = app.appNo;
+      if (formBadge) formBadge.textContent = app.formType || 'Form 1';
+
+      renderSubsidyRebateCard(app);
+      // Reuse official MPSEDC dossier sheet rendering structure into #subsidy-doc-sheet
+      const origSheet = document.getElementById('scrutiny-doc-sheet');
+      const targetSheet = document.getElementById('subsidy-doc-sheet');
+      if (origSheet && targetSheet) {
+        renderScrutinyDocumentSheet(app);
+        targetSheet.innerHTML = origSheet.innerHTML;
+      }
+      renderSubsidyAttachments(app);
+      renderSubsidyActionPanel(app);
+      renderSubsidyHistory(app);
+
+      switchView('subsidy-scrutiny');
+    }
+
+    function renderSubsidyRebateCard(app) {
+      const box = document.getElementById('subsidy-rebate-preview');
+      if (!box) return;
+      const rebate = computeRebateSlabBreakdown(app);
+      box.innerHTML = `
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-slate-200">
+          <div>
+            <div class="text-[11px] font-bold uppercase tracking-wider text-[#3b5998]">Stage 2 Policy Eligibility &amp; Progressive Rebate Verification</div>
+            <div class="font-bold text-slate-900 text-sm mt-0.5">${escapePlotHtml(app.policyName)} &bull; Sector: ${escapePlotHtml(app.businessDomain || app.purpose)}</div>
+          </div>
+          <span class="bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold px-2.5 py-1 rounded text-[11px]">Eligible Sector</span>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+          <div class="bg-slate-50 border border-slate-200 rounded p-2.5">
+            <div class="text-[10.5px] text-slate-500 font-semibold">Allotted Plot Area</div>
+            <div class="font-bold text-slate-900 font-mono mt-0.5">${rebate.acres.toFixed(2)} Acres</div>
+          </div>
+          <div class="bg-slate-50 border border-slate-200 rounded p-2.5">
+            <div class="text-[10.5px] text-slate-500 font-semibold">Gross Guideline Value</div>
+            <div class="font-bold text-slate-800 font-mono mt-0.5">${formatCurrencyInr(rebate.grossGuidelineTotal)}</div>
+          </div>
+          <div class="bg-emerald-50 border border-emerald-200 rounded p-2.5">
+            <div class="text-[10.5px] text-emerald-700 font-semibold">Progressive Policy Rebate</div>
+            <div class="font-bold text-emerald-800 font-mono mt-0.5">- ${formatCurrencyInr(rebate.totalRebateAmt)}</div>
+          </div>
+          <div class="bg-blue-50 border border-blue-200 rounded p-2.5">
+            <div class="text-[10.5px] text-blue-700 font-semibold">Net Payable Premium</div>
+            <div class="font-bold text-[#1e3a8a] font-mono mt-0.5">${formatCurrencyInr(rebate.netPayable)}</div>
+          </div>
+        </div>
+        <div class="overflow-x-auto border border-slate-200 rounded">
+          <table class="w-full text-[11.5px] border-collapse">
+            <thead class="bg-[#dfe5f5] text-slate-800 font-semibold">
+              <tr>
+                <th class="p-2 text-left">Progressive Area Slab</th>
+                <th class="p-2 text-right">Slice (Acres)</th>
+                <th class="p-2 text-center">Rebate %</th>
+                <th class="p-2 text-center">Payable %</th>
+                <th class="p-2 text-right">Net Payable Slice</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200">
+              ${rebate.slabs.map(s => `
+                <tr>
+                  <td class="p-2 font-semibold text-slate-800">${escapePlotHtml(s.label)}</td>
+                  <td class="p-2 text-right font-mono">${s.acres.toFixed(2)}</td>
+                  <td class="p-2 text-center font-bold text-emerald-700">${s.rebatePct}%</td>
+                  <td class="p-2 text-center font-mono">${s.payPct}%</td>
+                  <td class="p-2 text-right font-mono font-semibold text-slate-900">${formatCurrencyInr(s.payable)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderSubsidyAttachments(app) {
+      const tbody = document.getElementById('subsidy-attachments-tbody');
+      const badge = document.getElementById('subsidy-attachments-badge');
+      const atts = app.attachments || [];
+      if (badge) badge.textContent = `${atts.length} Files`;
+      if (!tbody) return;
+      if (atts.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">No attachments recorded.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = atts.map((d, i) => `
+        <tr class="hover:bg-slate-50">
+          <td class="p-2.5 text-center font-mono">${i + 1}</td>
+          <td class="p-2.5">
+            <a href="javascript:void(0)" onclick="previewDocumentDoc('${escapePlotHtml(d.title)}', '${escapePlotHtml(d.fileName)}')"
+              class="text-blue-700 hover:text-blue-900 underline font-semibold">${escapePlotHtml(d.title)}</a>
+            <div class="text-[10.5px] text-slate-500 font-mono">${escapePlotHtml(d.fileName)}</div>
+          </td>
+          <td class="p-2.5 text-center">${d.mandatory ? '<span class="bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded-full text-[10px] font-bold">Mandatory</span>' : '<span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-[10px] font-bold">Optional</span>'}</td>
+          <td class="p-2.5 text-center">${d.verified ? '<span class="text-emerald-700 font-bold">&#10003; Verified by OIC</span>' : '<span class="text-amber-700 font-semibold">Pending</span>'}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderSubsidyActionPanel(app) {
+      const incomingBanner = document.getElementById('subsidy-incoming-query-banner');
+      const contextBox = document.getElementById('subsidy-action-context');
+      const formEl = document.getElementById('subsidy-action-form');
+      const selectEl = document.getElementById('subsidy-action-select');
+      const notesEl = document.getElementById('subsidy-rebate-notes');
+      const commentEl = document.getElementById('subsidy-comment-input');
+      const stagePill = document.getElementById('subsidy-stage-pill');
+
+      clearSubsidyValidation('all');
+      if (commentEl) commentEl.value = '';
+      if (notesEl) notesEl.value = app.rebateVerificationNotes || '';
+
+      const isAtSubsidy = isApplicationAtRole(app, 'SUBSIDY_ADMIN');
+      const isQueriedBack = isAtSubsidy && (app.queriedBackTo === 'SUBSIDY_ADMIN' || app.stage === 'queried_back' || (app.status || '').includes('Queried Back'));
+
+      if (incomingBanner) {
+        if (isQueriedBack) {
+          incomingBanner.classList.remove('hidden');
+          incomingBanner.innerHTML = `
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+              <div class="font-bold text-red-900 text-sm flex items-center gap-2">
+                <span>&#9888; Queried Back to Subsidy Admin</span>
+                <span class="bg-red-200 text-red-950 text-[10.5px] font-mono px-2 py-0.5 rounded">From: ${escapePlotHtml(app.queriedBackBy || 'Higher Authority')}</span>
+              </div>
+              <span class="font-mono text-[11px] text-red-800">${escapePlotHtml(app.queriedBackTimestamp || app.pendingSince || '')}</span>
+            </div>
+            <div class="text-xs text-red-950 bg-white border border-red-200 rounded p-2.5 leading-relaxed">
+              <b>Query Reason / Instructions:</b> ${escapePlotHtml(app.queriedBackReason || app.queryRemarks || 'Higher authority requested policy/rebate clarification.')}
+            </div>
+          `;
+        } else {
+          incomingBanner.classList.add('hidden');
+          incomingBanner.innerHTML = '';
+        }
+      }
+
+      if (stagePill) {
+        stagePill.textContent = isQueriedBack ? 'Queried Back (Action Needed)' : (isAtSubsidy ? 'Stage 2: Policy & Rebate Check' : (app.status || 'Read-Only'));
+      }
+
+      if (!isAtSubsidy) {
+        if (formEl) formEl.classList.add('hidden');
+        if (contextBox) {
+          contextBox.classList.remove('hidden');
+          contextBox.className = 'rounded border p-3.5 text-xs bg-blue-50 border-blue-200 text-blue-950 space-y-2';
+          contextBox.innerHTML = `
+            <div class="font-bold text-slate-900">Status: ${escapePlotHtml(app.status)}</div>
+            <div>Currently at: <b>${escapePlotHtml(app.applicationAt)}</b></div>
+            ${app.rebateVerificationNotes ? `<div class="bg-white border border-blue-100 rounded p-2 text-[11px]"><b>Subsidy Admin Rebate Notes:</b> ${escapePlotHtml(app.rebateVerificationNotes)}</div>` : ''}
+            <button type="button" onclick="openScrutinyLogModal('${escapePlotHtml(app.appNo)}')" class="text-blue-700 font-semibold underline cursor-pointer bg-transparent border-0 p-0">View Inspection / Scrutiny Log</button>
+          `;
+        }
+        return;
+      }
+
+      if (formEl) formEl.classList.remove('hidden');
+      if (contextBox) {
+        if (isQueriedBack) {
+          contextBox.classList.remove('hidden');
+          contextBox.className = 'rounded border p-3 text-xs bg-red-50 border-red-200 text-red-950';
+          contextBox.innerHTML = `<b>Incoming Query (${escapePlotHtml(app.queriedBackBy || 'Authority')}):</b> ${escapePlotHtml(app.queriedBackReason || app.queryRemarks || '')}`;
+        } else {
+          contextBox.classList.add('hidden');
+        }
+      }
+
+      if (selectEl) {
+        const opts = isQueriedBack
+          ? [
+            { value: 'resolve_reforward_finance', label: 'Resolve Query & Re-forward to Finance Admin' },
+            { value: 'query_oic', label: 'Raise Query to OIC IT Park' }
+          ]
+          : [
+            { value: 'forward_finance', label: 'Verify Policy & Rebate -> Forward to Finance Admin' },
+            { value: 'query_oic', label: 'Raise Query to OIC IT Park' }
+          ];
+        selectEl.innerHTML = `<option value="">-- Please Select --</option>` +
+          opts.map(o => `<option value="${o.value}">${escapePlotHtml(o.label)}</option>`).join('');
+      }
+    }
+
+    function clearSubsidyValidation(which) {
+      const keys = which === 'all' ? ['action', 'comment'] : [which];
+      keys.forEach(k => document.getElementById(`subsidy-${k}-err`)?.classList.add('hidden'));
+      if (which === 'all' || which === 'action') document.getElementById('subsidy-action-select')?.classList.remove('border-red-500');
+      if (which === 'all' || which === 'comment') document.getElementById('subsidy-comment-input')?.classList.remove('border-red-500');
+    }
+
+    function submitSubsidyScrutinyAction(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      const app = (window.oicLandApplications || []).find(a => a.appNo === currentSubsidyAppNo) || window.submittedApplicationsMap[currentSubsidyAppNo];
+      if (!app) return;
+
+      const actionEl = document.getElementById('subsidy-action-select');
+      const commentEl = document.getElementById('subsidy-comment-input');
+      const notesEl = document.getElementById('subsidy-rebate-notes');
+
+      const actionVal = actionEl?.value || '';
+      const commentVal = commentEl?.value?.trim() || '';
+      const rebateNotes = notesEl?.value?.trim() || '';
+
+      let ok = true;
+      if (!actionVal) {
+        document.getElementById('subsidy-action-err')?.classList.remove('hidden');
+        actionEl?.classList.add('border-red-500');
+        ok = false;
+      }
+      if (!commentVal) {
+        document.getElementById('subsidy-comment-err')?.classList.remove('hidden');
+        commentEl?.classList.add('border-red-500');
+        ok = false;
+      }
+      if (!ok) return;
+
+      const ts = formatCurrentOicTimestamp();
+      if (rebateNotes) app.rebateVerificationNotes = rebateNotes;
+      app.history = app.history || [];
+
+      if (actionVal === 'forward_finance' || actionVal === 'resolve_reforward_finance') {
+        app.status = 'Forwarded to Finance Admin';
+        app.applicationAt = 'FINANCE_ADMIN';
+        app.stage = 'finance_scrutiny';
+        app.pendingSince = ts;
+        app.subsidyVerifiedAt = ts;
+        app.queriedBackTo = '';
+        app.queriedBackBy = '';
+        app.queriedBackReason = '';
+        app.history.push({
+          actor: 'Subsidy Admin (SUBSIDY_ADMIN)',
+          timestamp: ts,
+          status: actionVal === 'resolve_reforward_finance' ? 'Query Resolved & Re-forwarded to Finance Admin' : 'Forwarded to Finance Admin',
+          remark: commentVal + (rebateNotes ? ` [Rebate Note: ${rebateNotes}]` : '')
+        });
+        showGlobalToast(`${app.appNo} verified & forwarded to Finance Admin.`, 'success');
+      } else if (actionVal === 'query_oic') {
+        // Strict rule: Subsidy Admin can ONLY query OIC IT Park, never directly to Applicant
+        app.status = 'Queried by Subsidy Admin';
+        app.applicationAt = 'OIC_IT_PARK';
+        app.stage = 'initial_scrutiny';
+        app.pendingSince = ts;
+        app.queriedBy = 'SUBSIDY_ADMIN';
+        app.queriedBackBy = 'SUBSIDY_ADMIN';
+        app.queriedBackTo = 'OIC_IT_PARK';
+        app.queriedBackReason = commentVal;
+        app.queriedBackTimestamp = ts;
+        app.history.push({
+          actor: 'Subsidy Admin (SUBSIDY_ADMIN)',
+          timestamp: ts,
+          status: 'Queried by Subsidy Admin (Routed to OIC IT Park)',
+          remark: commentVal
+        });
+        showGlobalToast(`Query raised to OIC IT Park for ${app.appNo}.`, 'info');
+      }
+
+      window.submittedApplicationsMap[app.appNo] = app;
+      savePersistedApplications();
+      renderSubsidyDashboard();
+      renderSubsidyActionPanel(app);
+      renderSubsidyHistory(app);
+      updateOicStats();
+      updateOicProcessStats();
+      renderOicApplicationsTable();
+      if (typeof renderAuthorityWorkbench === 'function' && window.currentOfficerRole) renderAuthorityWorkbench(window.currentOfficerRole);
+    }
+
+    function renderSubsidyHistory(app) {
+      const container = document.getElementById('subsidy-history-timeline');
+      if (!container) return;
+      const hist = app.history || [];
+      if (hist.length === 0) {
+        container.innerHTML = `<div class="text-xs text-slate-400 italic text-center py-4">No workflow history recorded yet.</div>`;
+        return;
+      }
+      container.innerHTML = hist.map(item => `
+        <div class="space-y-1">
+          <div class="flex items-center justify-between gap-2 text-[11.5px] font-semibold text-slate-800">
+            <span class="truncate">${escapePlotHtml(item.actor)}</span>
+            <span class="font-mono text-[11px] text-slate-600 flex-shrink-0">${escapePlotHtml(item.timestamp)}</span>
+          </div>
+          <div class="scrutiny-speech-bubble">
+            <div class="text-[12px] font-semibold text-[#3b5998]">${escapePlotHtml(item.status)}</div>
+            ${item.remark ? `<div class="text-[11.5px] text-slate-600 mt-1 leading-relaxed">${escapePlotHtml(item.remark)}</div>` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openScrutinyLogModal(appNo) {
+      const app = (window.oicLandApplications || []).find(a => a.appNo === appNo) || window.submittedApplicationsMap[appNo];
+      const modal = document.getElementById('modal-scrutiny-log');
+      const sub = document.getElementById('scrutiny-log-modal-sub');
+      const body = document.getElementById('scrutiny-log-modal-body');
+      if (!app || !modal || !body) return;
+      if (sub) sub.textContent = `${app.appNo} • ${app.orgName}`;
+      const hist = app.history || [];
+      body.innerHTML = `
+        ${app.rebateVerificationNotes ? `<div class="bg-blue-50 border border-blue-200 rounded p-3 text-blue-950"><b>Policy / Rebate Note:</b> ${escapePlotHtml(app.rebateVerificationNotes)}</div>` : ''}
+        ${hist.length === 0 ? '<div class="text-slate-400 italic text-center py-4">No scrutiny log entries yet.</div>' : hist.map((h, i) => `
+          <div class="bg-white border border-slate-200 rounded p-3 shadow-2xs">
+            <div class="flex items-center justify-between font-semibold text-slate-800">
+              <span>${i + 1}. ${escapePlotHtml(h.actor)}</span>
+              <span class="font-mono text-[11px] text-slate-500">${escapePlotHtml(h.timestamp)}</span>
+            </div>
+            <div class="text-[#3b5998] font-bold mt-1">${escapePlotHtml(h.status)}</div>
+            ${h.remark ? `<div class="text-slate-600 mt-1 leading-relaxed">${escapePlotHtml(h.remark)}</div>` : ''}
+          </div>
+        `).join('')}
+      `;
+      modal.classList.remove('hidden');
+    }
+
+    // Higher Officer Workbench Engine (FINANCE_ADMIN, ED, MD)
+    function renderAuthorityWorkbench(roleKey) {
+      const role = roleKey || window.currentOfficerRole || 'FINANCE_ADMIN';
+      const titleMap = {
+        FINANCE_ADMIN: 'Finance Admin — Fee, 25% Advance EMD & Project Cost Verification',
+        ED: 'Executive Director (ED) — Stage 2 Executive Scrutiny & Recommendation',
+        MD: 'Managing Director (MD) — Final EOI Allotment Approval Authority'
+      };
+      const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+      setTxt('authority-workbench-title', titleMap[role] || 'Authority Queue');
+      setTxt('authority-workbench-role-badge', role);
+
+      const scoped = (window.oicLandApplications || []).filter(isSubsidyEoiScope);
+      const pendingMine = scoped.filter(a => isApplicationAtRole(a, role));
+      setTxt('authority-kpi-pending', pendingMine.length);
+      setTxt('authority-kpi-all', scoped.length);
+
+      const tbody = document.getElementById('authority-queue-tbody');
+      if (!tbody) return;
+      const ordered = [...pendingMine, ...scoped.filter(a => !isApplicationAtRole(a, role))];
+      tbody.innerHTML = ordered.map((app, i) => {
+        const isMine = isApplicationAtRole(app, role);
+        return `
+          <tr class="${isMine ? 'bg-amber-50/40 hover:bg-amber-50/80' : 'hover:bg-slate-50'}">
+            <td class="p-2.5 text-center font-mono">${i + 1}</td>
+            <td class="p-2.5 font-semibold text-slate-900">${escapePlotHtml(app.orgName)}</td>
+            <td class="p-2.5">${escapePlotHtml(app.plotNo)} &bull; ${escapePlotHtml(app.itPark)}</td>
+            <td class="p-2.5 font-mono font-bold text-[#3b5998]">${escapePlotHtml(app.appNo)}</td>
+            <td class="p-2.5 text-[11px]">Fee: ${escapePlotHtml(app.appFee || '₹ 10,000.00')} | EMD: <b>${escapePlotHtml(app.advanceEmd)}</b><br>Outlay: ${escapePlotHtml(app.totalCost)}</td>
+            <td class="p-2.5">${getSubsidyStatusBadgeHtml(app)}</td>
+            <td class="p-2.5 font-semibold">${escapePlotHtml(app.applicationAt)}</td>
+            <td class="p-2.5 text-center">
+              <button type="button" onclick="openAuthorityApplication('${escapePlotHtml(app.appNo)}')"
+                class="${isMine ? 'bg-[#22c55e] hover:bg-[#16a34a]' : 'bg-slate-600 hover:bg-slate-700'} text-white text-[11px] font-bold px-3 py-1 rounded cursor-pointer">
+                ${isMine ? 'Review & Act' : 'Inspect'}
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function openAuthorityApplication(appNo) {
+      const app = (window.oicLandApplications || []).find(a => a.appNo === appNo) || window.submittedApplicationsMap[appNo];
+      if (!app) return;
+      window.currentAuthorityAppNo = appNo;
+      const role = window.currentOfficerRole || 'FINANCE_ADMIN';
+      const card = document.getElementById('authority-action-card');
+      const heading = document.getElementById('authority-action-heading');
+      const summary = document.getElementById('authority-app-summary');
+      const sel = document.getElementById('authority-action-select');
+      const targetSel = document.getElementById('authority-query-target');
+      const comment = document.getElementById('authority-comment-input');
+      const targetWrap = document.getElementById('authority-query-target-wrap');
+
+      if (card) card.classList.remove('hidden');
+      if (heading) heading.textContent = `${role} Scrutiny — ${app.appNo} (${app.orgName})`;
+      if (comment) comment.value = '';
+      if (targetWrap) targetWrap.classList.add('hidden');
+
+      if (summary) {
+        summary.innerHTML = `
+          <div><b>Organization:</b> ${escapePlotHtml(app.orgName)} (${escapePlotHtml(app.cin)})</div>
+          <div><b>Plot &amp; Track:</b> ${escapePlotHtml(app.plotNo)} &bull; ${escapePlotHtml(app.itPark)} (${escapePlotHtml(app.plotSizeAcres)})</div>
+          <div><b>Policy / Rebate:</b> ${escapePlotHtml(app.policyName)} (${escapePlotHtml(computeRebateSlabBreakdown(app).slabSummary)})</div>
+          <div><b>Fee / 25% Advance / Project Cost:</b> ${escapePlotHtml(app.appFee || '₹ 10,000.00')} | <span class="text-emerald-800 font-bold">${escapePlotHtml(app.advanceEmd)}</span> | ${escapePlotHtml(app.totalCost)}</div>
+          <div><b>Means of Finance:</b> ${escapePlotHtml(app.meansOfFinance)}</div>
+          ${app.rebateVerificationNotes ? `<div class="bg-blue-50 border border-blue-200 rounded p-2"><b>Subsidy Admin Verification Note:</b> ${escapePlotHtml(app.rebateVerificationNotes)}</div>` : ''}
+          <div><b>Current Location:</b> <span class="font-mono font-bold">${escapePlotHtml(app.applicationAt)}</span> &bull; <b>Status:</b> ${escapePlotHtml(app.status)}</div>
+        `;
+      }
+
+      const lowerMap = {
+        FINANCE_ADMIN: [
+          { value: 'SUBSIDY_ADMIN', label: 'Subsidy Admin (SUBSIDY_ADMIN)' },
+          { value: 'OIC_IT_PARK', label: 'OIC IT Park (OIC_IT_PARK)' }
+        ],
+        ED: [
+          { value: 'FINANCE_ADMIN', label: 'Finance Admin (FINANCE_ADMIN)' },
+          { value: 'SUBSIDY_ADMIN', label: 'Subsidy Admin (SUBSIDY_ADMIN)' },
+          { value: 'OIC_IT_PARK', label: 'OIC IT Park (OIC_IT_PARK)' }
+        ],
+        MD: [
+          { value: 'ED', label: 'Executive Director (ED)' },
+          { value: 'FINANCE_ADMIN', label: 'Finance Admin (FINANCE_ADMIN)' },
+          { value: 'SUBSIDY_ADMIN', label: 'Subsidy Admin (SUBSIDY_ADMIN)' },
+          { value: 'OIC_IT_PARK', label: 'OIC IT Park (OIC_IT_PARK)' }
+        ]
+      };
+      if (targetSel) {
+        targetSel.innerHTML = (lowerMap[role] || lowerMap.FINANCE_ADMIN).map(o => `<option value="${o.value}">${escapePlotHtml(o.label)}</option>`).join('');
+      }
+
+      if (sel) {
+        const isMine = isApplicationAtRole(app, role);
+        const forwardLabel = role === 'FINANCE_ADMIN'
+          ? 'Verify Fee, 25% EMD & Outlay -> Forward to ED'
+          : role === 'ED'
+            ? 'Recommend Allotment -> Forward to MD'
+            : 'Approve EOI Allotment -> Route to OIC IT Park (LOA / Stage 3)';
+        sel.innerHTML = isMine
+          ? `<option value="">-- Select Action --</option><option value="forward">${forwardLabel}</option><option value="query_back">Raise Query Back to Lower Officer</option>`
+          : `<option value="">-- File currently at ${escapePlotHtml(app.applicationAt)} --</option><option value="query_back">Raise Query Back to Lower Officer (Override)</option>`;
+      }
+      card?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function handleAuthorityActionSelectChange() {
+      const val = document.getElementById('authority-action-select')?.value;
+      const wrap = document.getElementById('authority-query-target-wrap');
+      if (wrap) wrap.classList.toggle('hidden', val !== 'query_back');
+    }
+
+    function submitAuthorityWorkbenchAction(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      const app = (window.oicLandApplications || []).find(a => a.appNo === window.currentAuthorityAppNo) || window.submittedApplicationsMap[window.currentAuthorityAppNo];
+      if (!app) return;
+      const role = window.currentOfficerRole || 'FINANCE_ADMIN';
+      const actionVal = document.getElementById('authority-action-select')?.value || '';
+      const targetRole = document.getElementById('authority-query-target')?.value || 'SUBSIDY_ADMIN';
+      const commentVal = document.getElementById('authority-comment-input')?.value?.trim() || '';
+
+      if (!actionVal || !commentVal) {
+        showGlobalToast('Please select an Action and enter Scrutiny / Query Remarks.', 'error');
+        return;
+      }
+
+      const ts = formatCurrentOicTimestamp();
+      app.history = app.history || [];
+
+      if (actionVal === 'forward') {
+        if (role === 'FINANCE_ADMIN') {
+          app.status = 'Forwarded to Executive Director (ED)';
+          app.applicationAt = 'ED';
+          app.stage = 'ed_scrutiny';
+          app.history.push({ actor: 'Finance Admin (FINANCE_ADMIN)', timestamp: ts, status: 'Forwarded to Executive Director (ED)', remark: commentVal });
+        } else if (role === 'ED') {
+          app.status = 'Pending with Managing Director (MD)';
+          app.applicationAt = 'MD';
+          app.stage = 'md_scrutiny';
+          app.history.push({ actor: 'Executive Director (ED)', timestamp: ts, status: 'Forwarded to Managing Director (MD)', remark: commentVal });
+        } else if (role === 'MD') {
+          app.status = 'Approved by MD';
+          app.applicationAt = 'OIC_IT_PARK';
+          app.stage = 'post_approval';
+          app.history.push({ actor: 'Managing Director (MD)', timestamp: ts, status: 'Approved by MD', remark: commentVal });
+        }
+        showGlobalToast(`${app.appNo} forwarded by ${role}.`, 'success');
+      } else if (actionVal === 'query_back') {
+        app.queriedBackBy = role;
+        app.queriedBackTo = targetRole;
+        app.queriedBackReason = commentVal;
+        app.queriedBackTimestamp = ts;
+        app.queryRemarks = commentVal;
+        app.pendingSince = ts;
+        app.applicationAt = targetRole;
+        if (targetRole === 'SUBSIDY_ADMIN') {
+          app.status = 'Queried Back (Subsidy Admin)';
+          app.stage = 'queried_back';
+        } else if (targetRole === 'OIC_IT_PARK') {
+          app.status = `Queried Back (OIC IT Park) by ${role}`;
+          app.stage = 'initial_scrutiny';
+          app.queriedBy = role;
+        } else if (targetRole === 'FINANCE_ADMIN') {
+          app.status = `Queried Back (Finance Admin) by ${role}`;
+          app.stage = 'finance_scrutiny';
+        } else {
+          app.status = `Queried Back (${targetRole}) by ${role}`;
+          app.stage = 'ed_scrutiny';
+        }
+        app.history.push({
+          actor: `${getRoleDisplayLabel(role)} (${role})`,
+          timestamp: ts,
+          status: app.status,
+          remark: commentVal
+        });
+        showGlobalToast(`${app.appNo} queried back to ${targetRole}.`, 'info');
+      }
+
+      window.submittedApplicationsMap[app.appNo] = app;
+      savePersistedApplications();
+      document.getElementById('authority-action-card')?.classList.add('hidden');
+      renderAuthorityWorkbench(role);
+      renderSubsidyDashboard();
+      updateOicStats();
+      updateOicProcessStats();
+      renderOicApplicationsTable();
+      renderInvestorDashboard();
+    }
+
     // Initialize state on DOM ready (Load all persisted plots, drafts, applications & restore view)
     window.addEventListener('DOMContentLoaded', () => {
       setDefaultEoiDates();
@@ -9425,6 +11563,7 @@
       updateOicProcessStats();
       updateKpiCardActiveState();
       renderOicApplicationsTable();
+      renderSubsidyDashboard();
       renderInvestorDashboard();
       renderDocuments();
       initEoiFormStepper();
@@ -9433,17 +11572,25 @@
 
       try {
         const savedView = localStorage.getItem(STORAGE_KEYS.VIEW);
+        const savedRole = localStorage.getItem(STORAGE_KEYS.ROLE);
         const savedScrutinyApp = localStorage.getItem(STORAGE_KEYS.SCRUTINY_APP);
+        const savedSubsidyApp = localStorage.getItem(STORAGE_KEYS.SUBSIDY_APP);
         const savedRectifyApp = localStorage.getItem(STORAGE_KEYS.RECTIFY_APP);
         const savedActivePlot = localStorage.getItem(STORAGE_KEYS.ACTIVE_PLOT);
 
+        if (savedRole === 'FINANCE_ADMIN' || savedRole === 'ED' || savedRole === 'MD') {
+          window.currentOfficerRole = savedRole;
+        }
+
         if (savedView === 'oic-scrutiny-detail' && savedScrutinyApp && window.submittedApplicationsMap[savedScrutinyApp]) {
           openOicScrutinyDetail(savedScrutinyApp);
+        } else if (savedView === 'subsidy-scrutiny' && savedSubsidyApp && window.submittedApplicationsMap[savedSubsidyApp]) {
+          openSubsidyScrutinyDetail(savedSubsidyApp);
         } else if (savedView === 'eoi-form' && savedRectifyApp && window.submittedApplicationsMap[savedRectifyApp]) {
           openApplicantQueryRectification(savedRectifyApp);
         } else if (savedView === 'eoi-form' && savedActivePlot && (plotsDatabase[savedActivePlot] || oicPlotInventory.some(p => p.id === savedActivePlot || p.plotNo === savedActivePlot))) {
           openEoiFormForPlot(savedActivePlot);
-        } else if (savedView && savedView !== 'eoi-form' && savedView !== 'eoi-preview' && savedView !== 'oic-scrutiny-detail') {
+        } else if (savedView && savedView !== 'eoi-form' && savedView !== 'eoi-preview' && savedView !== 'oic-scrutiny-detail' && savedView !== 'subsidy-scrutiny') {
           switchView(savedView);
         }
       } catch (e) { }
@@ -10090,6 +12237,65 @@
           class="bg-[#7c69ef] hover:bg-[#6a56e2] text-white font-bold text-sm px-7 py-2.5 rounded shadow-sm transition cursor-pointer">
           OK
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Inspection / Scrutiny Log Drawer -->
+  <div id="modal-scrutiny-log"
+    class="hidden fixed inset-0 z-[10000] bg-slate-900/50 backdrop-blur-[1px] flex items-center justify-center p-4"
+    onclick="if(event.target===this)this.classList.add('hidden')">
+    <div
+      class="bg-white rounded-xl shadow-2xl border border-slate-200 max-w-2xl w-full overflow-hidden flex flex-col max-h-[88vh]">
+      <div class="bg-[#3b5998] text-white px-5 py-3.5 flex items-center justify-between">
+        <div>
+          <h3 class="font-bold text-sm tracking-wide">Inspection &amp; Multi-Tier Scrutiny Log</h3>
+          <div id="scrutiny-log-modal-sub" class="text-[11px] text-blue-100 font-mono">APP-2026</div>
+        </div>
+        <button type="button" onclick="document.getElementById('modal-scrutiny-log')?.classList.add('hidden')"
+          class="text-white/80 hover:text-white text-xl font-bold px-1.5 cursor-pointer bg-transparent border-0">&times;</button>
+      </div>
+      <div id="scrutiny-log-modal-body" class="p-5 overflow-y-auto space-y-3 text-xs bg-slate-50 flex-1"></div>
+      <div class="px-5 py-3 bg-white border-t border-slate-200 flex justify-end">
+        <button type="button" onclick="document.getElementById('modal-scrutiny-log')?.classList.add('hidden')"
+          class="bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs px-5 py-2 rounded cursor-pointer">Close
+          Log</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Authority Control Panel & Reset Demo State -->
+  <div id="modal-control-panel"
+    class="hidden fixed inset-0 z-[10000] bg-slate-900/50 backdrop-blur-[1px] flex items-center justify-center p-4"
+    onclick="if(event.target===this)this.classList.add('hidden')">
+    <div class="bg-white rounded-xl shadow-2xl border border-slate-200 max-w-md w-full overflow-hidden">
+      <div class="bg-[#3b5998] text-white px-5 py-3.5 flex items-center justify-between">
+        <h3 class="font-bold text-sm tracking-wide">Authority Control Panel</h3>
+        <button type="button" onclick="document.getElementById('modal-control-panel')?.classList.add('hidden')"
+          class="text-white/80 hover:text-white text-xl font-bold px-1.5 cursor-pointer bg-transparent border-0">&times;</button>
+      </div>
+      <div class="p-5 space-y-4 text-xs text-slate-700">
+        <div class="bg-slate-50 border border-slate-200 rounded p-3 space-y-1">
+          <div><b>Active Session Role:</b> <span id="cp-active-role"
+              class="font-mono text-[#3b5998] font-bold">SUBSIDY_ADMIN</span></div>
+          <div><b>Persisted Applications:</b> <span id="cp-app-count" class="font-mono font-bold">0</span></div>
+          <div><b>Persisted Plots:</b> <span id="cp-plot-count" class="font-mono font-bold">0</span></div>
+        </div>
+        <p class="text-[11.5px] text-slate-500 leading-relaxed">
+          All portal approvals, rebate verifications, multi-tier queries, LOA actions, and EOI form drafts persist
+          automatically in browser <code>localStorage</code>.
+        </p>
+        <div class="flex items-center justify-between pt-2 border-t border-slate-200">
+          <button type="button"
+            onclick="resetDemoState(); document.getElementById('modal-control-panel')?.classList.add('hidden');"
+            class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded cursor-pointer">
+            &#8634; Reset Demo State
+          </button>
+          <button type="button" onclick="document.getElementById('modal-control-panel')?.classList.add('hidden')"
+            class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs px-4 py-2 rounded cursor-pointer">
+            Close
+          </button>
+        </div>
       </div>
     </div>
   </div>
