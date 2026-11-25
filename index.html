@@ -1721,6 +1721,91 @@
       }
     }
 
+    function collectEoiAttachmentsSnapshot(existingAttachments) {
+      if (typeof currentDocs !== 'undefined' && Array.isArray(currentDocs) && currentDocs.length > 0) {
+        return currentDocs.map((d, idx) => {
+          const fn = document.getElementById('doc-name-' + idx)?.textContent?.trim();
+          const fileBox = document.getElementById('doc-file-' + idx);
+          const isShown = Boolean(fileBox && (fileBox.style.display === 'flex' || window.getComputedStyle(fileBox).display === 'flex'));
+          const draftFn = (typeof eoiDraftMemory !== 'undefined') ? eoiDraftMemory['doc_' + idx] : '';
+          const hasUploaded = Boolean((isShown && fn && fn !== '–' && fn !== '—') || draftFn);
+          if (!d.mandatory && !hasUploaded) return null;
+          const cleanFn = (isShown && fn && fn !== '–' && fn !== '—')
+            ? fn
+            : (draftFn || (d.name.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase().substring(0, 26) + '.pdf'));
+          const prev = Array.isArray(existingAttachments)
+            ? (existingAttachments.find(a => a.title === d.name) || existingAttachments[idx])
+            : null;
+          const unchanged = Boolean(prev && prev.fileName === cleanFn);
+          return {
+            title: d.name,
+            fileName: cleanFn,
+            mandatory: Boolean(d.mandatory),
+            verified: unchanged ? Boolean(prev.verified) : false
+          };
+        }).filter(Boolean);
+      }
+      if (Array.isArray(existingAttachments) && existingAttachments.length > 0) {
+        return existingAttachments;
+      }
+      return [
+        { title: 'Entity Registration Certificate (RoC / Registrar of Firms)', fileName: 'roc_certificate.pdf', mandatory: true, verified: false },
+        { title: 'Memorandum & Articles of Association (MoA & AoA)', fileName: 'moa_aoa_registered.pdf', mandatory: true, verified: false },
+        { title: 'CA Certificate for Annual Turnover & Net Worth (with UDIN)', fileName: 'ca_networth_udin.pdf', mandatory: true, verified: false },
+        { title: 'Form-2 Undertaking', fileName: 'form2_undertaking_signed.pdf', mandatory: true, verified: false }
+      ];
+    }
+
+    function syncAppRecordSummaryFromEoiForm(targetApp) {
+      const getFieldVal = (id, fb = '—') => {
+        const el = document.getElementById(id);
+        if (!el) return fb;
+        if (el.tagName === 'SELECT') return el.options[el.selectedIndex]?.text || el.value || fb;
+        return el.value?.trim() || el.textContent?.trim() || fb;
+      };
+      const appName = document.getElementById('applicant-name')?.value?.trim() || targetApp.orgName || 'Applicant Entity';
+      const authName = document.getElementById('auth-name')?.value?.trim() || targetApp.signatory || 'Authorized Signatory';
+      const cinStr = document.getElementById('applicant-cin')?.value?.trim() || targetApp.cin || '—';
+      const appCat = document.getElementById('applicant-category')?.value || 'unit';
+      const costStr = document.getElementById('total-project-cost-display')?.textContent?.trim() || targetApp.totalCost || '₹ 0.00';
+      const headcountStr = document.getElementById('proj-manpower')?.value?.trim() || targetApp.headcount || '—';
+      const regAddrFull = [
+        getFieldVal('applicant-reg-address', ''),
+        getFieldVal('applicant-district', ''),
+        getFieldVal('applicant-pincode', '')
+      ].filter(v => v && v !== '—' && !v.startsWith('-- Select')).join(', ') || targetApp.regAddress || '—';
+      const consortYes = document.getElementById('applicant-consortium')?.value === 'Yes';
+      const consortPartner = document.getElementById('consortium-company-name')?.value?.trim() || '';
+
+      targetApp.orgName = appName;
+      targetApp.signatory = authName;
+      targetApp.cin = cinStr;
+      targetApp.formType = appCat === 'developer' ? 'Form 1-A' : 'Form 1';
+      targetApp.totalCost = costStr;
+      targetApp.headcount = headcountStr;
+      targetApp.entityConstitution = getFieldVal('entity-constitution', targetApp.entityConstitution || 'Company under Companies Act');
+      targetApp.incDate = getFieldVal('applicant-inc-date', targetApp.incDate || '—');
+      targetApp.pan = getFieldVal('applicant-pan', targetApp.pan || '—');
+      targetApp.gstin = getFieldVal('applicant-gstin', targetApp.gstin || '—');
+      targetApp.regAddress = regAddrFull;
+      targetApp.consortiumStatus = consortYes ? `Yes (Lead Partner: ${consortPartner || 'Specified'})` : 'No (Single Entity)';
+      targetApp.designation = getFieldVal('auth-designation', targetApp.designation || 'Managing Director');
+      targetApp.mobile = getFieldVal('auth-mobile', targetApp.mobile || '—');
+      targetApp.email = getFieldVal('auth-email', targetApp.email || '—');
+      targetApp.businessDomain = getFieldVal('primary-business-type', targetApp.businessDomain || targetApp.purpose || '—');
+      targetApp.currentEmployees = getFieldVal('unit-emp-count', targetApp.currentEmployees || '—');
+      targetApp.turnover3FY = getFieldVal('unit-turnover', targetApp.turnover3FY || '—');
+      targetApp.pastInvestment = getFieldVal('unit-past-inv', targetApp.pastInvestment || '—');
+      targetApp.projTitle = getFieldVal('proj-title', targetApp.projTitle || '—');
+      targetApp.devBua = getFieldVal('dev-bua', targetApp.devBua || '');
+      targetApp.devInv = getFieldVal('dev-inv', targetApp.devInv || '');
+      targetApp.timeline = getFieldVal('proj-timeline', targetApp.timeline || '—');
+      targetApp.meansOfFinance = document.getElementById('total-means-finance-display')?.textContent?.trim() || costStr;
+      targetApp.directors = getDirectorsData();
+      targetApp.attachments = collectEoiAttachmentsSnapshot(targetApp.attachments);
+      targetApp.formSnapshot = captureEoiFormSnapshot();
+    }
+
     function confirmDscAndFinalSubmit() {
       const btn = document.getElementById('modal-confirm-dsc-btn');
       if (btn) {
@@ -1739,25 +1824,11 @@
         const timeFormatted = `${pad(now.getHours())}:${pad(now.getMinutes())} IST`;
         const fullDateTime = `${dateFormatted} ${timeFormatted}`;
 
-        const appName = document.getElementById('applicant-name')?.value?.trim() || 'Apex Precision Engineering Works Pvt Ltd';
-        const authName = document.getElementById('auth-name')?.value?.trim() || 'Satya Vishwakarma';
-        const cinStr = document.getElementById('applicant-cin')?.value?.trim() || 'U29299MP2021PTC012342';
         const plotNoStr = (document.getElementById('plot-id-display')?.textContent?.trim() || 'Plot ITP-IND-201').replace(/^Plot\s+/i, '');
         const itParkStr = document.getElementById('plot-area-display')?.textContent?.trim() || 'Crystal IT Park, Indore';
         const landTypeStr = currentSelectedPlot?.landType || document.getElementById('plot-land-type-display')?.textContent?.trim() || 'EOI Allotment';
-        const appCat = document.getElementById('applicant-category')?.value || 'unit';
-        const formTypeStr = appCat === 'developer' ? 'Form 1-A' : 'Form 1';
         const projectTypeStr = `${itParkStr} (${plotNoStr})`;
         const upfrontStr = document.getElementById('plot-app-plus-advance-display')?.textContent?.trim() || '₹ 6,135,000.00';
-        const costStr = document.getElementById('total-project-cost-display')?.textContent?.trim() || '₹ 32,360,000.00';
-        const headcountStr = document.getElementById('proj-manpower')?.value?.trim() || '500 Tech Professionals (Committed 3-Year Headcount)';
-
-        const getFieldVal = (id, fb = '—') => {
-          const el = document.getElementById(id);
-          if (!el) return fb;
-          if (el.tagName === 'SELECT') return el.options[el.selectedIndex]?.text || el.value || fb;
-          return el.value?.trim() || el.textContent?.trim() || fb;
-        };
 
         const oicDateStr = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
         let hrs12 = now.getHours();
@@ -1766,33 +1837,8 @@
         const oicHistTime = `${pad(now.getDate())}-${pad(now.getMonth() + 1)}-${now.getFullYear()} ${pad(hrs12)}:${pad(now.getMinutes())} ${ampm}`;
         const oicPendingSince = `${oicDateStr} ${pad(hrs12)}:${pad(now.getMinutes())}:${pad(now.getSeconds())} ${ampm}`;
 
-        const collectedDocs = (typeof currentDocs !== 'undefined' && Array.isArray(currentDocs) && currentDocs.length > 0)
-          ? currentDocs.map((d, idx) => {
-            const fn = document.getElementById('doc-name-' + idx)?.textContent?.trim();
-            const cleanFn = (fn && fn !== '–' && fn !== '—') ? fn : (d.name.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase().substring(0, 26) + '.pdf');
-            return { title: d.name, fileName: cleanFn, mandatory: Boolean(d.mandatory), verified: false };
-          })
-          : [
-            { title: 'Entity Registration Certificate (RoC / Registrar of Firms)', fileName: 'roc_certificate.pdf', mandatory: true, verified: false },
-            { title: 'Memorandum & Articles of Association (MoA & AoA)', fileName: 'moa_aoa_registered.pdf', mandatory: true, verified: false },
-            { title: 'CA Certificate for Annual Turnover & Net Worth (with UDIN)', fileName: 'ca_networth_udin.pdf', mandatory: true, verified: false },
-            { title: 'Form-2 Undertaking', fileName: 'form2_undertaking_signed.pdf', mandatory: true, verified: false }
-          ];
-
-        const regAddrFull = [
-          getFieldVal('applicant-reg-address', 'Plot 14-B, Sector 3, Pithampur Industrial Area'),
-          getFieldVal('applicant-district', ''),
-          getFieldVal('applicant-pincode', '')
-        ].filter(Boolean).join(', ');
-
-        const consortYes = document.getElementById('applicant-consortium')?.value === 'Yes';
-        const consortPartner = document.getElementById('consortium-company-name')?.value?.trim() || '';
-
         const appRecord = {
           appNo: appNo,
-          orgName: appName,
-          signatory: authName,
-          cin: cinStr,
           plotNo: plotNoStr,
           itPark: itParkStr,
           plotDisplay: `${plotNoStr} • ${itParkStr}`,
@@ -1801,7 +1847,6 @@
           purpose: document.getElementById('plot-purpose-display')?.textContent?.replace(/^Purpose:\s*/i, '')?.trim() || 'IT/ITeS/ESDM/Data Centre/Edge Data Centre',
           applicationType: landTypeStr,
           policyName: 'MP IT, ITeS & ESDM Policy 2023',
-          formType: formTypeStr,
           projectType: projectTypeStr,
           submissionDate: fullDateTime,
           createdDate: dateFormatted,
@@ -1812,25 +1857,6 @@
           stage: 'initial_scrutiny',
           bidCount: 'single',
           upfrontLiability: upfrontStr,
-          totalCost: costStr,
-          headcount: headcountStr,
-          entityConstitution: getFieldVal('entity-constitution', 'Company under Companies Act'),
-          incDate: getFieldVal('applicant-inc-date', '2021-08-14'),
-          pan: getFieldVal('applicant-pan', 'AAACA1234F'),
-          gstin: getFieldVal('applicant-gstin', '23AAACA1234F1Z5'),
-          regAddress: regAddrFull,
-          consortiumStatus: consortYes ? `Yes (Lead Partner: ${consortPartner || 'Specified'})` : 'No (Single Entity)',
-          designation: getFieldVal('auth-designation', 'Managing Director'),
-          mobile: getFieldVal('auth-mobile', '+91 98260 12345'),
-          email: getFieldVal('auth-email', 'satya@apexprecision.in'),
-          businessDomain: getFieldVal('primary-business-type', 'IT/ITeS/ESDM/Data Centre/Edge Data Centre'),
-          currentEmployees: getFieldVal('unit-emp-count', '240'),
-          turnover3FY: getFieldVal('unit-turnover', '₹ 42.50 Cr'),
-          pastInvestment: getFieldVal('unit-past-inv', '₹ 18.20 Cr'),
-          projTitle: getFieldVal('proj-title', 'Next-Gen Advanced Embedded & Software Center'),
-          devBua: getFieldVal('dev-bua', ''),
-          devInv: getFieldVal('dev-inv', ''),
-          timeline: getFieldVal('proj-timeline', 'Phase I civil works within 12 months; commercial operations within 24 months.'),
           landPremium: document.getElementById('plot-premium-display')?.textContent?.trim() || '₹ 2,45,00,000.00',
           devCharges: document.getElementById('plot-dev-display')?.textContent?.trim() || '₹ 70,00,000.00',
           maintCharges: document.getElementById('plot-maint-display')?.textContent?.trim() || '₹ 5,00,000.00',
@@ -1838,16 +1864,19 @@
           totalLandAmount: document.getElementById('plot-total-land-amount-display')?.textContent?.trim() || '₹ 3,23,50,000.00',
           appFee: document.getElementById('plot-app-charges-display')?.textContent?.trim() || (landTypeStr.includes('Mega') ? '₹ 50,000.00' : '₹ 10,000.00'),
           advanceEmd: document.getElementById('plot-advance-display')?.textContent?.trim() || '₹ 61,25,000.00',
-          meansOfFinance: document.getElementById('total-means-finance-display')?.textContent?.trim() || costStr,
-          directors: getDirectorsData(),
-          attachments: collectedDocs,
-          history: [
-            { actor: appName, timestamp: oicHistTime, status: 'Draft', remark: '' },
-            { actor: appName, timestamp: oicHistTime, status: 'Submitted to OIC IT Park', remark: `Digitally signed via Class-3 DSC and submitted for ${landTypeStr} scrutiny.` }
-          ],
+          queryRemarks: '',
           dscCertSerial: 'CCA-MPSEDC-DSC3-94821',
           dscDigest: 'SHA256:' + Array.from({ length: 16 }, () => Math.floor(Math.random() * 16).toString(16)).join('')
         };
+        syncAppRecordSummaryFromEoiForm(appRecord);
+        const appName = appRecord.orgName;
+        const authName = appRecord.signatory;
+        const costStr = appRecord.totalCost;
+        appRecord.history = [
+          { actor: appName, timestamp: oicHistTime, status: 'Draft', remark: '' },
+          { actor: appName, timestamp: oicHistTime, status: 'Submitted to OIC IT Park', remark: `Digitally signed via Class-3 DSC and submitted for ${landTypeStr} scrutiny.` }
+        ];
+
         window.submittedApplicationsMap[appNo] = appRecord;
         appRecord.plotKey = currentSelectedPlot?.plotKey || plotNoStr;
 
@@ -1871,6 +1900,8 @@
         try {
           localStorage.removeItem('mpsedc_eoi_draft');
           sessionStorage.removeItem('mpsedc_eoi_draft');
+          localStorage.removeItem(STORAGE_KEYS.ACTIVE_PLOT);
+          localStorage.removeItem(STORAGE_KEYS.RECTIFY_APP);
         } catch (e) { }
 
         if (typeof renderInvestorDashboard === 'function') {
@@ -6352,6 +6383,7 @@
       if (fileBox && fileName && btn) {
         fileName.textContent = file.name;
         fileBox.style.display = 'flex';
+        if (typeof eoiDraftMemory !== 'undefined') eoiDraftMemory['doc_' + i] = file.name;
         btn.innerHTML = '<input type="file" id="doc-file-input-' + i + '" accept=".pdf" style="display:none;" onchange="handleDocFileChange(' + i + ', this)" onclick="event.stopPropagation()">✓ Replace';
         btn.style.background = '#dff3e7';
         btn.style.borderColor = '#1f9d5a';
@@ -6370,6 +6402,7 @@
           .replace(/[^a-zA-Z0-9]/g, '_').toLowerCase().substring(0, 24) + '.pdf';
         fileName.textContent = docName;
         fileBox.style.display = 'flex';
+        if (typeof eoiDraftMemory !== 'undefined') eoiDraftMemory['doc_' + i] = docName;
         btn.innerHTML = '<input type="file" id="doc-file-input-' + i + '" accept=".pdf" style="display:none;" onchange="handleDocFileChange(' + i + ', this)" onclick="event.stopPropagation()">✓ Replace';
         btn.style.background = '#dff3e7';
         btn.style.borderColor = '#1f9d5a';
@@ -6384,6 +6417,7 @@
       const btn = document.getElementById('doc-btn-' + i);
       const fileInput = document.getElementById('doc-file-input-' + i);
       if (fileInput) fileInput.value = '';
+      if (typeof eoiDraftMemory !== 'undefined') delete eoiDraftMemory['doc_' + i];
       const docObj = (typeof currentDocs !== 'undefined' && currentDocs && currentDocs[i]) ? currentDocs[i] : null;
       const isMoaAoA = Boolean(docObj && (docObj.name.toLowerCase().includes('memorandum') || docObj.name.includes('MoA')));
       const maxMb = isMoaAoA ? 5 : 2;
@@ -6524,7 +6558,11 @@
       }
     }
 
-    function openEoiFormForPlot(plotIndex) {
+    function openEoiFormForPlot(plotIndex, options = {}) {
+      if (!options.preserveRectification && typeof clearApplicantQueryRectificationMode === 'function') {
+        clearApplicantQueryRectificationMode(false);
+      }
+
       // Find plot in plotsDatabase or oicPlotInventory
       let plot = plotsDatabase[plotIndex];
       let oicPlot = oicPlotInventory.find(p => p.id === plotIndex || p.plotNo === plotIndex);
@@ -6533,16 +6571,37 @@
         syncPlotsWithInvestorView();
         plot = plotsDatabase[oicPlot.id] || plotsDatabase[plotIndex];
       }
-      if (!plot) {
+      if (!plot && options.fallbackApp) {
+        const fb = options.fallbackApp;
+        const parseInr = (val, defVal) => {
+          const n = parseFloat(String(val || '').replace(/[^0-9.-]+/g, ''));
+          return (!isNaN(n) && n > 0) ? n : defVal;
+        };
+        const prem = parseInr(fb.landPremium, 24500000);
+        const sq = parseInr(fb.plotSizeSqFt, 35000);
+        const ac = parseInr(fb.plotSizeAcres, +(sq / 43560).toFixed(2));
+        plot = {
+          plotKey: fb.plotKey || fb.plotNo || plotIndex,
+          id: 'Plot ' + (fb.plotNo || plotIndex),
+          area: fb.itPark || 'IT Park',
+          loc: (fb.itPark || 'IT Park') + ', M.P.',
+          purpose: fb.purpose || 'IT/ITeS/ESDM/Data Centre/Edge Data Centre',
+          landType: fb.applicationType || 'EOI Allotment',
+          sizeSqFt: sq,
+          sizeAcres: ac,
+          premium: prem,
+          dev: parseInr(fb.devCharges, 7000000),
+          maint: parseInr(fb.maintCharges, 500000),
+          lease: parseInr(fb.leaseRent, 350000),
+          appChargesNum: parseInr(fb.appFee, 10000)
+        };
+      }
+      if (!plot && !options.fallbackApp) {
         plot = Object.values(plotsDatabase)[0];
         oicPlot = oicPlotInventory.find(p => p.published) || oicPlotInventory[0];
       }
-      if (!plot) {
-        showGlobalToast('No published IT Park plots are available. Please configure & publish a plot in OIC IT Park first.', 'error');
-        return;
-      }
       if (!plot && !oicPlot) {
-        showGlobalToast('No published plot available. Please ask OIC IT Park to publish a plot first.', 'error');
+        showGlobalToast('No published IT Park plots are available. Please configure & publish a plot in OIC IT Park first.', 'error');
         switchView('land-allotment');
         return;
       }
@@ -6645,6 +6704,11 @@
 
       const resolvedPlotKey = oicPlot ? (oicPlot.id || oicPlot.plotNo) : (plot.plotKey || plotIndex);
       if (currentSelectedPlot) currentSelectedPlot.plotKey = resolvedPlotKey;
+      try {
+        if (typeof STORAGE_KEYS !== 'undefined' && resolvedPlotKey) {
+          localStorage.setItem(STORAGE_KEYS.ACTIVE_PLOT, resolvedPlotKey);
+        }
+      } catch (e) { }
 
       // Clear previous non-plot inputs before restoring saved draft (if any) for this plot
       const editableIds = [
@@ -6664,6 +6728,7 @@
         else el.value = '';
         clearFieldInvalid(el);
       });
+      handleConsortiumChange('No');
       const consentBox = document.getElementById('declaration-consent');
       if (consentBox) {
         consentBox.checked = false;
@@ -6682,26 +6747,35 @@
         }
       }
 
-      // Restore saved draft for this specific plot from localStorage if available
-      const allDrafts = (typeof loadEoiDraftsMap === 'function') ? loadEoiDraftsMap() : {};
-      const savedPlotDraft = (resolvedPlotKey && allDrafts[resolvedPlotKey]) ? allDrafts[resolvedPlotKey] : null;
-      eoiDraftMemory = savedPlotDraft ? { ...savedPlotDraft } : {};
+      // Restore saved draft for this specific plot from localStorage unless skipped (e.g. query rectification mode)
+      if (!options.skipDraftRestore) {
+        const allDrafts = (typeof loadEoiDraftsMap === 'function') ? loadEoiDraftsMap() : {};
+        const savedPlotDraft = (resolvedPlotKey && allDrafts[resolvedPlotKey]) ? allDrafts[resolvedPlotKey] : null;
+        eoiDraftMemory = savedPlotDraft ? { ...savedPlotDraft } : {};
 
-      if (savedPlotDraft) {
-        Object.keys(savedPlotDraft).forEach(k => {
-          if (k.startsWith('_') || k === 'directors') return;
-          const el = document.getElementById(k);
-          if (el) {
-            if (el.type === 'checkbox') el.checked = Boolean(savedPlotDraft[k]);
-            else el.value = savedPlotDraft[k];
+        if (savedPlotDraft) {
+          if (savedPlotDraft['applicant-consortium']) {
+            const cEl = document.getElementById('applicant-consortium');
+            if (cEl) cEl.value = savedPlotDraft['applicant-consortium'];
+            handleConsortiumChange(savedPlotDraft['applicant-consortium']);
           }
-        });
-        if (Array.isArray(savedPlotDraft.directors) && savedPlotDraft.directors.length > 0) {
-          savedPlotDraft.directors.forEach(d => addDirectorRow(d.name, d.designation, d.din, d.contact));
+          Object.keys(savedPlotDraft).forEach(k => {
+            if (k.startsWith('_') || k === 'directors') return;
+            const el = document.getElementById(k);
+            if (el) {
+              if (el.type === 'checkbox') el.checked = Boolean(savedPlotDraft[k]);
+              else el.value = savedPlotDraft[k];
+            }
+          });
+          if (Array.isArray(savedPlotDraft.directors) && savedPlotDraft.directors.length > 0) {
+            savedPlotDraft.directors.forEach(d => addDirectorRow(d.name, d.designation, d.din, d.contact));
+          }
+          if (consentBox) handleDeclarationConsentChange(consentBox.checked);
+          calculateProjectFinancials();
+          showGlobalToast(`Restored saved draft for Plot ${resolvedPlotKey}.`, 'info');
         }
-        if (consentBox) handleDeclarationConsentChange(consentBox.checked);
-        calculateProjectFinancials();
-        showGlobalToast(`Restored saved draft for Plot ${resolvedPlotKey}.`, 'info');
+      } else {
+        eoiDraftMemory = {};
       }
 
       // Initialize stepper state: all sections accessible
@@ -6715,7 +6789,9 @@
       // Switch view to EOI form and scroll smoothly to top
       switchView('eoi-form');
       renderDocuments();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (!options.skipScroll) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
 
     function submitApplication() {
@@ -6798,6 +6874,9 @@
           localStorage.setItem(STORAGE_KEYS.VIEW, viewName);
           if (viewName === 'oic-scrutiny-detail' && currentScrutinyAppNo) {
             localStorage.setItem(STORAGE_KEYS.SCRUTINY_APP, currentScrutinyAppNo);
+          }
+          if (viewName !== 'eoi-form' && viewName !== 'eoi-preview' && typeof clearApplicantQueryRectificationMode === 'function') {
+            clearApplicantQueryRectificationMode(true);
           }
         }
       } catch (e) { }
@@ -7851,11 +7930,307 @@
       openEoiFormForPlot(plotKey);
     }
 
-    function respondToQueryFromInvestor(appNo) {
-      const app = (window.oicLandApplications || []).find(a => a.appNo === appNo);
-      if (!app) return;
-      const remark = prompt(`Enter response remarks for Query on ${appNo} (${app.plotNo}):`, 'Uploaded rectified statutory document as requested by OIC IT Park.');
-      if (remark === null) return;
+    function clearApplicantQueryRectificationMode(clearStorage = true) {
+      window.activeQueryRectificationAppNo = null;
+      const banner = document.getElementById('eoi-query-rectification-banner');
+      if (banner) banner.remove();
+
+      const submitBtn = document.getElementById('btn-submit-affix-dsc');
+      if (submitBtn) {
+        submitBtn.innerHTML = '<span>Submit</span>';
+        const consentBox = document.getElementById('declaration-consent');
+        if (consentBox && consentBox.checked) {
+          submitBtn.removeAttribute('disabled');
+          submitBtn.classList.remove('cursor-not-allowed', 'opacity-50');
+          submitBtn.classList.add('cursor-pointer');
+        } else {
+          submitBtn.setAttribute('disabled', 'true');
+          submitBtn.classList.add('cursor-not-allowed', 'opacity-50');
+          submitBtn.classList.remove('cursor-pointer');
+        }
+      }
+      if (clearStorage) {
+        try {
+          if (typeof STORAGE_KEYS !== 'undefined') localStorage.removeItem(STORAGE_KEYS.RECTIFY_APP);
+        } catch (e) { }
+      }
+    }
+
+    function cancelApplicantQueryRectification() {
+      clearApplicantQueryRectificationMode(true);
+      switchView('dashboard');
+      showGlobalToast('Returned to Investor Dashboard.', 'info');
+    }
+
+    function restoreEoiAttachmentsFromApplication(app) {
+      const attachments = Array.isArray(app?.attachments) ? app.attachments : [];
+      if (!Array.isArray(currentDocs) || currentDocs.length === 0) return;
+
+      currentDocs.forEach((docObj, i) => {
+        const match = attachments.find(a => a.title === docObj.name) || attachments[i];
+        if (!match || !match.fileName || match.fileName === '—' || match.fileName === '–') return;
+
+        const fileBox = document.getElementById('doc-file-' + i);
+        const fileNameEl = document.getElementById('doc-name-' + i);
+        const btn = document.getElementById('doc-btn-' + i);
+        if (fileBox && fileNameEl && btn) {
+          fileNameEl.textContent = match.fileName;
+          fileBox.style.display = 'flex';
+          if (typeof eoiDraftMemory !== 'undefined') eoiDraftMemory['doc_' + i] = match.fileName;
+          btn.innerHTML = '<input type="file" id="doc-file-input-' + i + '" accept=".pdf" style="display:none;" onchange="handleDocFileChange(' + i + ', this)" onclick="event.stopPropagation()">✓ Replace';
+          btn.style.background = '#dff3e7';
+          btn.style.borderColor = '#1f9d5a';
+          btn.style.color = '#1f9d5a';
+          const docRow = document.querySelectorAll('#docList .doc')[i];
+          if (docRow) docRow.classList.remove('doc-invalid', 'border-red-500');
+        }
+      });
+    }
+
+    function applyEoiFormSnapshotForRectification(app) {
+      const snap = (app && app.formSnapshot && typeof app.formSnapshot === 'object') ? { ...app.formSnapshot } : {};
+
+      // Fallback field mapping from top-level app record if formSnapshot has gaps
+      const fallbackFields = {
+        'applicant-name': app.orgName,
+        'applicant-inc-date': app.incDate,
+        'applicant-cin': app.cin,
+        'applicant-pan': app.pan,
+        'applicant-gstin': app.gstin,
+        'applicant-reg-address': app.regAddress,
+        'auth-name': app.signatory,
+        'auth-designation': app.designation,
+        'auth-mobile': app.mobile,
+        'auth-email': app.email,
+        'primary-business-type': app.businessDomain,
+        'unit-emp-count': app.currentEmployees,
+        'unit-turnover': app.turnover3FY,
+        'unit-past-inv': app.pastInvestment,
+        'dev-bua': app.devBua,
+        'dev-inv': app.devInv,
+        'proj-title': app.projTitle,
+        'proj-timeline': app.timeline,
+        'proj-manpower': app.headcount,
+        'declaration-consent': true
+      };
+      Object.entries(fallbackFields).forEach(([k, v]) => {
+        if (snap[k] === undefined && v !== undefined && v !== null && v !== '—') {
+          snap[k] = v;
+        }
+      });
+
+      const catEl = document.getElementById('applicant-category');
+      if (catEl && !catEl.disabled) {
+        const savedCat = snap['applicant-category'] || (app.formType === 'Form 1-A' ? 'developer' : 'unit');
+        catEl.value = savedCat;
+        if (typeof handleApplicantCategoryChange === 'function') {
+          handleApplicantCategoryChange(savedCat);
+        }
+      }
+
+      const consVal = snap['applicant-consortium'] || (String(app.consortiumStatus || '').startsWith('Yes') ? 'Yes' : 'No');
+      const consEl = document.getElementById('applicant-consortium');
+      if (consEl) consEl.value = consVal;
+      handleConsortiumChange(consVal);
+
+      Object.keys(snap).forEach(k => {
+        if (k === 'directors' || k.startsWith('_') || k === 'applicant-query-reply-note') return;
+        const val = snap[k];
+        const byId = document.getElementById(k);
+        if (byId) {
+          if (byId.type === 'file') return;
+          if (byId.type === 'checkbox') {
+            byId.checked = Boolean(val);
+          } else {
+            byId.value = val ?? '';
+          }
+          clearFieldInvalid(byId);
+          return;
+        }
+        const radios = document.querySelectorAll(`#view-eoi-form input[type="radio"][name="${k}"]`);
+        if (radios.length > 0) {
+          radios.forEach(r => { r.checked = (r.value === val); });
+        }
+      });
+
+      const dirTbody = document.getElementById('directors-tbody');
+      const directorsList = (Array.isArray(snap.directors) && snap.directors.length > 0)
+        ? snap.directors
+        : (Array.isArray(app.directors) ? app.directors : []);
+      if (dirTbody) {
+        dirTbody.innerHTML = '';
+        if (directorsList.length > 0) {
+          directorsList.forEach(d => addDirectorRow(d.name, d.designation, d.din, d.contact));
+        } else {
+          appendBlankDirectorRow();
+        }
+      }
+
+      renderDocuments();
+      restoreEoiAttachmentsFromApplication(app);
+      calculateProjectFinancials();
+
+      const consentBox = document.getElementById('declaration-consent');
+      if (consentBox) handleDeclarationConsentChange(consentBox.checked);
+
+      // Keep accordions open and accessible for smooth editing
+      for (let s = 1; s <= 5; s++) {
+        const panel = getSectionPanel(s);
+        if (panel) {
+          panel.classList.remove('is-collapsed');
+          panel.classList.add('is-expanded');
+        }
+        const badge = document.getElementById('badge-sec-' + s);
+        if (badge) {
+          badge.className = 'accordion-badge badge-active';
+          badge.textContent = 'Rectify / Review';
+        }
+      }
+    }
+
+    function openApplicantQueryRectification(appNo) {
+      const app = (window.oicLandApplications || []).find(a => a.appNo === appNo) || window.submittedApplicationsMap[appNo];
+      if (!app) {
+        showGlobalToast(`Application ${appNo} could not be loaded.`, 'error');
+        return;
+      }
+
+      window.activeQueryRectificationAppNo = app.appNo;
+      try {
+        if (typeof STORAGE_KEYS !== 'undefined') localStorage.setItem(STORAGE_KEYS.RECTIFY_APP, app.appNo);
+      } catch (e) { }
+
+      openEoiFormForPlot(app.plotKey || app.plotNo, {
+        skipDraftRestore: true,
+        preserveRectification: true,
+        fallbackApp: app
+      });
+
+      applyEoiFormSnapshotForRectification(app);
+
+      // Find latest OIC Query history entry for exact timestamp & fallback remark
+      const queryHistoryEntries = (app.history || []).filter(h => (h.status || '').toLowerCase().includes('query raised'));
+      const latestQueryEntry = queryHistoryEntries.length > 0 ? queryHistoryEntries[queryHistoryEntries.length - 1] : null;
+      const queryTimestamp = latestQueryEntry?.timestamp || app.pendingSince || '—';
+      const queryRemarkText = (app.queryRemarks && app.queryRemarks.trim())
+        ? app.queryRemarks.trim()
+        : (latestQueryEntry?.remark || 'OIC IT Park has raised a query requiring rectification and resubmission.');
+
+      const formContainer = document.querySelector('#view-eoi-form .gov-form-container');
+      if (formContainer) {
+        const existingBanner = document.getElementById('eoi-query-rectification-banner');
+        if (existingBanner) existingBanner.remove();
+
+        const bannerEl = document.createElement('div');
+        bannerEl.id = 'eoi-query-rectification-banner';
+        bannerEl.className = 'mb-6 rounded-xl border-2 border-amber-400 bg-amber-50/90 shadow-sm overflow-hidden';
+        bannerEl.innerHTML = `
+          <div class="bg-gradient-to-r from-amber-700 to-red-700 text-white px-5 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5">
+              <span class="text-lg leading-none">⚠️</span>
+              <div>
+                <h3 class="font-bold text-sm tracking-wide m-0 text-white">Official Query Raised by OIC IT Park — Rectification Required</h3>
+                <div class="text-[11px] text-amber-100 mt-0.5">
+                  Application No: <span class="font-mono font-bold text-white">${escapePlotHtml(app.appNo)}</span>
+                  &bull; ${escapePlotHtml(app.plotDisplay || `${app.plotNo} • ${app.itPark}`)}
+                  &bull; Query Raised On: <span class="font-mono">${escapePlotHtml(queryTimestamp)}</span>
+                </div>
+              </div>
+            </div>
+            <button type="button" onclick="cancelApplicantQueryRectification()"
+              class="bg-white/15 hover:bg-white/25 text-white text-xs font-semibold px-3 py-1.5 rounded border border-white/30 cursor-pointer transition">
+              &larr; Back to Dashboard
+            </button>
+          </div>
+          <div class="p-5 space-y-4 text-xs text-slate-800">
+            <div class="bg-white border border-red-200 rounded-lg p-3.5 shadow-2xs">
+              <div class="text-[11px] font-bold uppercase tracking-wider text-red-700 mb-1">OIC IT Park Query Comment:</div>
+              <div class="text-slate-900 font-medium text-xs leading-relaxed whitespace-pre-wrap">${escapePlotHtml(queryRemarkText)}</div>
+            </div>
+            <div>
+              <label for="applicant-query-reply-note" class="block text-xs font-bold text-slate-800 mb-1.5">
+                Applicant Clarification / Rectification Note <span class="text-red-600">*</span>
+              </label>
+              <textarea id="applicant-query-reply-note" rows="3"
+                placeholder="Describe all corrections, updated project figures, or rectified statutory documents made in response to OIC IT Park's query..."
+                oninput="this.classList.remove('border-red-500'); document.getElementById('applicant-query-reply-note-err')?.classList.add('hidden');"
+                class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"></textarea>
+              <p id="applicant-query-reply-note-err" class="hidden text-[11px] text-red-600 font-semibold mt-1">
+                Please enter your Clarification / Rectification Note before resubmitting.
+              </p>
+              <p class="text-[11px] text-slate-600 mt-1">
+                Review and edit any required form fields (Sections 1–4) or replace/upload documents (Section 5) below, then click <b>Resubmit Rectified Application</b>.
+              </p>
+            </div>
+          </div>
+        `;
+        formContainer.insertBefore(bannerEl, formContainer.firstChild);
+      }
+
+      // Switch primary submit button to enabled Rectification Resubmission Mode
+      const submitBtn = document.getElementById('btn-submit-affix-dsc');
+      if (submitBtn) {
+        submitBtn.innerHTML = '<span>Resubmit Rectified Application</span>';
+        submitBtn.removeAttribute('disabled');
+        submitBtn.classList.remove('cursor-not-allowed', 'opacity-50');
+        submitBtn.classList.add('cursor-pointer');
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      showGlobalToast(`Application ${app.appNo} opened in Query Rectification Mode.`, 'info');
+    }
+
+    function submitApplicantQueryRectification() {
+      const appNo = window.activeQueryRectificationAppNo;
+      const app = (window.oicLandApplications || []).find(a => a.appNo === appNo) || window.submittedApplicationsMap[appNo];
+      if (!app) {
+        showGlobalToast('Target queried application record not found.', 'error');
+        clearApplicantQueryRectificationMode(true);
+        return;
+      }
+
+      const replyNoteEl = document.getElementById('applicant-query-reply-note');
+      const replyNoteErr = document.getElementById('applicant-query-reply-note-err');
+      const replyNote = replyNoteEl?.value?.trim() || '';
+      if (!replyNote) {
+        if (replyNoteEl) {
+          replyNoteEl.classList.add('border-red-500');
+          replyNoteEl.focus();
+          replyNoteEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        if (replyNoteErr) replyNoteErr.classList.remove('hidden');
+        showGlobalToast('Please enter Applicant Clarification / Rectification Note before resubmitting.', 'error');
+        return;
+      }
+
+      // Validate all mandatory EOI form sections 1-5 & Form-2 declaration consent
+      const validators = [
+        [1, validateSection1],
+        [2, validateSection2],
+        [3, validateSection3],
+        [4, validateSection4],
+        [5, validateSection5]
+      ];
+      for (const [secNum, fn] of validators) {
+        if (!fn(true)) {
+          const panel = document.getElementById('sec-' + secNum);
+          if (panel) { panel.classList.remove('is-collapsed'); panel.classList.add('is-expanded'); }
+          panel?.scrollIntoView({ behavior: 'smooth' });
+          return;
+        }
+      }
+
+      const consent = document.getElementById('declaration-consent');
+      if (!consent || !consent.checked) {
+        showGlobalToast('Please confirm the Form-2 Undertaking and Terms & Conditions before resubmitting.', 'error');
+        consent?.focus();
+        document.getElementById('sec-5')?.scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
+
+      // Sync updated form snapshot, attachments, and summary fields back to the application record
+      syncAppRecordSummaryFromEoiForm(app);
+
       const ts = formatCurrentOicTimestamp();
       app.status = 'Query Responded';
       app.applicationAt = 'OIC IT Park';
@@ -7866,14 +8241,28 @@
         actor: app.orgName,
         timestamp: ts,
         status: 'Query Responded',
-        remark: remark.trim() || 'Query response submitted by Applicant.'
+        remark: replyNote
       });
-      savePersistedApplications();
-      renderInvestorDashboard();
-      updateOicStats();
-      updateOicProcessStats();
-      renderOicApplicationsTable();
-      showGlobalToast(`Query response submitted for ${appNo}. Routed back to OIC IT Park.`, 'success');
+
+      window.submittedApplicationsMap[app.appNo] = app;
+      if (typeof savePersistedApplications === 'function') savePersistedApplications();
+
+      clearApplicantQueryRectificationMode(true);
+      try {
+        localStorage.removeItem(STORAGE_KEYS.ACTIVE_PLOT);
+      } catch (e) { }
+
+      if (typeof renderInvestorDashboard === 'function') renderInvestorDashboard();
+      if (typeof updateOicStats === 'function') updateOicStats();
+      if (typeof updateOicProcessStats === 'function') updateOicProcessStats();
+      if (typeof renderOicApplicationsTable === 'function') renderOicApplicationsTable();
+
+      switchView('dashboard');
+      showGlobalToast(`Rectified application ${app.appNo} resubmitted to OIC IT Park (Query Responded).`, 'success');
+    }
+
+    function respondToQueryFromInvestor(appNo) {
+      openApplicantQueryRectification(appNo);
     }
 
     function renderInvestorDashboard() {
@@ -8000,9 +8389,12 @@
         localStorage.removeItem(STORAGE_KEYS.DRAFTS);
         localStorage.removeItem(STORAGE_KEYS.VIEW);
         localStorage.removeItem(STORAGE_KEYS.SCRUTINY_APP);
+        localStorage.removeItem(STORAGE_KEYS.RECTIFY_APP);
+        localStorage.removeItem(STORAGE_KEYS.ACTIVE_PLOT);
         localStorage.removeItem('mpsedc_eoi_draft');
         sessionStorage.removeItem('mpsedc_eoi_draft');
       } catch (e) { }
+      if (typeof clearApplicantQueryRectificationMode === 'function') clearApplicantQueryRectificationMode(true);
       oicPlotInventory = [];
       window.plotMasterDB = oicPlotInventory;
       window.oicLandApplications = [];
@@ -8913,6 +9305,7 @@
 
       pendingOicActionPayload = {
         appNo: app.appNo,
+        actionVal,
         newStatus,
         newAt,
         newStage,
@@ -8939,6 +9332,9 @@
       app.applicationAt = p.newAt;
       app.stage = p.newStage;
       app.pendingSince = p.timestamp;
+      if (p.actionVal === 'query_applicant' || p.newStage === 'queried') {
+        app.queryRemarks = p.commentVal || '';
+      }
       app.history = app.history || [];
       app.history.push({
         actor: 'OIC IT Park',
@@ -8952,6 +9348,7 @@
       if (window.submittedApplicationsMap[app.appNo]) {
         window.submittedApplicationsMap[app.appNo].status = app.status;
       }
+      window.submittedApplicationsMap[app.appNo] = app;
       const invRow = document.querySelector(`#applied-tbody tr[data-app-no="${app.appNo}"] .investor-status-badge`);
       if (invRow) {
         invRow.textContent = app.status;
@@ -9037,677 +9434,665 @@
       try {
         const savedView = localStorage.getItem(STORAGE_KEYS.VIEW);
         const savedScrutinyApp = localStorage.getItem(STORAGE_KEYS.SCRUTINY_APP);
+        const savedRectifyApp = localStorage.getItem(STORAGE_KEYS.RECTIFY_APP);
+        const savedActivePlot = localStorage.getItem(STORAGE_KEYS.ACTIVE_PLOT);
+
         if (savedView === 'oic-scrutiny-detail' && savedScrutinyApp && window.submittedApplicationsMap[savedScrutinyApp]) {
           openOicScrutinyDetail(savedScrutinyApp);
+        } else if (savedView === 'eoi-form' && savedRectifyApp && window.submittedApplicationsMap[savedRectifyApp]) {
+          openApplicantQueryRectification(savedRectifyApp);
+        } else if (savedView === 'eoi-form' && savedActivePlot && (plotsDatabase[savedActivePlot] || oicPlotInventory.some(p => p.id === savedActivePlot || p.plotNo === savedActivePlot))) {
+          openEoiFormForPlot(savedActivePlot);
         } else if (savedView && savedView !== 'eoi-form' && savedView !== 'eoi-preview' && savedView !== 'oic-scrutiny-detail') {
           switchView(savedView);
         }
       } catch (e) { }
     });
   </script>
-              <!-- Modal: Confirmation for Plot Publish / Unpublish Toggle -->
-              <div id="plot-toggle-modal"
-                class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 hidden transition-opacity duration-200"
-                onclick="handlePlotModalBackdropClick(event)">
-                <div id="plot-toggle-modal-card"
-                  class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 border border-slate-200 overflow-hidden transform transition-all duration-200 scale-95 opacity-0">
+  <!-- Modal: Confirmation for Plot Publish / Unpublish Toggle -->
+  <div id="plot-toggle-modal"
+    class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 hidden transition-opacity duration-200"
+    onclick="handlePlotModalBackdropClick(event)">
+    <div id="plot-toggle-modal-card"
+      class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 border border-slate-200 overflow-hidden transform transition-all duration-200 scale-95 opacity-0">
 
-                  <!-- Modal Header -->
-                  <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                    <div class="flex items-center gap-3">
-                      <div id="plot-modal-icon-container"
-                        class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shadow-xs">
-                        &#10003;
-                      </div>
-                      <h3 id="plot-modal-title" class="text-base font-bold text-slate-900">Confirm Action</h3>
-                    </div>
-                    <button type="button" onclick="closePlotToggleModal()"
-                      class="text-slate-400 hover:text-slate-600 rounded p-1 text-lg font-bold leading-none transition"
-                      aria-label="Close">
-                      &times;
-                    </button>
-                  </div>
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div class="flex items-center gap-3">
+          <div id="plot-modal-icon-container"
+            class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shadow-xs">
+            &#10003;
+          </div>
+          <h3 id="plot-modal-title" class="text-base font-bold text-slate-900">Confirm Action</h3>
+        </div>
+        <button type="button" onclick="closePlotToggleModal()"
+          class="text-slate-400 hover:text-slate-600 rounded p-1 text-lg font-bold leading-none transition"
+          aria-label="Close">
+          &times;
+        </button>
+      </div>
 
-                  <!-- Modal Body -->
-                  <div class="px-6 py-5">
-                    <p id="plot-modal-message" class="text-xs text-slate-600 leading-relaxed font-normal">
-                      <!-- Populated dynamically -->
-                    </p>
-                  </div>
+      <!-- Modal Body -->
+      <div class="px-6 py-5">
+        <p id="plot-modal-message" class="text-xs text-slate-600 leading-relaxed font-normal">
+          <!-- Populated dynamically -->
+        </p>
+      </div>
 
-                  <!-- Modal Footer -->
-                  <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
-                    <button type="button" id="plot-modal-cancel-btn" onclick="closePlotToggleModal()"
-                      class="px-4 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 transition shadow-xs cursor-pointer">
-                      Cancel
-                    </button>
-                    <button type="button" id="plot-modal-confirm-btn" onclick="confirmPlotToggleAction()"
-                      class="px-4 py-2 text-xs font-bold text-white rounded-lg transition shadow-sm cursor-pointer">
-                      Confirm
-                    </button>
-                  </div>
+      <!-- Modal Footer -->
+      <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
+        <button type="button" id="plot-modal-cancel-btn" onclick="closePlotToggleModal()"
+          class="px-4 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 transition shadow-xs cursor-pointer">
+          Cancel
+        </button>
+        <button type="button" id="plot-modal-confirm-btn" onclick="confirmPlotToggleAction()"
+          class="px-4 py-2 text-xs font-bold text-white rounded-lg transition shadow-sm cursor-pointer">
+          Confirm
+        </button>
+      </div>
 
+    </div>
+  </div>
+
+  <!-- Submission Confirmation Modal -->
+  <div class="modal-bg" id="submissionDoneModal"
+    style="display:none; position:fixed; inset:0; background:rgba(20,30,50,.5); align-items:center; justify-content:center; z-index:9999;">
+    <div class="modal"
+      style="background:#fff; border-radius:12px; padding:24px; max-width:480px; width:90%; box-shadow:0 10px 30px rgba(0,0,0,0.2); font-family:Nunito,sans-serif;">
+      <div style="text-align:center; margin-bottom:14px;">
+        <div
+          style="width:48px; height:48px; background:#dff3e7; color:#1f9d5a; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:24px; font-weight:800;">
+          ✓</div>
+        <h3 style="color:#1f9d5a; margin:8px 0 2px; font-size:17px; font-weight:800;">Application
+          Successfully
+          Submitted!</h3>
+        <span style="font-size:12px; color:#64748b;">Land Allotment Module &bull; Draft Tender No. MPSEDC:
+          ITIA: ALLOT:
+          2026:674</span>
+      </div>
+      <div
+        style="border:1px solid #e2e8f0; border-radius:8px; padding:12px 14px; background:#f8fafc; font-size:12.5px;">
+        <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed #cbd5e1;">
+          <span style="color:#64748b;">Application ID:</span><b id="doneAppNo"
+            style="font-family:monospace; color:#33518c; font-size:13px;">LA-2026-00152</b>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed #cbd5e1;">
+          <span style="color:#64748b;">Allotted Plot:</span><b id="donePlotName" style="color:#0f172a;">Plot
+            ITP-IND-201</b>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed #cbd5e1;">
+          <span style="color:#64748b;">IT Park:</span><b id="doneItPark" style="color:#0f172a;">Crystal IT
+            Park
+            (Indore)</b>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed #cbd5e1;">
+          <span style="color:#64748b;">Applicant Track:</span><b id="doneTrack" style="color:#0f172a;">Unit
+            (Form 1)</b>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed #cbd5e1;">
+          <span style="color:#64748b;">Submitted On:</span><b id="doneTimestamp">—</b>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:4px 0;">
+          <span style="color:#64748b;">Bid Validity:</span><b style="color:#059669;">90 Days (Clause
+            2.8)</b>
+        </div>
+      </div>
+      <div style="display:flex; gap:10px; margin-top:16px;">
+        <button type="button" class="btn"
+          style="flex:1; padding:9px 12px; border-radius:7px; border:1px solid #cbd5e1; font-weight:700; cursor:pointer;"
+          onclick="downloadApplicationReceipt()">⬇ Download Receipt</button>
+        <button type="button" class="btn btn-primary"
+          style="flex:1; padding:9px 12px; border-radius:7px; background:#4267b2; color:#fff; font-weight:700; border:none; cursor:pointer;"
+          onclick="closeSubmissionAndGoDashboard()">Go to Dashboard</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal: Pre-Submission Review & Edit Reminder (Tender 674 DSC Signing) -->
+
+  <!-- Modal: UniPay DSC Utility Helper -->
+  <div id="modal-unipay-utility"
+    class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div
+      class="bg-white rounded-lg shadow-2xl border border-slate-200 max-w-lg w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      <div class="bg-[#2b579a] text-white px-5 py-3.5 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">🔏</span>
+          <h3 class="font-bold text-sm tracking-wide">UniPay DSC Signer Utility (v3.4.2)</h3>
+        </div>
+        <button type="button" onclick="closeUniPayModal()"
+          class="text-white/80 hover:text-white text-xl font-bold p-1 leading-none cursor-pointer"
+          aria-label="Close">&times;</button>
+      </div>
+      <div class="p-5 space-y-4 text-xs text-slate-700">
+        <div class="bg-emerald-50 border border-emerald-300 rounded-md p-3 flex items-start gap-2.5">
+          <div
+            class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-[11px] flex-shrink-0 mt-0.5">
+            ✓</div>
+          <div>
+            <div class="font-bold text-emerald-900 text-xs">UniPay WebSocket Service Detected (Active)</div>
+            <div class="text-[11px] text-emerald-800 mt-0.5">Port 127.0.0.1:8080 is responding. Class-3 USB
+              Token driver
+              (PKCS#11) is ready for cryptographic digital signing.</div>
+          </div>
+        </div>
+        <div>
+          <div class="font-bold text-slate-800 mb-1.5 uppercase tracking-wide text-[11px]">System
+            Prerequisites for
+            Digital Signature:</div>
+          <ol class="list-decimal pl-4 space-y-1.5 text-slate-600 leading-relaxed">
+            <li>Insert your Class-3 FIPS 140-2 Level 2 USB Crypto Token (ePass2003, ProxKey, Watchdata) into
+              your
+              computer.</li>
+            <li>Ensure the latest token CSP middleware is installed and certificate chain is verified by CCA
+              India.</li>
+            <li>If the utility is not yet installed on this PC, download and install the appropriate package
+              below.</li>
+          </ol>
+        </div>
+        <div class="bg-slate-50 border border-slate-200 rounded p-3">
+          <div class="font-bold text-slate-800 mb-2 text-[11px] uppercase tracking-wide">Download UniPay
+            Utility
+            Installer:</div>
+          <div class="grid grid-cols-3 gap-2">
+            <button type="button"
+              onclick="showGlobalToast('Downloading UniPay_Setup_v3.4_x64.exe for Windows...', 'info')"
+              class="bg-white hover:bg-slate-100 border border-slate-300 rounded p-2 text-center transition cursor-pointer">
+              <div class="font-bold text-slate-800 text-[11px]">🪟 Windows</div>
+              <div class="text-[10px] text-slate-500">64-bit (.exe)</div>
+            </button>
+            <button type="button" onclick="showGlobalToast('Downloading UniPay_v3.4_macOS.dmg for Mac...', 'info')"
+              class="bg-white hover:bg-slate-100 border border-slate-300 rounded p-2 text-center transition cursor-pointer">
+              <div class="font-bold text-slate-800 text-[11px]">🍎 macOS</div>
+              <div class="text-[10px] text-slate-500">Universal (.dmg)</div>
+            </button>
+            <button type="button" onclick="showGlobalToast('Downloading UniPay_v3.4_linux.deb for Linux...', 'info')"
+              class="bg-white hover:bg-slate-100 border border-slate-300 rounded p-2 text-center transition cursor-pointer">
+              <div class="font-bold text-slate-800 text-[11px]">🐧 Linux</div>
+              <div class="text-[10px] text-slate-500">Debian (.deb)</div>
+            </button>
+          </div>
+        </div>
+        <div class="text-[11px] text-slate-500 bg-amber-50 border border-amber-200 p-2.5 rounded text-amber-900">
+          <b>Security Notice:</b> The browser communication with UniPay local bridge is end-to-end encrypted
+          with zero
+          certificate exposure over external networks.
+        </div>
+      </div>
+      <div class="bg-slate-100 px-5 py-3 border-t border-slate-200 flex justify-end">
+        <button type="button" onclick="closeUniPayModal()"
+          class="bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs px-5 py-2 rounded transition cursor-pointer">
+          Close Window
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: FORM-2 UNDERTAKING TEMPLATE PREVIEW & DOWNLOAD                      -->
+  <!-- ========================================================================= -->
+  <div id="modal-form2-template"
+    class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 transition-opacity duration-200"
+    onclick="handleForm2ModalBackdropClick(event)">
+    <div id="modal-form2-template-card"
+      class="bg-white rounded-xl shadow-2xl border border-slate-200 max-w-3xl w-full overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-150">
+
+      <!-- Modal Header -->
+      <div class="bg-[#2b579a] text-white px-5 py-3.5 flex items-center justify-between flex-shrink-0">
+        <div class="flex items-center gap-2.5">
+          <span class="text-xl">📄</span>
+          <div>
+            <h3 class="font-bold text-sm tracking-wide">Form-2 Undertaking Template</h3>
+            <div class="text-[11px] text-blue-200 font-mono">Tender No. MPSEDC: ITIA: ALLOT: 2026:674 Dated
+              12/02/2026
+            </div>
+          </div>
+        </div>
+        <button type="button" onclick="closeForm2TemplateModal()"
+          class="text-white/80 hover:text-white text-2xl font-bold p-1 leading-none cursor-pointer border-0 bg-transparent transition"
+          aria-label="Close">&times;</button>
+      </div>
+
+      <!-- Advisory Banner -->
+      <div
+        class="bg-blue-50 border-b border-blue-200 px-5 py-2.5 text-xs text-blue-900 flex items-center justify-between gap-3 flex-shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="text-blue-700 font-bold">ℹ️</span>
+          <span>Please print or execute this statutory format on applicant entity letterhead with authorized
+            stamp &amp;
+            signature, then upload the scanned PDF under Document 7.</span>
+        </div>
+      </div>
+
+      <!-- Printable Legal Document Sheet (Matching Official Format) -->
+      <div class="p-6 overflow-y-auto flex-1 bg-slate-100 flex justify-center">
+        <div id="form2-printable-doc"
+          class="bg-white border border-slate-300 shadow-sm rounded-sm p-8 md:p-12 max-w-2xl w-full text-slate-900 leading-relaxed font-serif text-[13.5px]"
+          style="font-family: 'Times New Roman', Times, Georgia, serif;">
+
+          <!-- Document Titles -->
+          <div class="text-center font-bold text-lg mb-1 tracking-wide">
+            Form-2
+          </div>
+          <div class="text-center font-bold text-base mb-8 tracking-wider uppercase">
+            UNDERTAKING
+          </div>
+
+          <!-- Legal Undertaking Text (Strictly Verbatim from Official Notification) -->
+          <div class="space-y-4 text-justify mb-8 text-[13px] leading-[1.8] text-slate-900">
+            <p>
+              I/We will abide by all conditions which may be stipulated by the Ministry of Electronics &amp;
+              Information
+              Technology, Government of India/Department of Science and Technology, Government of Madhya
+              Pradesh from
+              time to time.
+            </p>
+
+            <p>
+              I/We hereby declare that above statements are true and correct to the best of my/our knowledge
+              and belief.
+            </p>
+
+            <p>
+              I/We fully undertake that the project/unit will abide by all the terms &amp;
+              condition/eligibility
+              criteria laid down by the Madhya Pradesh IT, ITeS and ESDM Investment Promotion Policy 2023,
+              Madhya
+              Pradesh Global Capability Centres Policy 2025, Madhya Pradesh AVGC-XR Policy 2025 &amp; Madhya
+              Pradesh
+              Semiconductor Policy 2025 and its guidelines.
+            </p>
+
+            <p>
+              I/We fully undertake that Letter of Allotment, granted to me/us based on the
+              information/documents
+              furnished are found incorrect or false, is liable for cancellation. In addition, the nodal
+              agency may
+              impose penalty or take action in this regard.
+            </p>
+
+            <p>
+              I/We hereby undertake that we shall carry out the activities shown as specified in Form-1 Part
+              6 of the
+              tender submitted with the application and if any new activity is added it will be of the same
+              class i.e.,
+              IT/ITeS/ESDM/Data Centre/GCC/AVGC-XR/Semiconductor as the case may be, If the Plot/Area
+              applied by me/us
+              is allotted to, me/us on the basis of online Tender No. MPSEDC: ITIA: ALLOT: 2026:674 Dated
+              12/02/2026.
+            </p>
+          </div>
+
+          <!-- Seal, Stamp & Signature Grid (Verbatim Layout) -->
+          <div class="pt-8 mt-6 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-8 text-[13px]">
+            <!-- Left Column: Seal / Stamp & Applicant Particulars -->
+            <div class="space-y-2">
+              <div class="font-bold text-slate-900 pb-8">
+                Seal / Stamp of the Organization
+              </div>
+              <div class="flex items-baseline gap-1 text-xs">
+                <span class="font-semibold text-slate-700 whitespace-nowrap">Name in Block Letters:</span>
+                <span id="form2-modal-name"
+                  class="font-sans font-medium text-slate-900 border-b border-dotted border-slate-400 flex-1 pl-1">Apex
+                  Precision Engineering Works Pvt Ltd</span>
+              </div>
+              <div class="flex items-baseline gap-1 text-xs">
+                <span class="font-semibold text-slate-700 whitespace-nowrap">Designation:</span>
+                <span id="form2-modal-designation"
+                  class="font-sans font-medium text-slate-900 border-b border-dotted border-slate-400 flex-1 pl-1">Managing
+                  Director</span>
+              </div>
+              <div class="flex items-baseline gap-1 text-xs">
+                <span class="font-semibold text-slate-700 whitespace-nowrap">E-mail id:</span>
+                <span id="form2-modal-email"
+                  class="font-sans font-medium text-slate-900 border-b border-dotted border-slate-400 flex-1 pl-1">satya.v@apexprecision.in</span>
+              </div>
+              <div class="flex items-baseline gap-1 text-xs">
+                <span class="font-semibold text-slate-700 whitespace-nowrap">Aadhaar No.:</span>
+                <span id="form2-modal-aadhaar"
+                  class="font-sans font-medium text-slate-900 border-b border-dotted border-slate-400 flex-1 pl-1">XXXX-XXXX-8921</span>
+              </div>
+              <div class="flex items-baseline gap-1 text-xs">
+                <span class="font-semibold text-slate-700 whitespace-nowrap">Mobile No.:</span>
+                <span id="form2-modal-mobile"
+                  class="font-sans font-medium text-slate-900 border-b border-dotted border-slate-400 flex-1 pl-1">+91
+                  98260 12345</span>
+              </div>
+            </div>
+
+            <!-- Right Column: Signature of the Authorized Person -->
+            <div class="flex flex-col justify-between sm:items-end">
+              <div class="font-bold text-slate-900 pb-16 sm:text-right">
+                Signature of the Authorized Person
+              </div>
+              <div class="sm:text-right w-full pt-4 border-t border-slate-300">
+                <span class="font-sans text-xs text-slate-500 italic block">(Authorized Signatory)</span>
+                <span id="form2-modal-auth-signatory" class="font-sans font-semibold text-slate-900 text-xs">Satya
+                  Vishwakarma</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Modal Footer Actions -->
+      <div
+        class="bg-slate-50 px-5 py-3 border-t border-slate-200 flex flex-wrap justify-between items-center gap-3 flex-shrink-0">
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="downloadForm2Document()"
+            class="bg-[#2b579a] hover:bg-blue-900 text-white font-semibold text-xs py-2 px-4 rounded-[3px] shadow-sm transition inline-flex items-center gap-1.5 cursor-pointer border-0">
+            <span>⬇</span><span>Download Template (.DOC)</span>
+          </button>
+          <button type="button" onclick="printForm2Document()"
+            class="bg-white hover:bg-slate-100 text-slate-700 font-semibold text-xs py-2 px-4 rounded-[3px] border border-slate-300 shadow-2xs transition inline-flex items-center gap-1.5 cursor-pointer">
+            <span>🖨️</span><span>Print Form-2</span>
+          </button>
+        </div>
+        <button type="button" onclick="closeForm2TemplateModal()"
+          class="bg-slate-700 hover:bg-slate-800 text-white font-semibold text-xs py-2 px-5 rounded-[3px] transition cursor-pointer border-0">
+          Close
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal: Document Viewer Preview -->
+  <div id="modal-doc-viewer"
+    class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div
+      class="bg-white rounded-lg shadow-2xl border border-slate-200 max-w-2xl w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150 flex flex-col max-h-[90vh]">
+      <div class="bg-[#2b579a] text-white px-5 py-3.5 flex items-center justify-between flex-shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="text-base">📄</span>
+          <div>
+            <h3 class="font-bold text-sm tracking-wide" id="doc-modal-title">Document Preview</h3>
+            <div class="text-[10px] text-blue-200 font-mono" id="doc-modal-filename">verified_document.pdf
+            </div>
+          </div>
+        </div>
+        <button type="button" onclick="closeDocViewerModal()"
+          class="text-white/80 hover:text-white text-xl font-bold p-1 leading-none cursor-pointer"
+          aria-label="Close">&times;</button>
+      </div>
+
+      <div class="p-5 overflow-y-auto space-y-4 flex-1">
+        <div class="bg-emerald-50 border border-emerald-200 rounded p-2.5 flex items-center justify-between text-xs">
+          <div class="flex items-center gap-2 text-emerald-800 font-semibold">
+            <span class="text-emerald-600 font-bold">✓</span>
+            <span>Digitally Verified &amp; Watermarked Document</span>
+          </div>
+          <span class="text-[11px] font-mono text-emerald-700" id="doc-modal-sha">SHA256:4a8f9c...</span>
+        </div>
+
+        <div
+          class="border border-slate-300 rounded-lg p-6 bg-slate-50 min-h-[260px] flex flex-col justify-between relative shadow-inner">
+          <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-5">
+            <span class="text-6xl font-black text-slate-900 rotate-[-30deg] tracking-widest uppercase">MPSEDC
+              VERIFIED</span>
+          </div>
+          <div>
+            <div class="flex justify-between items-start border-b border-slate-300 pb-3 mb-4">
+              <div>
+                <div class="text-xs uppercase font-bold text-slate-500">Government of Madhya Pradesh</div>
+                <div class="text-sm font-black text-slate-800" id="doc-modal-body-title">Mandatory
+                  Verification Document
                 </div>
               </div>
-
-              <!-- Submission Confirmation Modal -->
-              <div class="modal-bg" id="submissionDoneModal"
-                style="display:none; position:fixed; inset:0; background:rgba(20,30,50,.5); align-items:center; justify-content:center; z-index:9999;">
-                <div class="modal"
-                  style="background:#fff; border-radius:12px; padding:24px; max-width:480px; width:90%; box-shadow:0 10px 30px rgba(0,0,0,0.2); font-family:Nunito,sans-serif;">
-                  <div style="text-align:center; margin-bottom:14px;">
-                    <div
-                      style="width:48px; height:48px; background:#dff3e7; color:#1f9d5a; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:24px; font-weight:800;">
-                      ✓</div>
-                    <h3 style="color:#1f9d5a; margin:8px 0 2px; font-size:17px; font-weight:800;">Application
-                      Successfully
-                      Submitted!</h3>
-                    <span style="font-size:12px; color:#64748b;">Land Allotment Module &bull; Draft Tender No. MPSEDC:
-                      ITIA: ALLOT:
-                      2026:674</span>
-                  </div>
-                  <div
-                    style="border:1px solid #e2e8f0; border-radius:8px; padding:12px 14px; background:#f8fafc; font-size:12.5px;">
-                    <div
-                      style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed #cbd5e1;">
-                      <span style="color:#64748b;">Application ID:</span><b id="doneAppNo"
-                        style="font-family:monospace; color:#33518c; font-size:13px;">LA-2026-00152</b>
-                    </div>
-                    <div
-                      style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed #cbd5e1;">
-                      <span style="color:#64748b;">Allotted Plot:</span><b id="donePlotName" style="color:#0f172a;">Plot
-                        ITP-IND-201</b>
-                    </div>
-                    <div
-                      style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed #cbd5e1;">
-                      <span style="color:#64748b;">IT Park:</span><b id="doneItPark" style="color:#0f172a;">Crystal IT
-                        Park
-                        (Indore)</b>
-                    </div>
-                    <div
-                      style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed #cbd5e1;">
-                      <span style="color:#64748b;">Applicant Track:</span><b id="doneTrack" style="color:#0f172a;">Unit
-                        (Form 1)</b>
-                    </div>
-                    <div
-                      style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed #cbd5e1;">
-                      <span style="color:#64748b;">Submitted On:</span><b id="doneTimestamp">—</b>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; padding:4px 0;">
-                      <span style="color:#64748b;">Bid Validity:</span><b style="color:#059669;">90 Days (Clause
-                        2.8)</b>
-                    </div>
-                  </div>
-                  <div style="display:flex; gap:10px; margin-top:16px;">
-                    <button type="button" class="btn"
-                      style="flex:1; padding:9px 12px; border-radius:7px; border:1px solid #cbd5e1; font-weight:700; cursor:pointer;"
-                      onclick="downloadApplicationReceipt()">⬇ Download Receipt</button>
-                    <button type="button" class="btn btn-primary"
-                      style="flex:1; padding:9px 12px; border-radius:7px; background:#4267b2; color:#fff; font-weight:700; border:none; cursor:pointer;"
-                      onclick="closeSubmissionAndGoDashboard()">Go to Dashboard</button>
-                  </div>
-                </div>
+              <div class="text-right text-[11px] text-slate-500">
+                <div>Tender: MPSEDC:ITIA:2026:674</div>
+                <div class="font-mono text-emerald-700 font-bold">Status: Scrutinized</div>
               </div>
+            </div>
+            <div class="space-y-2 text-xs text-slate-600 leading-relaxed" id="doc-modal-body-desc">
+              This document has been uploaded as part of the Expression of Interest (EOI) application for
+              Land Allotment
+              under the Madhya Pradesh IT, ITeS &amp; ESDM Investment Promotion Policy 2023. File integrity
+              has been
+              cryptographically confirmed.
+            </div>
+          </div>
+          <div class="border-t border-slate-200 pt-3 flex items-center justify-between text-[11px] text-slate-500">
+            <span>File Type: Application/PDF (Max 2 MB)</span>
+            <span id="doc-modal-signatory">Verified Signatory: Apex Precision Engineering</span>
+          </div>
+        </div>
+      </div>
 
+      <div class="bg-slate-100 px-5 py-3 border-t border-slate-200 flex justify-between items-center flex-shrink-0">
+        <button type="button"
+          onclick="showGlobalToast('Downloading certified copy of ' + document.getElementById('doc-modal-filename').textContent, 'success')"
+          class="text-xs font-semibold text-blue-700 hover:text-blue-900 inline-flex items-center gap-1.5 cursor-pointer">
+          <span>⬇</span><span>Download Certified Copy</span>
+        </button>
+        <button type="button" onclick="closeDocViewerModal()"
+          class="bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs px-5 py-2 rounded transition cursor-pointer">
+          Close Preview
+        </button>
+      </div>
+    </div>
+  </div>
 
-              <!-- Modal: Pre-Submission Review & Edit Reminder (Tender 674 DSC Signing) -->
+  <div id="modal-dsc-review"
+    class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[9999] hidden transition-opacity duration-200 p-4"
+    onclick="handleDscModalBackdropClick(event)">
+    <div id="modal-dsc-review-card"
+      class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full border border-slate-200 overflow-hidden transform transition-all duration-200 scale-95 opacity-0 flex flex-col max-h-[90vh]">
 
-              <!-- Modal: UniPay DSC Utility Helper -->
-              <div id="modal-unipay-utility"
-                class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-                <div
-                  class="bg-white rounded-lg shadow-2xl border border-slate-200 max-w-lg w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-                  <div class="bg-[#2b579a] text-white px-5 py-3.5 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                      <span class="text-lg">🔏</span>
-                      <h3 class="font-bold text-sm tracking-wide">UniPay DSC Signer Utility (v3.4.2)</h3>
-                    </div>
-                    <button type="button" onclick="closeUniPayModal()"
-                      class="text-white/80 hover:text-white text-xl font-bold p-1 leading-none cursor-pointer"
-                      aria-label="Close">&times;</button>
-                  </div>
-                  <div class="p-5 space-y-4 text-xs text-slate-700">
-                    <div class="bg-emerald-50 border border-emerald-300 rounded-md p-3 flex items-start gap-2.5">
-                      <div
-                        class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-[11px] flex-shrink-0 mt-0.5">
-                        ✓</div>
-                      <div>
-                        <div class="font-bold text-emerald-900 text-xs">UniPay WebSocket Service Detected (Active)</div>
-                        <div class="text-[11px] text-emerald-800 mt-0.5">Port 127.0.0.1:8080 is responding. Class-3 USB
-                          Token driver
-                          (PKCS#11) is ready for cryptographic digital signing.</div>
-                      </div>
-                    </div>
-                    <div>
-                      <div class="font-bold text-slate-800 mb-1.5 uppercase tracking-wide text-[11px]">System
-                        Prerequisites for
-                        Digital Signature:</div>
-                      <ol class="list-decimal pl-4 space-y-1.5 text-slate-600 leading-relaxed">
-                        <li>Insert your Class-3 FIPS 140-2 Level 2 USB Crypto Token (ePass2003, ProxKey, Watchdata) into
-                          your
-                          computer.</li>
-                        <li>Ensure the latest token CSP middleware is installed and certificate chain is verified by CCA
-                          India.</li>
-                        <li>If the utility is not yet installed on this PC, download and install the appropriate package
-                          below.</li>
-                      </ol>
-                    </div>
-                    <div class="bg-slate-50 border border-slate-200 rounded p-3">
-                      <div class="font-bold text-slate-800 mb-2 text-[11px] uppercase tracking-wide">Download UniPay
-                        Utility
-                        Installer:</div>
-                      <div class="grid grid-cols-3 gap-2">
-                        <button type="button"
-                          onclick="showGlobalToast('Downloading UniPay_Setup_v3.4_x64.exe for Windows...', 'info')"
-                          class="bg-white hover:bg-slate-100 border border-slate-300 rounded p-2 text-center transition cursor-pointer">
-                          <div class="font-bold text-slate-800 text-[11px]">🪟 Windows</div>
-                          <div class="text-[10px] text-slate-500">64-bit (.exe)</div>
-                        </button>
-                        <button type="button"
-                          onclick="showGlobalToast('Downloading UniPay_v3.4_macOS.dmg for Mac...', 'info')"
-                          class="bg-white hover:bg-slate-100 border border-slate-300 rounded p-2 text-center transition cursor-pointer">
-                          <div class="font-bold text-slate-800 text-[11px]">🍎 macOS</div>
-                          <div class="text-[10px] text-slate-500">Universal (.dmg)</div>
-                        </button>
-                        <button type="button"
-                          onclick="showGlobalToast('Downloading UniPay_v3.4_linux.deb for Linux...', 'info')"
-                          class="bg-white hover:bg-slate-100 border border-slate-300 rounded p-2 text-center transition cursor-pointer">
-                          <div class="font-bold text-slate-800 text-[11px]">🐧 Linux</div>
-                          <div class="text-[10px] text-slate-500">Debian (.deb)</div>
-                        </button>
-                      </div>
-                    </div>
-                    <div
-                      class="text-[11px] text-slate-500 bg-amber-50 border border-amber-200 p-2.5 rounded text-amber-900">
-                      <b>Security Notice:</b> The browser communication with UniPay local bridge is end-to-end encrypted
-                      with zero
-                      certificate exposure over external networks.
-                    </div>
-                  </div>
-                  <div class="bg-slate-100 px-5 py-3 border-t border-slate-200 flex justify-end">
-                    <button type="button" onclick="closeUniPayModal()"
-                      class="bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs px-5 py-2 rounded transition cursor-pointer">
-                      Close Window
-                    </button>
-                  </div>
-                </div>
-              </div>
+      <!-- Header -->
+      <div
+        class="px-6 py-4 bg-gradient-to-r from-slate-50 to-blue-50/50 border-b border-slate-200 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div
+            class="w-9 h-9 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-base shadow-xs">
+            🔏
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-slate-900">Review &amp; Confirm EOI Application</h3>
+            <span class="text-[11px] text-slate-500 font-medium">Madhya Pradesh State Electronics
+              Development
+              Corporation (MPSEDC) &bull; Tender No. 674</span>
+          </div>
+        </div>
+        <button type="button" onclick="closeDscReviewModal()"
+          class="text-slate-400 hover:text-slate-600 rounded-lg p-1.5 text-xl font-bold leading-none transition"
+          aria-label="Close dialog">
+          &times;
+        </button>
+      </div>
 
-              <!-- ========================================================================= -->
-              <!-- MODAL: FORM-2 UNDERTAKING TEMPLATE PREVIEW & DOWNLOAD                      -->
-              <!-- ========================================================================= -->
-              <div id="modal-form2-template"
-                class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 transition-opacity duration-200"
-                onclick="handleForm2ModalBackdropClick(event)">
-                <div id="modal-form2-template-card"
-                  class="bg-white rounded-xl shadow-2xl border border-slate-200 max-w-3xl w-full overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-150">
+      <!-- Scrollable Body -->
+      <div class="px-6 py-5 overflow-y-auto space-y-4 text-xs">
 
-                  <!-- Modal Header -->
-                  <div class="bg-[#2b579a] text-white px-5 py-3.5 flex items-center justify-between flex-shrink-0">
-                    <div class="flex items-center gap-2.5">
-                      <span class="text-xl">📄</span>
-                      <div>
-                        <h3 class="font-bold text-sm tracking-wide">Form-2 Undertaking Template</h3>
-                        <div class="text-[11px] text-blue-200 font-mono">Tender No. MPSEDC: ITIA: ALLOT: 2026:674 Dated
-                          12/02/2026
-                        </div>
-                      </div>
-                    </div>
-                    <button type="button" onclick="closeForm2TemplateModal()"
-                      class="text-white/80 hover:text-white text-2xl font-bold p-1 leading-none cursor-pointer border-0 bg-transparent transition"
-                      aria-label="Close">&times;</button>
-                  </div>
+        <!-- Header Alert Box -->
+        <div class="bg-amber-50 border-l-4 border-amber-500 p-3.5 rounded-r-lg flex items-start gap-3">
+          <span class="text-amber-600 text-base font-bold flex-shrink-0 mt-0.5">⚠️</span>
+          <div>
+            <div class="font-bold text-amber-900 text-xs sm:text-sm">
+              Important: Please review your entered details before applying your Class-3 Digital Signature
+              Certificate
+              (DSC).
+            </div>
+            <div class="text-amber-800 text-[11.5px] mt-0.5 leading-relaxed">
+              Once digitally signed, your technical bid docket will be cryptographically locked against
+              further
+              alterations under Madhya Pradesh IT Investment Policy guidelines.
+            </div>
+          </div>
+        </div>
 
-                  <!-- Advisory Banner -->
-                  <div
-                    class="bg-blue-50 border-b border-blue-200 px-5 py-2.5 text-xs text-blue-900 flex items-center justify-between gap-3 flex-shrink-0">
-                    <div class="flex items-center gap-2">
-                      <span class="text-blue-700 font-bold">ℹ️</span>
-                      <span>Please print or execute this statutory format on applicant entity letterhead with authorized
-                        stamp &amp;
-                        signature, then upload the scanned PDF under Document 7.</span>
-                    </div>
-                  </div>
+        <!-- Summary Reminder Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
 
-                  <!-- Printable Legal Document Sheet (Matching Official Format) -->
-                  <div class="p-6 overflow-y-auto flex-1 bg-slate-100 flex justify-center">
-                    <div id="form2-printable-doc"
-                      class="bg-white border border-slate-300 shadow-sm rounded-sm p-8 md:p-12 max-w-2xl w-full text-slate-900 leading-relaxed font-serif text-[13.5px]"
-                      style="font-family: 'Times New Roman', Times, Georgia, serif;">
+          <!-- Card 1: Target Plot & IT Park -->
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-1.5">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">1. Target Plot &amp;
+              Park</span>
+            <div class="font-extrabold text-slate-900 text-sm" id="modal-review-plot-no">Plot ITP-IND-201
+            </div>
+            <div class="text-slate-600 text-xs font-semibold" id="modal-review-it-park">Crystal IT Park,
+              Indore</div>
+            <span class="inline-block bg-blue-100 text-blue-800 font-semibold px-2 py-0.5 rounded text-[10px]"
+              id="modal-review-land-type">EOI Allotment (IT/ITeS)</span>
+          </div>
 
-                      <!-- Document Titles -->
-                      <div class="text-center font-bold text-lg mb-1 tracking-wide">
-                        Form-2
-                      </div>
-                      <div class="text-center font-bold text-base mb-8 tracking-wider uppercase">
-                        UNDERTAKING
-                      </div>
+          <!-- Card 2: Headcount & Capital Outlay -->
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-1.5">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">2. Commitments &amp;
+              Outlay</span>
+            <div class="text-xs text-slate-600">3-Year Headcount:</div>
+            <div class="font-extrabold text-blue-900 text-xs sm:text-[13px]" id="modal-review-headcount">500
+              Personnel
+            </div>
+            <div class="text-xs text-slate-600 pt-1">Proposed Capital Outlay:</div>
+            <div class="font-extrabold text-emerald-800 text-xs sm:text-[13px] font-mono" id="modal-review-outlay">₹
+              32,360,000.00</div>
+          </div>
 
-                      <!-- Legal Undertaking Text (Strictly Verbatim from Official Notification) -->
-                      <div class="space-y-4 text-justify mb-8 text-[13px] leading-[1.8] text-slate-900">
-                        <p>
-                          I/We will abide by all conditions which may be stipulated by the Ministry of Electronics &amp;
-                          Information
-                          Technology, Government of India/Department of Science and Technology, Government of Madhya
-                          Pradesh from
-                          time to time.
-                        </p>
+          <!-- Card 3: Upfront Liability -->
+          <div class="bg-emerald-50/70 border border-emerald-200 rounded-xl p-3.5 space-y-1.5">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700">3. Upfront
+              Liability</span>
+            <div class="text-[11px] text-emerald-800">Application Fee + 25% Advance EMD:</div>
+            <div class="font-extrabold text-emerald-950 text-sm sm:text-base font-mono pt-1" id="modal-review-upfront">₹
+              6,135,000.00</div>
+            <span class="text-[10px] text-emerald-700 block">Non-refundable Fee + 25% Premium Advance</span>
+          </div>
 
-                        <p>
-                          I/We hereby declare that above statements are true and correct to the best of my/our knowledge
-                          and belief.
-                        </p>
+        </div>
 
-                        <p>
-                          I/We fully undertake that the project/unit will abide by all the terms &amp;
-                          condition/eligibility
-                          criteria laid down by the Madhya Pradesh IT, ITeS and ESDM Investment Promotion Policy 2023,
-                          Madhya
-                          Pradesh Global Capability Centres Policy 2025, Madhya Pradesh AVGC-XR Policy 2025 &amp; Madhya
-                          Pradesh
-                          Semiconductor Policy 2025 and its guidelines.
-                        </p>
+        <!-- Applicant Details Row -->
+        <div class="bg-white border border-slate-200 rounded-xl p-3 flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <span class="text-[10px] uppercase font-bold text-slate-400 block">Applicant Organization</span>
+            ... [truncated for diff preview]
+            <span class="font-bold text-slate-800 text-xs" id="modal-review-applicant-name">Apex Precision
+              Engineering
+              Works Pvt Ltd</span>
+          </div>
+          <div>
+            <span class="text-[10px] uppercase font-bold text-slate-400 block">Authorized Signatory</span>
+            <span class="font-bold text-slate-800 text-xs" id="modal-review-signatory">Satya Vishwakarma
+              (Director)</span>
+          </div>
+          <div>
+            <span class="text-[10px] uppercase font-bold text-slate-400 block">DSC Token
+              Specification</span>
+            <span class="font-bold text-indigo-700 text-xs font-mono">Class-3 Signing (CCA / USB
+              Token)</span>
+          </div>
+        </div>
 
-                        <p>
-                          I/We fully undertake that Letter of Allotment, granted to me/us based on the
-                          information/documents
-                          furnished are found incorrect or false, is liable for cancellation. In addition, the nodal
-                          agency may
-                          impose penalty or take action in this regard.
-                        </p>
+        <!-- Advisory / Suggestion Box -->
+        <div
+          class="bg-blue-50/70 border border-blue-200 rounded-xl p-3.5 text-xs text-blue-900 leading-relaxed flex items-start gap-3">
+          <span class="text-base text-blue-600 flex-shrink-0"></span>
+          <div>
+            <p class="font-medium m-0">
+              <b>Advisory / Suggestion:</b> Once your DSC is affixed, all project parameters and uploaded
+              documents will
+              be locked and sealed for technical committee scrutiny under Tender No. 674. If you need to
+              make
+              corrections, click "Edit Details" now.
+            </p>
+          </div>
+        </div>
 
-                        <p>
-                          I/We hereby undertake that we shall carry out the activities shown as specified in Form-1 Part
-                          6 of the
-                          tender submitted with the application and if any new activity is added it will be of the same
-                          class i.e.,
-                          IT/ITeS/ESDM/Data Centre/GCC/AVGC-XR/Semiconductor as the case may be, If the Plot/Area
-                          applied by me/us
-                          is allotted to, me/us on the basis of online Tender No. MPSEDC: ITIA: ALLOT: 2026:674 Dated
-                          12/02/2026.
-                        </p>
-                      </div>
+      </div>
 
-                      <!-- Seal, Stamp & Signature Grid (Verbatim Layout) -->
-                      <div
-                        class="pt-8 mt-6 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-8 text-[13px]">
-                        <!-- Left Column: Seal / Stamp & Applicant Particulars -->
-                        <div class="space-y-2">
-                          <div class="font-bold text-slate-900 pb-8">
-                            Seal / Stamp of the Organization
-                          </div>
-                          <div class="flex items-baseline gap-1 text-xs">
-                            <span class="font-semibold text-slate-700 whitespace-nowrap">Name in Block Letters:</span>
-                            <span id="form2-modal-name"
-                              class="font-sans font-medium text-slate-900 border-b border-dotted border-slate-400 flex-1 pl-1">Apex
-                              Precision Engineering Works Pvt Ltd</span>
-                          </div>
-                          <div class="flex items-baseline gap-1 text-xs">
-                            <span class="font-semibold text-slate-700 whitespace-nowrap">Designation:</span>
-                            <span id="form2-modal-designation"
-                              class="font-sans font-medium text-slate-900 border-b border-dotted border-slate-400 flex-1 pl-1">Managing
-                              Director</span>
-                          </div>
-                          <div class="flex items-baseline gap-1 text-xs">
-                            <span class="font-semibold text-slate-700 whitespace-nowrap">E-mail id:</span>
-                            <span id="form2-modal-email"
-                              class="font-sans font-medium text-slate-900 border-b border-dotted border-slate-400 flex-1 pl-1">satya.v@apexprecision.in</span>
-                          </div>
-                          <div class="flex items-baseline gap-1 text-xs">
-                            <span class="font-semibold text-slate-700 whitespace-nowrap">Aadhaar No.:</span>
-                            <span id="form2-modal-aadhaar"
-                              class="font-sans font-medium text-slate-900 border-b border-dotted border-slate-400 flex-1 pl-1">XXXX-XXXX-8921</span>
-                          </div>
-                          <div class="flex items-baseline gap-1 text-xs">
-                            <span class="font-semibold text-slate-700 whitespace-nowrap">Mobile No.:</span>
-                            <span id="form2-modal-mobile"
-                              class="font-sans font-medium text-slate-900 border-b border-dotted border-slate-400 flex-1 pl-1">+91
-                              98260 12345</span>
-                          </div>
-                        </div>
+      <!-- Modal Footer Action Buttons -->
+      <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-end gap-3">
+        <button type="button" onclick="closeDscReviewModalAndEdit()"
+          class="px-5 py-2.5 text-xs font-bold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 transition shadow-xs cursor-pointer flex items-center gap-1.5">
+          <span>✏️</span>
+          <span>Edit Details</span>
+        </button>
+        ... [truncated for diff preview]
+        <button type="button" id="modal-confirm-dsc-btn" onclick="confirmDscAndFinalSubmit()"
+          class="px-6 py-2.5 text-xs font-bold text-white bg-blue-700 hover:bg-blue-800 rounded-lg transition shadow-md hover:shadow-lg cursor-pointer flex items-center gap-2">
+          <span>🔏</span>
+          <span>Confirm, Affix DSC &amp; Submit</span>
+        </button>
+      </div>
 
-                        <!-- Right Column: Signature of the Authorized Person -->
-                        <div class="flex flex-col justify-between sm:items-end">
-                          <div class="font-bold text-slate-900 pb-16 sm:text-right">
-                            Signature of the Authorized Person
-                          </div>
-                          <div class="sm:text-right w-full pt-4 border-t border-slate-300">
-                            <span class="font-sans text-xs text-slate-500 italic block">(Authorized Signatory)</span>
-                            <span id="form2-modal-auth-signatory"
-                              class="font-sans font-semibold text-slate-900 text-xs">Satya
-                              Vishwakarma</span>
-                          </div>
-                        </div>
-                      </div>
+    </div>
+  </div>
 
-                    </div>
-                  </div>
+  <!-- Modal: View Application Docket -->
+  <div id="modal-view-docket"
+    class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[9999] hidden transition-opacity duration-200 p-4"
+    onclick="handleDocketModalBackdropClick(event)">
+    <div id="modal-view-docket-card"
+      class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full border border-slate-200 overflow-hidden transform transition-all duration-200 scale-95 opacity-0 flex flex-col max-h-[90vh]">
 
-                  <!-- Modal Footer Actions -->
-                  <div
-                    class="bg-slate-50 px-5 py-3 border-t border-slate-200 flex flex-wrap justify-between items-center gap-3 flex-shrink-0">
-                    <div class="flex items-center gap-2">
-                      <button type="button" onclick="downloadForm2Document()"
-                        class="bg-[#2b579a] hover:bg-blue-900 text-white font-semibold text-xs py-2 px-4 rounded-[3px] shadow-sm transition inline-flex items-center gap-1.5 cursor-pointer border-0">
-                        <span>⬇</span><span>Download Template (.DOC)</span>
-                      </button>
-                      <button type="button" onclick="printForm2Document()"
-                        class="bg-white hover:bg-slate-100 text-slate-700 font-semibold text-xs py-2 px-4 rounded-[3px] border border-slate-300 shadow-2xs transition inline-flex items-center gap-1.5 cursor-pointer">
-                        <span>🖨️</span><span>Print Form-2</span>
-                      </button>
-                    </div>
-                    <button type="button" onclick="closeForm2TemplateModal()"
-                      class="bg-slate-700 hover:bg-slate-800 text-white font-semibold text-xs py-2 px-5 rounded-[3px] transition cursor-pointer border-0">
-                      Close
-                    </button>
-                  </div>
+      <div
+        class="px-6 py-4 bg-gradient-to-r from-slate-50 to-blue-50/50 border-b border-slate-200 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div
+            class="w-9 h-9 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-base shadow-xs">
+            📄
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-slate-900">Application Bidding Docket</h3>
+            <span class="text-[11px] text-slate-500 font-medium">MPSEDC Land Allotment Module &bull;
+              Official
+              Dossier</span>
+          </div>
+        </div>
+        <button type="button" onclick="closeDocketModal()"
+          class="text-slate-400 hover:text-slate-600 rounded-lg p-1.5 text-xl font-bold leading-none transition"
+          aria-label="Close docket">
+          &times;
+        </button>
+      </div>
 
-                </div>
-              </div>
+      <div class="px-6 py-5 overflow-y-auto" id="modal-docket-content">
+        <!-- Content populated dynamically -->
+      </div>
 
-              <!-- Modal: Document Viewer Preview -->
-              <div id="modal-doc-viewer"
-                class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-                <div
-                  class="bg-white rounded-lg shadow-2xl border border-slate-200 max-w-2xl w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150 flex flex-col max-h-[90vh]">
-                  <div class="bg-[#2b579a] text-white px-5 py-3.5 flex items-center justify-between flex-shrink-0">
-                    <div class="flex items-center gap-2">
-                      <span class="text-base">📄</span>
-                      <div>
-                        <h3 class="font-bold text-sm tracking-wide" id="doc-modal-title">Document Preview</h3>
-                        <div class="text-[10px] text-blue-200 font-mono" id="doc-modal-filename">verified_document.pdf
-                        </div>
-                      </div>
-                    </div>
-                    <button type="button" onclick="closeDocViewerModal()"
-                      class="text-white/80 hover:text-white text-xl font-bold p-1 leading-none cursor-pointer"
-                      aria-label="Close">&times;</button>
-                  </div>
+      <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+        <span class="text-[11px] text-slate-500 font-medium">Class-3 DSC Validated &bull; Tender No.
+          674</span>
+        <div class="flex items-center gap-3">
+          <button type="button" onclick="downloadApplicationReceipt()"
+            class="px-4 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 transition shadow-xs cursor-pointer">
+            ⬇ Download Receipt
+          </button>
+          <button type="button" onclick="closeDocketModal()"
+            class="px-5 py-2 text-xs font-bold text-white bg-blue-700 hover:bg-blue-800 rounded-lg transition shadow-xs cursor-pointer">
+            Close
+          </button>
+        </div>
+      </div>
 
-                  <div class="p-5 overflow-y-auto space-y-4 flex-1">
-                    <div
-                      class="bg-emerald-50 border border-emerald-200 rounded p-2.5 flex items-center justify-between text-xs">
-                      <div class="flex items-center gap-2 text-emerald-800 font-semibold">
-                        <span class="text-emerald-600 font-bold">✓</span>
-                        <span>Digitally Verified &amp; Watermarked Document</span>
-                      </div>
-                      <span class="text-[11px] font-mono text-emerald-700" id="doc-modal-sha">SHA256:4a8f9c...</span>
-                    </div>
+    </div>
+  </div>
 
-                    <div
-                      class="border border-slate-300 rounded-lg p-6 bg-slate-50 min-h-[260px] flex flex-col justify-between relative shadow-inner">
-                      <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-5">
-                        <span
-                          class="text-6xl font-black text-slate-900 rotate-[-30deg] tracking-widest uppercase">MPSEDC
-                          VERIFIED</span>
-                      </div>
-                      <div>
-                        <div class="flex justify-between items-start border-b border-slate-300 pb-3 mb-4">
-                          <div>
-                            <div class="text-xs uppercase font-bold text-slate-500">Government of Madhya Pradesh</div>
-                            <div class="text-sm font-black text-slate-800" id="doc-modal-body-title">Mandatory
-                              Verification Document
-                            </div>
-                          </div>
-                          <div class="text-right text-[11px] text-slate-500">
-                            <div>Tender: MPSEDC:ITIA:2026:674</div>
-                            <div class="font-mono text-emerald-700 font-bold">Status: Scrutinized</div>
-                          </div>
-                        </div>
-                        <div class="space-y-2 text-xs text-slate-600 leading-relaxed" id="doc-modal-body-desc">
-                          This document has been uploaded as part of the Expression of Interest (EOI) application for
-                          Land Allotment
-                          under the Madhya Pradesh IT, ITeS &amp; ESDM Investment Promotion Policy 2023. File integrity
-                          has been
-                          cryptographically confirmed.
-                        </div>
-                      </div>
-                      <div
-                        class="border-t border-slate-200 pt-3 flex items-center justify-between text-[11px] text-slate-500">
-                        <span>File Type: Application/PDF (Max 2 MB)</span>
-                        <span id="doc-modal-signatory">Verified Signatory: Apex Precision Engineering</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div
-                    class="bg-slate-100 px-5 py-3 border-t border-slate-200 flex justify-between items-center flex-shrink-0">
-                    <button type="button"
-                      onclick="showGlobalToast('Downloading certified copy of ' + document.getElementById('doc-modal-filename').textContent, 'success')"
-                      class="text-xs font-semibold text-blue-700 hover:text-blue-900 inline-flex items-center gap-1.5 cursor-pointer">
-                      <span>⬇</span><span>Download Certified Copy</span>
-                    </button>
-                    <button type="button" onclick="closeDocViewerModal()"
-                      class="bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs px-5 py-2 rounded transition cursor-pointer">
-                      Close Preview
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div id="modal-dsc-review"
-                class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[9999] hidden transition-opacity duration-200 p-4"
-                onclick="handleDscModalBackdropClick(event)">
-                <div id="modal-dsc-review-card"
-                  class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full border border-slate-200 overflow-hidden transform transition-all duration-200 scale-95 opacity-0 flex flex-col max-h-[90vh]">
-
-                  <!-- Header -->
-                  <div
-                    class="px-6 py-4 bg-gradient-to-r from-slate-50 to-blue-50/50 border-b border-slate-200 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                      <div
-                        class="w-9 h-9 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-base shadow-xs">
-                        🔏
-                      </div>
-                      <div>
-                        <h3 class="text-base font-extrabold text-slate-900">Review &amp; Confirm EOI Application</h3>
-                        <span class="text-[11px] text-slate-500 font-medium">Madhya Pradesh State Electronics
-                          Development
-                          Corporation (MPSEDC) &bull; Tender No. 674</span>
-                      </div>
-                    </div>
-                    <button type="button" onclick="closeDscReviewModal()"
-                      class="text-slate-400 hover:text-slate-600 rounded-lg p-1.5 text-xl font-bold leading-none transition"
-                      aria-label="Close dialog">
-                      &times;
-                    </button>
-                  </div>
-
-                  <!-- Scrollable Body -->
-                  <div class="px-6 py-5 overflow-y-auto space-y-4 text-xs">
-
-                    <!-- Header Alert Box -->
-                    <div class="bg-amber-50 border-l-4 border-amber-500 p-3.5 rounded-r-lg flex items-start gap-3">
-                      <span class="text-amber-600 text-base font-bold flex-shrink-0 mt-0.5">⚠️</span>
-                      <div>
-                        <div class="font-bold text-amber-900 text-xs sm:text-sm">
-                          Important: Please review your entered details before applying your Class-3 Digital Signature
-                          Certificate
-                          (DSC).
-                        </div>
-                        <div class="text-amber-800 text-[11.5px] mt-0.5 leading-relaxed">
-                          Once digitally signed, your technical bid docket will be cryptographically locked against
-                          further
-                          alterations under Madhya Pradesh IT Investment Policy guidelines.
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Summary Reminder Cards Grid -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-
-                      <!-- Card 1: Target Plot & IT Park -->
-                      <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-1.5">
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">1. Target Plot &amp;
-                          Park</span>
-                        <div class="font-extrabold text-slate-900 text-sm" id="modal-review-plot-no">Plot ITP-IND-201
-                        </div>
-                        <div class="text-slate-600 text-xs font-semibold" id="modal-review-it-park">Crystal IT Park,
-                          Indore</div>
-                        <span
-                          class="inline-block bg-blue-100 text-blue-800 font-semibold px-2 py-0.5 rounded text-[10px]"
-                          id="modal-review-land-type">EOI Allotment (IT/ITeS)</span>
-                      </div>
-
-                      <!-- Card 2: Headcount & Capital Outlay -->
-                      <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-1.5">
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">2. Commitments &amp;
-                          Outlay</span>
-                        <div class="text-xs text-slate-600">3-Year Headcount:</div>
-                        <div class="font-extrabold text-blue-900 text-xs sm:text-[13px]" id="modal-review-headcount">500
-                          Personnel
-                        </div>
-                        <div class="text-xs text-slate-600 pt-1">Proposed Capital Outlay:</div>
-                        <div class="font-extrabold text-emerald-800 text-xs sm:text-[13px] font-mono"
-                          id="modal-review-outlay">₹
-                          32,360,000.00</div>
-                      </div>
-
-                      <!-- Card 3: Upfront Liability -->
-                      <div class="bg-emerald-50/70 border border-emerald-200 rounded-xl p-3.5 space-y-1.5">
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700">3. Upfront
-                          Liability</span>
-                        <div class="text-[11px] text-emerald-800">Application Fee + 25% Advance EMD:</div>
-                        <div class="font-extrabold text-emerald-950 text-sm sm:text-base font-mono pt-1"
-                          id="modal-review-upfront">₹
-                          6,135,000.00</div>
-                        <span class="text-[10px] text-emerald-700 block">Non-refundable Fee + 25% Premium Advance</span>
-                      </div>
-
-                    </div>
-
-                    <!-- Applicant Details Row -->
-                    <div
-                      class="bg-white border border-slate-200 rounded-xl p-3 flex flex-wrap items-center justify-between gap-2">
-                      <div>
-                        <span class="text-[10px] uppercase font-bold text-slate-400 block">Applicant Organization</span>
-                        ... [truncated for diff preview]
-                        <span class="font-bold text-slate-800 text-xs" id="modal-review-applicant-name">Apex Precision
-                          Engineering
-                          Works Pvt Ltd</span>
-                      </div>
-                      <div>
-                        <span class="text-[10px] uppercase font-bold text-slate-400 block">Authorized Signatory</span>
-                        <span class="font-bold text-slate-800 text-xs" id="modal-review-signatory">Satya Vishwakarma
-                          (Director)</span>
-                      </div>
-                      <div>
-                        <span class="text-[10px] uppercase font-bold text-slate-400 block">DSC Token
-                          Specification</span>
-                        <span class="font-bold text-indigo-700 text-xs font-mono">Class-3 Signing (CCA / USB
-                          Token)</span>
-                      </div>
-                    </div>
-
-                    <!-- Advisory / Suggestion Box -->
-                    <div
-                      class="bg-blue-50/70 border border-blue-200 rounded-xl p-3.5 text-xs text-blue-900 leading-relaxed flex items-start gap-3">
-                      <span class="text-base text-blue-600 flex-shrink-0"></span>
-                      <div>
-                        <p class="font-medium m-0">
-                          <b>Advisory / Suggestion:</b> Once your DSC is affixed, all project parameters and uploaded
-                          documents will
-                          be locked and sealed for technical committee scrutiny under Tender No. 674. If you need to
-                          make
-                          corrections, click "Edit Details" now.
-                        </p>
-                      </div>
-                    </div>
-
-                  </div>
-
-                  <!-- Modal Footer Action Buttons -->
-                  <div
-                    class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-end gap-3">
-                    <button type="button" onclick="closeDscReviewModalAndEdit()"
-                      class="px-5 py-2.5 text-xs font-bold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 transition shadow-xs cursor-pointer flex items-center gap-1.5">
-                      <span>✏️</span>
-                      <span>Edit Details</span>
-                    </button>
-                    <button type="button" id="modal-confirm-dsc-btn" onclick="confirmDscAndFinalSubmit()"
-                      class="px-6 py-2.5 text-xs font-bold text-white bg-blue-700 hover:bg-blue-800 rounded-lg transition shadow-md hover:shadow-lg cursor-pointer flex items-center gap-2">
-                      <span>🔏</span>
-                      <span>Confirm, Affix DSC &amp; Submit</span>
-                    </button>
-                  </div>
-
-                </div>
-              </div>
-
-              <!-- Modal: View Application Docket -->
-              <div id="modal-view-docket"
-                class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[9999] hidden transition-opacity duration-200 p-4"
-                onclick="handleDocketModalBackdropClick(event)">
-                <div id="modal-view-docket-card"
-                  class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full border border-slate-200 overflow-hidden transform transition-all duration-200 scale-95 opacity-0 flex flex-col max-h-[90vh]">
-
-                  <div
-                    class="px-6 py-4 bg-gradient-to-r from-slate-50 to-blue-50/50 border-b border-slate-200 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                      <div
-                        class="w-9 h-9 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-base shadow-xs">
-                        📄
-                      </div>
-                      <div>
-                        <h3 class="text-base font-extrabold text-slate-900">Application Bidding Docket</h3>
-                        <span class="text-[11px] text-slate-500 font-medium">MPSEDC Land Allotment Module &bull;
-                          Official
-                          Dossier</span>
-                      </div>
-                    </div>
-                    <button type="button" onclick="closeDocketModal()"
-                      class="text-slate-400 hover:text-slate-600 rounded-lg p-1.5 text-xl font-bold leading-none transition"
-                      aria-label="Close docket">
-                      &times;
-                    </button>
-                  </div>
-
-                  <div class="px-6 py-5 overflow-y-auto" id="modal-docket-content">
-                    <!-- Content populated dynamically -->
-                  </div>
-
-                  <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
-                    <span class="text-[11px] text-slate-500 font-medium">Class-3 DSC Validated &bull; Tender No.
-                      674</span>
-                    <div class="flex items-center gap-3">
-                      <button type="button" onclick="downloadApplicationReceipt()"
-                        class="px-4 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 transition shadow-xs cursor-pointer">
-                        ⬇ Download Receipt
-                      </button>
-                      <button type="button" onclick="closeDocketModal()"
-                        class="px-5 py-2 text-xs font-bold text-white bg-blue-700 hover:bg-blue-800 rounded-lg transition shadow-xs cursor-pointer">
-                        Close
-                      </button>
-                    </div>
-                  </div>
-
-                </div>
-              </div>
-
-              <!-- Modal: OIC Action Taken Successfully Confirmation (Matching Screenshot 5) -->
-              <div id="modal-oic-action-success"
-                class="hidden fixed inset-0 z-[10000] bg-slate-900/45 backdrop-blur-[1px] flex items-center justify-center p-4">
-                <div
-                  class="bg-white rounded-md shadow-2xl border border-slate-200 max-w-md w-full px-8 py-9 text-center space-y-5">
-                  <div
-                    class="w-20 h-20 rounded-full border-[3px] border-[#dcfce7] bg-[#f0fdf4] mx-auto flex items-center justify-center">
-                    <svg class="w-10 h-10 text-[#86efac]" style="color:#4ade80" fill="none" stroke="currentColor"
-                      stroke-width="3" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <div class="space-y-1.5">
-                    <h3 class="text-xl font-bold text-slate-700">Action Taken Successfully</h3>
-                    <p id="oic-success-modal-sub" class="text-xs text-slate-500 leading-relaxed"></p>
-                  </div>
-                  <div>
-                    <button type="button" onclick="confirmOicSuccessModalOk()"
-                      class="bg-[#7c69ef] hover:bg-[#6a56e2] text-white font-bold text-sm px-7 py-2.5 rounded shadow-sm transition cursor-pointer">
-                      OK
-                    </button>
-                  </div>
-                </div>
-              </div>
+  <!-- Modal: OIC Action Taken Successfully Confirmation (Matching Screenshot 5) -->
+  <div id="modal-oic-action-success"
+    class="hidden fixed inset-0 z-[10000] bg-slate-900/45 backdrop-blur-[1px] flex items-center justify-center p-4">
+    <div class="bg-white rounded-md shadow-2xl border border-slate-200 max-w-md w-full px-8 py-9 text-center space-y-5">
+      <div
+        class="w-20 h-20 rounded-full border-[3px] border-[#dcfce7] bg-[#f0fdf4] mx-auto flex items-center justify-center">
+        <svg class="w-10 h-10 text-[#86efac]" style="color:#4ade80" fill="none" stroke="currentColor" stroke-width="3"
+          viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+      <div class="space-y-1.5">
+        <h3 class="text-xl font-bold text-slate-700">Action Taken Successfully</h3>
+        <p id="oic-success-modal-sub" class="text-xs text-slate-500 leading-relaxed"></p>
+      </div>
+      <div>
+        <button type="button" onclick="confirmOicSuccessModalOk()"
+          class="bg-[#7c69ef] hover:bg-[#6a56e2] text-white font-bold text-sm px-7 py-2.5 rounded shadow-sm transition cursor-pointer">
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
 
 </body>
 
