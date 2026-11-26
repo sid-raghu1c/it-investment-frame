@@ -1231,7 +1231,8 @@
       // 4. Section 3 Tariffs & Outlays
       const landPrem = document.getElementById('plot-land-prem-display')?.textContent?.trim() || '₹ 24,500,000.00';
       const rebateVal = document.getElementById('plot-rebate-display')?.textContent?.trim() || '₹ 0.00';
-      const netPrem = document.getElementById('cost-land')?.value ? `₹ ${parseFloat(document.getElementById('cost-land').value).toLocaleString('en-IN')}.00` : landPrem;
+      const costLandEl = document.getElementById('cost-land');
+      const netPrem = costLandEl?.value ? `₹ ${parseFloat(costLandEl.value).toLocaleString('en-IN')}.00` : landPrem;
       const advPrem = document.getElementById('plot-advance-prem-display')?.textContent?.trim() || '₹ 6,125,000.00';
       const devCharges = document.getElementById('plot-dev-charges-display')?.textContent?.trim() || '₹ 7,000,000.00';
       const leaseRent = document.getElementById('plot-lease-rent-display')?.textContent?.trim() || '₹ 245,000.00';
@@ -1253,11 +1254,15 @@
       if (elSecDep) elSecDep.textContent = secDeposit;
 
       // Capital Outlay values
-      const costLand = document.getElementById('cost-land')?.value ? `₹ ${parseFloat(document.getElementById('cost-land').value).toLocaleString('en-IN')}.00` : netPrem;
-      const costDev = document.getElementById('cost-dev')?.value ? `₹ ${parseFloat(document.getElementById('cost-dev').value).toLocaleString('en-IN')}.00` : '₹ 2,500,000.00';
-      const costBuilding = document.getElementById('cost-building')?.value ? `₹ ${parseFloat(document.getElementById('cost-building').value).toLocaleString('en-IN')}.00` : '₹ 45,000,000.00';
-      const costMachinery = document.getElementById('cost-machinery')?.value ? `₹ ${parseFloat(document.getElementById('cost-machinery').value).toLocaleString('en-IN')}.00` : '₹ 18,000,000.00';
-      const costContingency = document.getElementById('cost-contingency')?.value ? `₹ ${parseFloat(document.getElementById('cost-contingency').value).toLocaleString('en-IN')}.00` : '₹ 2,000,000.00';
+      const fmtPreviewCost = (id, fb) => {
+        const val = document.getElementById(id)?.value;
+        return val ? `₹ ${parseFloat(val).toLocaleString('en-IN')}.00` : fb;
+      };
+      const costLand = fmtPreviewCost('cost-land', netPrem);
+      const costDev = fmtPreviewCost('cost-dev', '₹ 2,500,000.00');
+      const costBuilding = fmtPreviewCost('cost-building', '₹ 45,000,000.00');
+      const costMachinery = fmtPreviewCost('cost-machinery', '₹ 18,000,000.00');
+      const costContingency = fmtPreviewCost('cost-contingency', '₹ 2,000,000.00');
       const totalCost = document.getElementById('total-project-cost-display')?.textContent?.trim() || '₹ 92,000,000.00';
 
       const elCostLand = document.getElementById('preview-cost-land');
@@ -1274,9 +1279,9 @@
       if (elTotalCost) elTotalCost.textContent = totalCost;
 
       // Financing values
-      const finEquity = document.getElementById('fin-equity')?.value ? `₹ ${parseFloat(document.getElementById('fin-equity').value).toLocaleString('en-IN')}.00` : '₹ 55,000,000.00';
-      const finLoan = document.getElementById('fin-loan')?.value ? `₹ ${parseFloat(document.getElementById('fin-loan').value).toLocaleString('en-IN')}.00` : '₹ 32,000,000.00';
-      const finOther = document.getElementById('fin-other')?.value ? `₹ ${parseFloat(document.getElementById('fin-other').value).toLocaleString('en-IN')}.00` : '₹ 5,000,000.00';
+      const finEquity = fmtPreviewCost('fin-equity', '₹ 55,000,000.00');
+      const finLoan = fmtPreviewCost('fin-loan', '₹ 32,000,000.00');
+      const finOther = fmtPreviewCost('fin-other', '₹ 5,000,000.00');
       const totalFin = document.getElementById('total-means-finance-display')?.textContent?.trim() || totalCost;
 
       const elFinEq = document.getElementById('preview-fin-equity');
@@ -1289,7 +1294,8 @@
       if (elTotFin) elTotFin.textContent = totalFin;
 
       // Developer Track & Promoters Preview
-      const isDevTrack = (category.toLowerCase().includes('developer') || (document.getElementById('devOnlyBlock') && document.getElementById('devOnlyBlock').style.display !== 'none'));
+      const devOnlyEl = document.getElementById('devOnlyBlock');
+      const isDevTrack = (category.toLowerCase().includes('developer') || Boolean(devOnlyEl && devOnlyEl.style.display !== 'none'));
       const prevDevBlock = document.getElementById('preview-developer-block');
       if (prevDevBlock) {
         if (isDevTrack) {
@@ -3744,7 +3750,8 @@
             <h2 id="investor-table-heading">Applied application list</h2>
             <button type="button" onclick="resetAllPortalStorage()"
               style="background:rgba(255,255,255,0.16);color:#fff;border:1px solid rgba(255,255,255,0.3);padding:4px 10px;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;"
-              title="Clear all saved plots, drafts, and applications from browser storage">Reset Saved Data</button>
+              title="Clear all saved plots, drafts, and applications from browser storage and reset counters to 0">Reset
+              All Data (0)</button>
           </div>
           <div class="pb">
             <div class="search"><label for="q">Application No</label><input id="q" type="text"
@@ -6242,47 +6249,162 @@
 
       <!-- ========================================================================= -->
       <!-- VIEW 6B: OIC IT PARK - GENERATE LOA OFFICIAL LETTER (#view-oic-generate-loa) -->
-      <!-- Modeled on Official MPSEDC LOA Letter Sheet adapted to Land Allotment     -->
+      <!-- Section 1: Cascading Selection & Post-E-Bidding Land Premium Card          -->
+      <!-- Section 2: Official MPSEDC LOA Letter Preview & Generate LOA Action        -->
       <!-- ========================================================================= -->
       <div id="view-oic-generate-loa" class="hidden px-6 py-5 flex-1" style="margin-top: 0; padding-top: 20px;">
-        <div style="max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:16px;">
+        <div style="max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:18px;">
 
-          <!-- Top Application Selector & Status Bar -->
-          <div
-            style="background:#ffffff;border:1px solid #dbe1ea;border-radius:4px;padding:12px 18px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 1px 4px rgba(15,23,42,0.05);">
-            <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
-              <label for="loa-app-select"
-                style="font-size:12px;font-weight:700;color:#3b5998;white-space:nowrap;">Select Approved / Eligible
-                Application:</label>
-              <select id="loa-app-select" onchange="selectLoaApplication(this.value)"
-                style="border:1px solid #cbd5e1;border-radius:4px;padding:6px 12px;font-size:12.5px;color:#1e293b;background:#ffffff;min-width:340px;outline:none;">
-                <option value="">-- Select Application --</option>
-              </select>
+          <!-- SECTION 1: LOA Selection & Post-E-Bidding Land Premium Card -->
+          <div id="loa-selection-section"
+            style="background:#ffffff;border:1px solid #cbd5e1;border-radius:6px;overflow:hidden;box-shadow:0 2px 8px rgba(15,23,42,0.06);">
+            <div
+              style="background:linear-gradient(135deg,#3b5998 0%,#4267b2 100%);color:#ffffff;padding:12px 20px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;">
+              <div>
+                <h2 style="margin:0;font-size:14.5px;font-weight:700;color:#ffffff;letter-spacing:0.01em;">
+                  LOA &amp; Post-E-Bidding Land Premium
+                </h2>
+                <div style="font-size:11.5px;color:#dbeafe;margin-top:2px;">
+                  Update Land Premium post e-bidding to preview
+                  &amp; generate LOA
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <!-- <span id="loa-status-badge"
+                  style="display:inline-block;background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;font-size:11px;font-weight:700;padding:4px 10px;border-radius:9999px;">
+                  Ready for LOA
+                </span> -->
+                <button type="button" onclick="switchView('oic-it-park')"
+                  style="background:rgba(255,255,255,0.16);color:#ffffff;border:1px solid rgba(255,255,255,0.35);border-radius:4px;padding:5px 12px;font-size:11.5px;font-weight:600;cursor:pointer;">
+                  &larr; Back to Dashboard
+                </button>
+              </div>
             </div>
-            <div style="display:flex;align-items:center;gap:10px;">
-              <span id="loa-status-badge"
-                style="display:inline-block;background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;font-size:11px;font-weight:700;padding:4px 10px;border-radius:9999px;">
-                Ready for LOA
+
+            <div style="padding:18px 20px;display:flex;flex-direction:column;gap:14px;">
+              <!-- LOA Generation Success Banner -->
+              <div id="loa-success-banner" class="hidden"
+                style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:5px;padding:10px 14px;font-size:12px;color:#065f46;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                <div id="loa-success-banner-text"></div>
+              </div>
+
+              <!-- Row 1: Cascading IT Park -> Plot No. -> Eligible Application -->
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;">
+                <div>
+                  <label for="loa-it-park-select"
+                    style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:5px;">
+                    IT Park <span style="color:#dc2626;">*</span>
+                  </label>
+                  <select id="loa-it-park-select" onchange="handleLoaItParkChange(this.value)"
+                    style="width:100%;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:4px;padding:8px 10px;font-size:12.5px;color:#1e293b;background:#ffffff;outline:none;">
+                    <option value="">-- Select IT Park --</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label for="loa-plot-no-select"
+                    style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:5px;">
+                    Plot No. <span style="color:#dc2626;">*</span>
+                  </label>
+                  <select id="loa-plot-no-select" onchange="handleLoaPlotNoChange(this.value)"
+                    style="width:100%;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:4px;padding:8px 10px;font-size:12.5px;color:#1e293b;background:#ffffff;outline:none;">
+                    <option value="">-- Select Plot No. --</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label for="loa-eligible-app-select"
+                    style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:5px;">
+                    Select Eligible Application: <span style="color:#dc2626;">*</span>
+                  </label>
+                  <select id="loa-eligible-app-select" onchange="selectLoaApplication(this.value)"
+                    style="width:100%;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:4px;padding:8px 10px;font-size:12.5px;color:#1e293b;background:#ffffff;outline:none;">
+                    <option value="">-- Select Eligible Application --</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Row 2: Old Land Premium Amount & Updated Land Premium (Post E-Bidding) -->
+              <div
+                style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;align-items:start;">
+                <div>
+                  <label for="loa-old-premium-input"
+                    style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:5px;">
+                    Old Land Premium Amount
+                  </label>
+                  <input type="text" id="loa-old-premium-input" readonly value="Rs. 0.00"
+                    style="width:100%;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:4px;padding:8px 10px;font-size:12.5px;font-weight:700;font-family:monospace;color:#334155;background:#f1f5f9;outline:none;">
+                  <div style="font-size:11px;color:#64748b;margin-top:3px;">
+                    Base / pre-bidding land premium from selected application / plot record
+                  </div>
+                </div>
+
+                <div>
+                  <label for="loa-updated-premium-input"
+                    style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:5px;">
+                    Updated Land Premium (Post E-Bidding, Rs.)
+                  </label>
+                  <input type="number" id="loa-updated-premium-input" min="0" step="0.01"
+                    placeholder="Enter updated land premium after e-bidding"
+                    oninput="handleLoaUpdatedPremiumInput(this.value)"
+                    style="width:100%;box-sizing:border-box;border:1px solid #93c5fd;border-radius:4px;padding:8px 10px;font-size:12.5px;font-weight:700;font-family:monospace;color:#0f172a;background:#ffffff;outline:none;">
+                  <div id="loa-updated-premium-hint" style="font-size:11px;color:#1d4ed8;margin-top:3px;">
+                    Edit to reflect post-e-bidding land premium; leave blank to retain Old Land Premium Amount
+                  </div>
+                </div>
+
+                <!-- Live Recalculated Summary Box -->
+                <div
+                  style="background:#f8fafc;border:1px solid #dbe1ea;border-radius:4px;padding:10px 12px;font-size:11.5px;color:#334155;display:flex;flex-direction:column;gap:4px;">
+                  <div
+                    style="font-weight:700;color:#3b5998;text-transform:uppercase;font-size:10.5px;letter-spacing:0.03em;">
+                    Recalculated Remaning Amount Payable Summary
+                  </div>
+                  <div style="display:flex;justify-content:space-between;gap:8px;">
+                    <span>Effective Land Premium:</span>
+                    <b id="loa-calc-effective-premium" style="font-family:monospace;color:#0f172a;">Rs. 0.00</b>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;gap:8px;">
+                    <span>Lease Rent (@2% + 18% GST):</span>
+                    <b id="loa-calc-lease-total" style="font-family:monospace;color:#0f172a;">Rs. 0.00</b>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;gap:8px;">
+                    <span>Development Charges:</span>
+                    <b id="loa-calc-dev-charges" style="font-family:monospace;color:#0f172a;">Rs. 0.00</b>
+                  </div>
+                  <div
+                    style="display:flex;justify-content:space-between;gap:8px;border-top:1px solid #cbd5e1;padding-top:4px;margin-top:2px;">
+                    <span style="font-weight:700;color:#1e3a8a;">Total Remaning Payable amount</span>
+                    <b id="loa-calc-grand-total" style="font-family:monospace;color:#1e3a8a;">Rs. 0.00</b>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 2: Official Letter of Allotment (LOA) Preview & Action -->
+          <div id="loa-letter-section"
+            style="background:#ffffff;border:1px solid #cbd5e1;border-radius:6px;overflow:hidden;box-shadow:0 2px 8px rgba(15,23,42,0.06);">
+            <div
+              style="background:#3b5998;color:#ffffff;padding:10px 20px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;">
+              <span style="font-size:13.5px;font-weight:700;color:#ffffff;">
+                Letter of Allotment (LOA)
               </span>
-              <button type="button" onclick="switchView('oic-it-park')"
-                style="background:#f8fafc;color:#3b5998;border:1px solid #cbd5e1;border-radius:4px;padding:5px 12px;font-size:11.5px;font-weight:600;cursor:pointer;">
-                &larr; Back to Dashboard
+            </div>
+
+            <!-- Official White LOA Letter Sheet -->
+            <div id="loa-letter-sheet" style="background:#ffffff;padding:34px 44px;color:#1e293b;">
+              <!-- Populated dynamically by renderLoaLetterSheet() -->
+            </div>
+
+            <!-- Bottom Centered Generate LOA Button -->
+            <div
+              style="display:flex;justify-content:center;align-items:center;gap:12px;padding:14px 20px 20px;border-top:1px solid #e2e8f0;background:#f8fafc;">
+              <button type="button" id="btn-generate-loa-submit" onclick="executeGenerateLoaAction()"
+                style="background:#4267b2;color:#ffffff;font-size:13px;font-weight:700;padding:9px 26px;border-radius:4px;border:0;box-shadow:0 2px 6px rgba(59,89,152,0.28);cursor:pointer;">
+                Generate LOA
               </button>
             </div>
-          </div>
-
-          <!-- Official White LOA Letter Sheet (Matching Screenshot Layout) -->
-          <div id="loa-letter-sheet"
-            style="background:#ffffff;border:1px solid #cbd5e1;border-radius:4px;padding:34px 42px;box-shadow:0 2px 8px rgba(15,23,42,0.06);color:#334155;">
-            <!-- Populated dynamically by renderLoaLetterSheet(app) -->
-          </div>
-
-          <!-- Bottom Centered Action Button (Matching Screenshot) -->
-          <div style="display:flex;justify-content:center;padding:6px 0 18px;">
-            <button type="button" id="btn-generate-loa-action" onclick="executeGenerateLoaAction()"
-              style="background:#4267b2;color:#ffffff;font-size:12.5px;font-weight:600;padding:8px 20px;border-radius:3px;border:0;box-shadow:0 2px 6px rgba(59,89,152,0.28);cursor:pointer;">
-              Generate LOA
-            </button>
           </div>
 
         </div>
@@ -7147,68 +7269,50 @@
     const plotsDatabase = {};
 
     function getDefaultSeededPlots() {
-      return [
-        {
-          id: 'ITP-IND-201', itPark: 'Crystal IT Park, Indore', park: 'Crystal IT Park, Indore', plotNo: 'ITP-IND-201',
-          purpose: 'IT/ITeS/ESDM/Data Centre/Edge Data Centre', landUse: 'IT/ITeS/ESDM/Data Centre/Edge Data Centre',
-          landType: 'EOI Allotment', sizeAcres: 0.80, acres: 0.80, sizeSqFt: 34848, sqft: 34848,
-          premium: 24500000, payablePremium: 24500000, dev: 7000000, devCharges: 7000000, maint: 500000, maintCharges: 500000,
-          lease: 245000, leaseRent: 245000, appCharges: 10000, totalLandAmount: 32245000, total: 32245000,
-          advance: 6125000, emd: 6125000, secDep: 490000, startDate: '01/11/2026 10:00', endDate: '30/11/2026 17:00', published: true
-        },
-        {
-          id: 'ITP-SIN-114', itPark: 'IT Park Sinhasa, Indore', park: 'IT Park Sinhasa, Indore', plotNo: 'ITP-SIN-114',
-          purpose: 'IT/ITeS/ESDM/Data Centre/Edge Data Centre, Semiconductor Manufacturing & Design',
-          landUse: 'IT/ITeS/ESDM/Data Centre/Edge Data Centre, Semiconductor Manufacturing & Design',
-          landType: 'EOI Allotment', sizeAcres: 1.40, acres: 1.40, sizeSqFt: 60984, sqft: 60984,
-          premium: 39200000, payablePremium: 39200000, dev: 9800000, devCharges: 9800000, maint: 650000, maintCharges: 650000,
-          lease: 392000, leaseRent: 392000, appCharges: 10000, totalLandAmount: 50042000, total: 50042000,
-          advance: 9800000, emd: 9800000, secDep: 784000, startDate: '01/11/2026 10:00', endDate: '30/11/2026 17:00', published: true
-        },
-        {
-          id: 'ITP-BHP-108', itPark: 'IT Park Badwai, Bhopal', park: 'IT Park Badwai, Bhopal', plotNo: 'ITP-BHP-108',
-          purpose: 'Edge Data Centre / Cloud Infrastructure', landUse: 'Edge Data Centre / Cloud Infrastructure',
-          landType: 'EOI Allotment', sizeAcres: 0.45, acres: 0.45, sizeSqFt: 19602, sqft: 19602,
-          premium: 11250000, payablePremium: 11250000, dev: 3200000, devCharges: 3200000, maint: 250000, maintCharges: 250000,
-          lease: 112500, leaseRent: 112500, appCharges: 10000, totalLandAmount: 14812500, total: 14812500,
-          advance: 2812500, emd: 2812500, secDep: 250000, startDate: '01/11/2026 10:00', endDate: '30/11/2026 17:00', published: true
-        },
-        {
-          id: 'ITP-JBP-019', itPark: 'IT Park Purva, Jabalpur', park: 'IT Park Purva, Jabalpur', plotNo: 'ITP-JBP-019',
-          purpose: 'Global Capability Centre (GCC)', landUse: 'Global Capability Centre (GCC)',
-          landType: 'EOI Allotment', sizeAcres: 0.75, acres: 0.75, sizeSqFt: 32670, sqft: 32670,
-          premium: 16200000, payablePremium: 16200000, dev: 4500000, devCharges: 4500000, maint: 325000, maintCharges: 325000,
-          lease: 162000, leaseRent: 162000, appCharges: 10000, totalLandAmount: 21187000, total: 21187000,
-          advance: 4050000, emd: 4050000, secDep: 324000, startDate: '01/11/2026 10:00', endDate: '30/11/2026 17:00', published: true
-        },
-        {
-          id: 'ITP-GWL-008', itPark: 'IT Park Ganga Malanpur, Gwalior', park: 'IT Park Ganga Malanpur, Gwalior', plotNo: 'ITP-GWL-008',
-          purpose: 'IT/ITeS/ESDM/Data Centre/Edge Data Centre', landUse: 'IT/ITeS/ESDM/Data Centre/Edge Data Centre',
-          landType: 'EOI Allotment', sizeAcres: 0.50, acres: 0.50, sizeSqFt: 21780, sqft: 21780,
-          premium: 10500000, payablePremium: 10500000, dev: 2800000, devCharges: 2800000, maint: 225000, maintCharges: 225000,
-          lease: 105000, leaseRent: 105000, appCharges: 10000, totalLandAmount: 13630000, total: 13630000,
-          advance: 2625000, emd: 2625000, secDep: 225000, startDate: '01/11/2026 10:00', endDate: '30/11/2026 17:00', published: true
+      return [];
+    }
+
+    function clearLegacySeededStorageIfNeeded() {
+      try {
+        if (localStorage.getItem('mpsedc_eoi_seed_v2') === '1' && !localStorage.getItem('mpsedc_zero_clean_v1')) {
+          Object.values(STORAGE_KEYS).forEach(k => localStorage.removeItem(k));
+          localStorage.removeItem('mpsedc_eoi_draft');
+          localStorage.removeItem('mpsedc_eoi_seed_v2');
+          sessionStorage.removeItem('mpsedc_eoi_draft');
+          localStorage.setItem('mpsedc_zero_clean_v1', '1');
         }
-      ];
+      } catch (e) { }
+    }
+
+    function sanitizePlotRecord(p) {
+      if (!p || typeof p !== 'object') return null;
+      const plotNo = String(p.plotNo || p.id || '').trim();
+      const itPark = String(p.itPark || p.park || 'Crystal IT Park, Indore').trim();
+      if (!plotNo) return null;
+      return {
+        ...p,
+        id: String(p.id || plotNo),
+        plotNo,
+        itPark,
+        park: itPark,
+        purpose: String(p.purpose || p.landUse || 'IT/ITeS/ESDM/Data Centre/Edge Data Centre'),
+        landUse: String(p.landUse || p.purpose || 'IT/ITeS/ESDM/Data Centre/Edge Data Centre'),
+        landType: String(p.landType || 'EOI Allotment')
+      };
     }
 
     function loadPersistedPlots() {
       try {
+        clearLegacySeededStorageIfNeeded();
         const raw = localStorage.getItem(STORAGE_KEYS.PLOTS);
         if (raw === null) {
-          const seeded = getDefaultSeededPlots();
-          localStorage.setItem(STORAGE_KEYS.PLOTS, JSON.stringify(seeded));
-          return seeded;
+          localStorage.setItem('mpsedc_zero_clean_v1', '1');
+          return [];
         }
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length === 0 && !localStorage.getItem('mpsedc_eoi_seed_v2')) {
-          const seeded = getDefaultSeededPlots();
-          localStorage.setItem(STORAGE_KEYS.PLOTS, JSON.stringify(seeded));
-          return seeded;
-        }
-        return Array.isArray(parsed) ? parsed : [];
+        return Array.isArray(parsed) ? parsed.map(sanitizePlotRecord).filter(Boolean) : [];
       } catch (e) {
-        return getDefaultSeededPlots();
+        return [];
       }
     }
 
@@ -8405,6 +8509,19 @@
         if (listTitle) listTitle.textContent = activeRole === 'FINANCE_ADMIN' ? 'All Application list' : 'Pending Application list';
         window.authorityActiveKpiFilter = activeRole === 'FINANCE_ADMIN' ? 'all' : 'pending';
         if (typeof renderAuthorityWorkbench === 'function') renderAuthorityWorkbench(activeRole);
+      } else {
+        window.currentActiveRole = 'APPLICANT';
+        if (dash) dash.classList.remove('hidden');
+        if (navDash) navDash.classList.add('on');
+        if (heroSub) heroSub.innerHTML = '<span>Investor Dashboard</span><span>&#8681; Investment Policy, 2023</span>';
+        if (heroH1) heroH1.textContent = 'IT Investment Portal 2.0';
+        if (userPillName) userPillName.textContent = 'World123';
+        if (userBoxInvestor) userBoxInvestor.classList.remove('hidden');
+        if (navInvestor) navInvestor.classList.remove('hidden');
+        try {
+          if (typeof STORAGE_KEYS !== 'undefined') localStorage.setItem(STORAGE_KEYS.VIEW, 'dashboard');
+        } catch (e) { }
+        if (typeof renderInvestorDashboard === 'function') renderInvestorDashboard();
       }
       try {
         if (typeof STORAGE_KEYS !== 'undefined' && window.currentActiveRole) {
@@ -9372,8 +9489,10 @@
       });
     }
 
+  </script>
+  <script>
     // =========================================================================
-    // OIC IT PARK LAND ALLOTMENT SCRUTINY & ACTION ENGINE
+    // MODULE: OIC APPLICATIONS DATABASE, PERSISTENCE & INVESTOR DASHBOARD
     // =========================================================================
     let oicActiveKpiFilter = 'pending';
     let oicSortKey = 'sno';
@@ -9384,471 +9503,37 @@
     let pendingOicActionPayload = null;
 
     function getDefaultSeededApplications() {
-      return [
-        {
-          appNo: 'APP-2026-EOI-101',
-          orgName: 'Narmada CloudTech Systems Pvt Ltd',
-          signatory: 'Raghavendra Tiwari',
-          designation: 'Managing Director',
-          mobile: '+91 98261 44510',
-          email: 'raghav@narmadacloud.in',
-          cin: 'U72900MP2022PTC059812',
-          incDate: '2022-04-18',
-          pan: 'AABCN8421K',
-          gstin: '23AABCN8421K1Z8',
-          regAddress: '402, Sapphire Corporate Towers, Vijay Nagar, Indore - 452010',
-          consortiumStatus: 'No (Single Entity)',
-          entityConstitution: 'Company under Companies Act',
-          applicationType: 'EOI Allotment',
-          policyName: 'MP IT, ITeS & ESDM Policy 2023',
-          rebateSlabLabel: 'Slab 1 (75%) + Slab 2 (60%)',
-          formType: 'Form 1',
-          itPark: 'Crystal IT Park, Indore',
-          plotNo: 'ITP-IND-201',
-          plotKey: 'ITP-IND-201',
-          plotDisplay: 'ITP-IND-201 • Crystal IT Park, Indore',
-          plotSizeAcres: '0.80 Acre',
-          plotSizeSqFt: '34,848 Sq.Ft.',
-          purpose: 'IT/ITeS/ESDM/Data Centre/Edge Data Centre',
-          businessDomain: 'IT/ITeS/ESDM/Data Centre/Edge Data Centre',
-          currentEmployees: '215 Professionals',
-          turnover3FY: '₹ 44.80 Cr',
-          pastInvestment: '₹ 16.50 Cr',
-          projTitle: 'Cloud-Native SaaS & AI Engineering Campus',
-          timeline: 'Civil completion in 12 months; commercial launch in 20 months.',
-          headcount: '420 Direct Tech Professionals over 3 years',
-          landPremium: '₹ 2,45,00,000.00',
-          devCharges: '₹ 70,00,000.00',
-          maintCharges: '₹ 5,00,000.00',
-          leaseRent: '₹ 2,45,000.00',
-          totalLandAmount: '₹ 3,22,45,000.00',
-          appFee: '₹ 10,000.00',
-          advanceEmd: '₹ 61,25,000.00',
-          totalCost: '₹ 12,40,00,000.00',
-          meansOfFinance: '₹ 12,40,00,000.00 (65% Equity / 35% Term Loan)',
-          appDate: '16/11/2026',
-          pendingSince: '21/11/2026 11:30:00 AM',
-          status: 'Pending with Subsidy Admin',
-          applicationAt: 'SUBSIDY_ADMIN',
-          stage: 'subsidy_scrutiny',
-          bidCount: 'single',
-          queryRemarks: '',
-          rebateVerificationNotes: '',
-          directors: [],
-          attachments: [
-            { title: 'Entity Registration Certificate (RoC / Registrar of Firms)', fileName: 'narmada_roc_cert.pdf', mandatory: true, verified: true },
-            { title: 'Memorandum & Articles of Association (MoA & AoA)', fileName: 'narmada_moa_aoa.pdf', mandatory: true, verified: true },
-            { title: 'CA Certificate for Annual Turnover & Net Worth (with UDIN)', fileName: 'narmada_ca_udin.pdf', mandatory: true, verified: true },
-            { title: 'Detailed Project Report (DPR) & Implementation Phasing Plan', fileName: 'narmada_cloud_dpr.pdf', mandatory: true, verified: true },
-            { title: 'Form-2 Undertaking', fileName: 'narmada_form2_signed.pdf', mandatory: true, verified: true }
-          ],
-          history: [
-            { actor: 'Narmada CloudTech Systems Pvt Ltd', timestamp: '16-11-2026 10:15 AM', status: 'Submitted to OIC IT Park', remark: 'EOI Land Allotment application digitally signed and submitted.' },
-            { actor: 'OIC IT Park', timestamp: '21-11-2026 11:30 AM', status: 'Verified By OIC IT Park - Forwarded to Subsidy Admin', remark: 'Initial parcel availability and statutory KYC documents verified. Routed to Subsidy Admin for MP IT Policy 2023 eligibility & progressive rebate check.' }
-          ]
-        },
-        {
-          appNo: 'APP-2026-EOI-102',
-          orgName: 'Malwa Semiconductor & VLSI Labs Pvt Ltd',
-          signatory: 'Siddharth Deshmukh',
-          designation: 'Chief Operating Officer',
-          mobile: '+91 98262 77319',
-          email: 'siddharth@malwasemi.in',
-          cin: 'U32109MP2021PTC057410',
-          incDate: '2021-07-09',
-          pan: 'AADCM5419N',
-          gstin: '23AADCM5419N1Z4',
-          regAddress: 'Plot 21, Super Corridor Tech Hub, Indore - 453112',
-          consortiumStatus: 'No (Single Entity)',
-          entityConstitution: 'Company under Companies Act',
-          applicationType: 'EOI Allotment',
-          policyName: 'MP Semiconductor Policy 2025',
-          rebateSlabLabel: 'Slab 1 (75%) + Slab 2 (60%) + Slab 3 (50%)',
-          formType: 'Form 1',
-          itPark: 'IT Park Sinhasa, Indore',
-          plotNo: 'ITP-SIN-114',
-          plotKey: 'ITP-SIN-114',
-          plotDisplay: 'ITP-SIN-114 • IT Park Sinhasa, Indore',
-          plotSizeAcres: '1.40 Acres',
-          plotSizeSqFt: '60,984 Sq.Ft.',
-          purpose: 'Semiconductor Manufacturing & Design, IT/ITeS/ESDM',
-          businessDomain: 'Semiconductor Design & VLSI Verification',
-          currentEmployees: '185 Engineers',
-          turnover3FY: '₹ 58.40 Cr',
-          pastInvestment: '₹ 24.10 Cr',
-          projTitle: 'FAB-less RISC-V SoC Verification & EDA Center',
-          timeline: 'Cleanroom lab & EDA cluster setup in 16 months.',
-          headcount: '550 Semiconductor & Embedded Engineers over 3 years',
-          landPremium: '₹ 3,92,00,000.00',
-          devCharges: '₹ 98,00,000.00',
-          maintCharges: '₹ 6,50,000.00',
-          leaseRent: '₹ 3,92,000.00',
-          totalLandAmount: '₹ 5,00,42,000.00',
-          appFee: '₹ 10,000.00',
-          advanceEmd: '₹ 98,00,000.00',
-          totalCost: '₹ 21,50,00,000.00',
-          meansOfFinance: '₹ 21,50,00,000.00 (70% Equity / 30% Bank Loan)',
-          appDate: '12/11/2026',
-          pendingSince: '24/11/2026 04:15:00 PM',
-          status: 'Queried Back (Subsidy Admin)',
-          applicationAt: 'SUBSIDY_ADMIN',
-          stage: 'queried_back',
-          queriedBackTo: 'SUBSIDY_ADMIN',
-          queriedBackBy: 'FINANCE_ADMIN',
-          queriedBackReason: 'Confirm 3-slab progressive rebate computation (0.50 + 0.50 + 0.40 Acres) against ₹ 98.00 Lakh 25% EMD challan reconciliation before Finance sign-off.',
-          queriedBackTimestamp: '24-11-2026 04:15 PM',
-          subsidyVerifiedAt: '19-11-2026 02:10 PM',
-          rebateVerificationNotes: 'Pending re-confirmation of Slab 3 (50% rebate) calculation for 0.40 Acre portion.',
-          bidCount: 'single',
-          queryRemarks: 'Confirm 3-slab progressive rebate computation against ₹ 98.00 Lakh 25% EMD challan reconciliation.',
-          directors: [],
-          attachments: [
-            { title: 'Entity Registration Certificate (RoC / Registrar of Firms)', fileName: 'malwa_semi_roc.pdf', mandatory: true, verified: true },
-            { title: 'CA Certificate for Annual Turnover & Net Worth (with UDIN)', fileName: 'malwa_semi_ca_udin.pdf', mandatory: true, verified: true },
-            { title: 'Detailed Project Report (DPR) & VLSI Cluster Plan', fileName: 'malwa_semi_dpr.pdf', mandatory: true, verified: true },
-            { title: 'Form-2 Undertaking', fileName: 'malwa_semi_form2.pdf', mandatory: true, verified: true }
-          ],
-          history: [
-            { actor: 'Malwa Semiconductor & VLSI Labs Pvt Ltd', timestamp: '12-11-2026 09:40 AM', status: 'Submitted to OIC IT Park', remark: 'EOI submitted under MP Semiconductor Policy 2025.' },
-            { actor: 'OIC IT Park', timestamp: '15-11-2026 01:20 PM', status: 'Verified By OIC IT Park - Forwarded to Subsidy Admin', remark: 'Plot ITP-SIN-114 survey and KYC validated.' },
-            { actor: 'Subsidy Admin (SUBSIDY_ADMIN)', timestamp: '19-11-2026 02:10 PM', status: 'Forwarded to Finance Admin', remark: 'Policy eligibility verified. Forwarded for financial scrutiny.' },
-            { actor: 'Finance Admin (FINANCE_ADMIN)', timestamp: '24-11-2026 04:15 PM', status: 'Queried Back (Subsidy Admin)', remark: 'Confirm 3-slab progressive rebate computation (0.50 + 0.50 + 0.40 Acres) against ₹ 98.00 Lakh 25% EMD challan reconciliation before Finance sign-off.' }
-          ]
-        },
-        {
-          appNo: 'APP-2026-EOI-103',
-          orgName: 'Bhojpur Edge Data Infrastructure LLP',
-          signatory: 'Anirudh Saxena',
-          designation: 'Designated Partner',
-          mobile: '+91 94250 61209',
-          email: 'anirudh@bhojpuredge.in',
-          cin: 'AAK-8842-MP2023',
-          incDate: '2023-02-14',
-          pan: 'ABCFB3310P',
-          gstin: '23ABCFB3310P1Z2',
-          regAddress: 'E-4/18 Arera Colony, Bhopal - 462016',
-          consortiumStatus: 'No (Single Entity)',
-          entityConstitution: 'Limited Liability Partnership (LLP)',
-          applicationType: 'EOI Allotment',
-          policyName: 'MP IT, ITeS & ESDM Policy 2023',
-          rebateSlabLabel: 'Slab 1 (75% Rebate)',
-          formType: 'Form 1',
-          itPark: 'IT Park Badwai, Bhopal',
-          plotNo: 'ITP-BHP-108',
-          plotKey: 'ITP-BHP-108',
-          plotDisplay: 'ITP-BHP-108 • IT Park Badwai, Bhopal',
-          plotSizeAcres: '0.45 Acre',
-          plotSizeSqFt: '19,602 Sq.Ft.',
-          purpose: 'Edge Data Centre / Cloud Infrastructure',
-          businessDomain: 'Tier-III Edge Data Centre Hosting',
-          currentEmployees: '78 Engineers',
-          turnover3FY: '₹ 19.60 Cr',
-          pastInvestment: '₹ 8.40 Cr',
-          projTitle: 'Bhopal Low-Latency Edge Colocation Facility (2 MW)',
-          timeline: '14 months to Tier-III certification & commissioning.',
-          headcount: '160 Data Centre & NOC Specialists over 3 years',
-          landPremium: '₹ 1,12,50,000.00',
-          devCharges: '₹ 32,00,000.00',
-          maintCharges: '₹ 2,50,000.00',
-          leaseRent: '₹ 1,12,500.00',
-          totalLandAmount: '₹ 1,48,12,500.00',
-          appFee: '₹ 10,000.00',
-          advanceEmd: '₹ 28,12,500.00',
-          totalCost: '₹ 16,20,00,000.00',
-          meansOfFinance: '₹ 16,20,00,000.00 (50% Equity / 50% Term Debt)',
-          appDate: '22/11/2026',
-          pendingSince: '22/11/2026 03:45:00 PM',
-          status: 'Submitted - Pending OIC IT Park Scrutiny',
-          applicationAt: 'OIC_IT_PARK',
-          stage: 'initial_scrutiny',
-          bidCount: 'single',
-          queryRemarks: '',
-          directors: [],
-          attachments: [
-            { title: 'Entity Registration Certificate (RoC / Registrar of Firms)', fileName: 'bhojpur_llp_cert.pdf', mandatory: true, verified: false },
-            { title: 'CA Certificate for Annual Turnover & Net Worth (with UDIN)', fileName: 'bhojpur_ca_udin.pdf', mandatory: true, verified: false },
-            { title: 'Form-2 Undertaking', fileName: 'bhojpur_form2.pdf', mandatory: true, verified: false }
-          ],
-          history: [
-            { actor: 'Bhojpur Edge Data Infrastructure LLP', timestamp: '22-11-2026 03:45 PM', status: 'Submitted to OIC IT Park', remark: 'Digitally signed via Class-3 DSC for Plot ITP-BHP-108.' }
-          ]
-        },
-        {
-          appNo: 'APP-2026-EOI-104',
-          orgName: 'Mahakoshal GCC Analytics Pvt Ltd',
-          signatory: 'Meenakshi Shrivastava',
-          designation: 'Director (India Ops)',
-          mobile: '+91 94251 88320',
-          email: 'meenakshi@mahakoshalgcc.com',
-          cin: 'U72200MP2020PTC051290',
-          incDate: '2020-06-04',
-          pan: 'AADCM7731Q',
-          gstin: '23AADCM7731Q1Z9',
-          regAddress: 'Civic Centre Tech Plaza, Jabalpur - 482002',
-          consortiumStatus: 'No (Single Entity)',
-          entityConstitution: 'Company under Companies Act',
-          applicationType: 'EOI Allotment',
-          policyName: 'MP GCC Policy 2025',
-          rebateSlabLabel: 'Slab 1 (75%) + Slab 2 (60%)',
-          formType: 'Form 1',
-          itPark: 'IT Park Purva, Jabalpur',
-          plotNo: 'ITP-JBP-019',
-          plotKey: 'ITP-JBP-019',
-          plotDisplay: 'ITP-JBP-019 • IT Park Purva, Jabalpur',
-          plotSizeAcres: '0.75 Acre',
-          plotSizeSqFt: '32,670 Sq.Ft.',
-          purpose: 'Global Capability Centre (GCC)',
-          businessDomain: 'Global Capability Centre (GCC)',
-          currentEmployees: '310 Professionals',
-          turnover3FY: '₹ 64.10 Cr',
-          pastInvestment: '₹ 22.80 Cr',
-          projTitle: 'MP GCC Digital Twin & Cloud Analytics Center',
-          timeline: 'Campus fit-out completed in 14 months.',
-          headcount: '650 Direct GCC Professionals over 3 years',
-          landPremium: '₹ 1,62,00,000.00',
-          devCharges: '₹ 45,00,000.00',
-          maintCharges: '₹ 3,25,000.00',
-          leaseRent: '₹ 1,62,000.00',
-          totalLandAmount: '₹ 2,11,87,000.00',
-          appFee: '₹ 10,000.00',
-          advanceEmd: '₹ 40,50,000.00',
-          totalCost: '₹ 14,80,00,000.00',
-          meansOfFinance: '₹ 14,80,00,000.00 (100% Internal Accruals)',
-          appDate: '10/11/2026',
-          pendingSince: '20/11/2026 05:10:00 PM',
-          status: 'Forwarded to Finance Admin',
-          applicationAt: 'FINANCE_ADMIN',
-          stage: 'finance_scrutiny',
-          subsidyVerifiedAt: '20-11-2026 05:10 PM',
-          rebateVerificationNotes: 'MP GCC Policy 2025 & 0.75 Acre progressive slab rebate (75%/60%) certified.',
-          bidCount: 'single',
-          queryRemarks: '',
-          directors: [],
-          attachments: [
-            { title: 'Entity Registration Certificate (RoC / Registrar of Firms)', fileName: 'mahakoshal_roc.pdf', mandatory: true, verified: true },
-            { title: 'CA Certificate for Annual Turnover & Net Worth (with UDIN)', fileName: 'mahakoshal_ca_udin.pdf', mandatory: true, verified: true },
-            { title: 'Form-2 Undertaking', fileName: 'mahakoshal_form2.pdf', mandatory: true, verified: true }
-          ],
-          history: [
-            { actor: 'Mahakoshal GCC Analytics Pvt Ltd', timestamp: '10-11-2026 11:00 AM', status: 'Submitted to OIC IT Park', remark: 'EOI submitted.' },
-            { actor: 'OIC IT Park', timestamp: '14-11-2026 02:15 PM', status: 'Verified By OIC IT Park - Forwarded to Subsidy Admin', remark: 'Initial verification done.' },
-            { actor: 'Subsidy Admin (SUBSIDY_ADMIN)', timestamp: '20-11-2026 05:10 PM', status: 'Forwarded to Finance Admin', remark: 'Verified policy eligibility & 0.75 Acre rebate slab breakdown. Forwarded for Finance fee & EMD verification.' }
-          ]
-        },
-        {
-          appNo: 'APP-2026-EOI-105',
-          orgName: 'Avanti AVGC-XR Studios Pvt Ltd',
-          signatory: 'Kabir Malhotra',
-          designation: 'Co-Founder & CEO',
-          mobile: '+91 99264 55190',
-          email: 'kabir@avantixr.in',
-          cin: 'U72900MP2023PTC064112',
-          incDate: '2023-01-22',
-          pan: 'AAECA9912R',
-          gstin: '23AAECA9912R1Z1',
-          regAddress: 'Orbit Business Park, AB Road, Indore - 452001',
-          consortiumStatus: 'No (Single Entity)',
-          entityConstitution: 'Company under Companies Act',
-          applicationType: 'EOI Allotment',
-          policyName: 'MP AVGC-XR Policy 2025',
-          rebateSlabLabel: 'Slab 1 (75%) + Slab 2 (60%)',
-          formType: 'Form 1',
-          itPark: 'Crystal IT Park, Indore',
-          plotNo: 'ITP-IND-201',
-          plotKey: 'ITP-IND-201',
-          plotDisplay: 'ITP-IND-201 • Crystal IT Park, Indore',
-          plotSizeAcres: '0.60 Acre',
-          plotSizeSqFt: '26,136 Sq.Ft.',
-          purpose: 'AVGC-XR (Animation, VFX, Gaming & Comics)',
-          businessDomain: 'Spatial Computing & VFX Studio',
-          currentEmployees: '140 Professionals',
-          turnover3FY: '₹ 21.30 Cr',
-          pastInvestment: '₹ 9.60 Cr',
-          projTitle: 'Immersive VFX Render Farm & Gaming Studio',
-          timeline: '15 months to studio operations.',
-          headcount: '380 Direct AVGC-XR Artists & Engineers over 3 years',
-          landPremium: '₹ 1,95,00,000.00',
-          devCharges: '₹ 52,00,000.00',
-          maintCharges: '₹ 4,10,000.00',
-          leaseRent: '₹ 1,95,000.00',
-          totalLandAmount: '₹ 2,53,05,000.00',
-          appFee: '₹ 10,000.00',
-          advanceEmd: '₹ 48,75,000.00',
-          totalCost: '₹ 11,20,00,000.00',
-          meansOfFinance: '₹ 11,20,00,000.00 (70% Equity / 30% Loan)',
-          appDate: '07/11/2026',
-          pendingSince: '21/11/2026 04:05:00 PM',
-          status: 'Forwarded to Executive Director (ED)',
-          applicationAt: 'ED',
-          stage: 'ed_scrutiny',
-          subsidyVerifiedAt: '16-11-2026 03:20 PM',
-          rebateVerificationNotes: 'MP AVGC-XR Policy 2025 certified by Subsidy Admin.',
-          bidCount: 'single',
-          queryRemarks: '',
-          directors: [],
-          attachments: [
-            { title: 'Entity Registration Certificate (RoC / Registrar of Firms)', fileName: 'avantixr_roc.pdf', mandatory: true, verified: true },
-            { title: 'CA Certificate for Annual Turnover & Net Worth (with UDIN)', fileName: 'avantixr_ca_udin.pdf', mandatory: true, verified: true },
-            { title: 'Form-2 Undertaking', fileName: 'avantixr_form2.pdf', mandatory: true, verified: true }
-          ],
-          history: [
-            { actor: 'Avanti AVGC-XR Studios Pvt Ltd', timestamp: '07-11-2026 12:15 PM', status: 'Submitted to OIC IT Park', remark: 'EOI submitted.' },
-            { actor: 'OIC IT Park', timestamp: '11-11-2026 03:00 PM', status: 'Verified By OIC IT Park - Forwarded to Subsidy Admin', remark: 'Verified.' },
-            { actor: 'Subsidy Admin (SUBSIDY_ADMIN)', timestamp: '16-11-2026 03:20 PM', status: 'Forwarded to Finance Admin', remark: 'AVGC-XR Policy 2025 & rebate verified.' },
-            { actor: 'Finance Admin (FINANCE_ADMIN)', timestamp: '21-11-2026 04:05 PM', status: 'Forwarded to Executive Director (ED)', remark: 'Fee ₹10,000 & 25% EMD ₹48,75,000 reconciled with treasury challan.' }
-          ]
-        },
-        {
-          appNo: 'APP-2026-EOI-106',
-          orgName: 'Vindhya Fintech Systems Ltd',
-          signatory: 'Prashant Kulkarni',
-          designation: 'Executive Director',
-          mobile: '+91 98270 11840',
-          email: 'pkulkarni@vindhyafintech.com',
-          cin: 'U72900MP2019PLC048210',
-          incDate: '2019-09-11',
-          pan: 'AAACV6204E',
-          gstin: '23AAACV6204E1Z6',
-          regAddress: 'MP Nagar Zone II, Bhopal - 462011',
-          consortiumStatus: 'No (Single Entity)',
-          entityConstitution: 'Company under Companies Act',
-          applicationType: 'EOI Allotment',
-          policyName: 'MP IT, ITeS & ESDM Policy 2023',
-          rebateSlabLabel: 'Slab 1 (75%) + Slab 2 (60%) + Slab 3 (50%)',
-          formType: 'Form 1',
-          itPark: 'IT Park Badwai, Bhopal',
-          plotNo: 'ITP-BHP-108',
-          plotKey: 'ITP-BHP-108',
-          plotDisplay: 'ITP-BHP-108 • IT Park Badwai, Bhopal',
-          plotSizeAcres: '1.80 Acres',
-          plotSizeSqFt: '78,408 Sq.Ft.',
-          purpose: 'IT/ITeS/ESDM/Data Centre/Edge Data Centre',
-          businessDomain: 'Digital Payments & Core Banking Cloud',
-          currentEmployees: '420 Professionals',
-          turnover3FY: '₹ 89.00 Cr',
-          pastInvestment: '₹ 34.00 Cr',
-          projTitle: 'Vindhya Sovereign Payment & UPI Clearing Campus',
-          timeline: '18 months commercial rollout.',
-          headcount: '900 Direct Tech Engineers over 3 years',
-          landPremium: '₹ 4,48,00,000.00',
-          devCharges: '₹ 1,10,00,000.00',
-          maintCharges: '₹ 7,20,000.00',
-          leaseRent: '₹ 4,48,000.00',
-          totalLandAmount: '₹ 5,69,68,000.00',
-          appFee: '₹ 10,000.00',
-          advanceEmd: '₹ 1,12,00,000.00',
-          totalCost: '₹ 24,00,00,000.00',
-          meansOfFinance: '₹ 24,00,00,000.00 (80% Equity / 20% Bank Facility)',
-          appDate: '04/11/2026',
-          pendingSince: '22/11/2026 06:10:00 PM',
-          status: 'Pending with Managing Director (MD)',
-          applicationAt: 'MD',
-          stage: 'md_scrutiny',
-          subsidyVerifiedAt: '12-11-2026 04:00 PM',
-          rebateVerificationNotes: '3-slab progressive rebate & MP IT Policy 2023 eligibility cleared.',
-          bidCount: 'single',
-          queryRemarks: '',
-          directors: [],
-          attachments: [
-            { title: 'Entity Registration Certificate (RoC / Registrar of Firms)', fileName: 'vindhya_roc.pdf', mandatory: true, verified: true },
-            { title: 'CA Certificate for Annual Turnover & Net Worth (with UDIN)', fileName: 'vindhya_ca_udin.pdf', mandatory: true, verified: true },
-            { title: 'Form-2 Undertaking', fileName: 'vindhya_form2.pdf', mandatory: true, verified: true }
-          ],
-          history: [
-            { actor: 'Vindhya Fintech Systems Ltd', timestamp: '04-11-2026 11:10 AM', status: 'Submitted to OIC IT Park', remark: 'EOI submitted.' },
-            { actor: 'OIC IT Park', timestamp: '08-11-2026 02:30 PM', status: 'Verified By OIC IT Park - Forwarded to Subsidy Admin', remark: 'Initial verification cleared.' },
-            { actor: 'Subsidy Admin (SUBSIDY_ADMIN)', timestamp: '12-11-2026 04:00 PM', status: 'Forwarded to Finance Admin', remark: 'Policy & progressive rebate verified.' },
-            { actor: 'Finance Admin (FINANCE_ADMIN)', timestamp: '17-11-2026 01:45 PM', status: 'Forwarded to Executive Director (ED)', remark: '25% Advance EMD & means of finance verified.' },
-            { actor: 'Executive Director (ED)', timestamp: '22-11-2026 06:10 PM', status: 'Forwarded to Managing Director (MD)', remark: 'Recommended for final EOI allotment sanction.' }
-          ]
-        },
-        {
-          appNo: 'APP-2026-EOI-107',
-          orgName: 'Chambal Photonics & Cloud India Pvt Ltd',
-          signatory: 'Devendra Singh Tomar',
-          designation: 'Chief Executive Officer',
-          mobile: '+91 98270 33108',
-          email: 'dtomar@chambalphotonics.com',
-          cin: 'U64202MP2018PTC045910',
-          incDate: '2018-07-27',
-          pan: 'AABCG5502L',
-          gstin: '23AABCG5502L1Z7',
-          regAddress: 'City Centre Tech Enclave, Gwalior - 474011',
-          consortiumStatus: 'No (Single Entity)',
-          entityConstitution: 'Company under Companies Act',
-          applicationType: 'EOI Allotment',
-          policyName: 'MP IT, ITeS & ESDM Policy 2023',
-          rebateSlabLabel: 'Slab 1 (75% Rebate)',
-          formType: 'Form 1',
-          itPark: 'IT Park Ganga Malanpur, Gwalior',
-          plotNo: 'ITP-GWL-008',
-          plotKey: 'ITP-GWL-008',
-          plotDisplay: 'ITP-GWL-008 • IT Park Ganga Malanpur, Gwalior',
-          plotSizeAcres: '0.50 Acre',
-          plotSizeSqFt: '21,780 Sq.Ft.',
-          purpose: 'IT/ITeS/ESDM/Data Centre/Edge Data Centre',
-          businessDomain: 'Optical Networking & Cloud Systems',
-          currentEmployees: '165 Engineers',
-          turnover3FY: '₹ 38.90 Cr',
-          pastInvestment: '₹ 14.10 Cr',
-          projTitle: 'Optical Transceiver & Edge Networking Lab',
-          timeline: '12 months implementation.',
-          headcount: '310 Engineers over 3 years',
-          landPremium: '₹ 1,05,00,000.00',
-          devCharges: '₹ 28,00,000.00',
-          maintCharges: '₹ 2,25,000.00',
-          leaseRent: '₹ 1,05,000.00',
-          totalLandAmount: '₹ 1,36,30,000.00',
-          appFee: '₹ 10,000.00',
-          advanceEmd: '₹ 26,25,000.00',
-          totalCost: '₹ 9,80,00,000.00',
-          meansOfFinance: '₹ 9,80,00,000.00 (60% Equity / 40% Loan)',
-          appDate: '01/11/2026',
-          pendingSince: '23/11/2026 05:30:00 PM',
-          status: 'Approved by MD',
-          applicationAt: 'OIC_IT_PARK',
-          stage: 'post_approval',
-          subsidyVerifiedAt: '09-11-2026 03:00 PM',
-          rebateVerificationNotes: '75% first-slab rebate verified under MP IT Policy 2023.',
-          bidCount: 'single',
-          queryRemarks: '',
-          directors: [],
-          attachments: [
-            { title: 'Entity Registration Certificate (RoC / Registrar of Firms)', fileName: 'chambal_roc.pdf', mandatory: true, verified: true },
-            { title: 'CA Certificate for Annual Turnover & Net Worth (with UDIN)', fileName: 'chambal_ca_udin.pdf', mandatory: true, verified: true },
-            { title: 'Form-2 Undertaking', fileName: 'chambal_form2.pdf', mandatory: true, verified: true }
-          ],
-          history: [
-            { actor: 'Chambal Photonics & Cloud India Pvt Ltd', timestamp: '01-11-2026 10:30 AM', status: 'Submitted to OIC IT Park', remark: 'EOI submitted.' },
-            { actor: 'OIC IT Park', timestamp: '05-11-2026 04:00 PM', status: 'Verified By OIC IT Park - Forwarded to Subsidy Admin', remark: 'Initial verification passed.' },
-            { actor: 'Subsidy Admin (SUBSIDY_ADMIN)', timestamp: '09-11-2026 03:00 PM', status: 'Forwarded to Finance Admin', remark: 'Policy & 75% slab rebate confirmed.' },
-            { actor: 'Finance Admin (FINANCE_ADMIN)', timestamp: '14-11-2026 11:45 AM', status: 'Forwarded to Executive Director (ED)', remark: 'Fee & 25% EMD reconciled.' },
-            { actor: 'Executive Director (ED)', timestamp: '19-11-2026 02:20 PM', status: 'Forwarded to Managing Director (MD)', remark: 'Recommended for single-bid EOI allotment.' },
-            { actor: 'Managing Director (MD)', timestamp: '23-11-2026 05:30 PM', status: 'Approved by MD', remark: 'Approved for Stage 3 LOA generation (15-Day Payment SLA) via OIC IT Park & ED DSC.' }
-          ]
-        }
-      ];
+      return [];
+    }
+
+    function sanitizeApplicationRecord(app) {
+      if (!app || typeof app !== 'object' || !app.appNo) return null;
+      return {
+        ...app,
+        appNo: String(app.appNo),
+        orgName: String(app.orgName || 'Applicant Entity'),
+        plotNo: String(app.plotNo || app.plotKey || '—'),
+        itPark: String(app.itPark || 'MPSEDC IT Park'),
+        status: String(app.status || 'Submitted to OIC IT Park'),
+        stage: String(app.stage || 'initial_scrutiny'),
+        history: Array.isArray(app.history) ? app.history : [],
+        attachments: Array.isArray(app.attachments) ? app.attachments : [],
+        directors: Array.isArray(app.directors) ? app.directors : []
+      };
     }
 
     function loadPersistedApplications() {
       try {
+        clearLegacySeededStorageIfNeeded();
         const raw = localStorage.getItem(STORAGE_KEYS.APPS);
         if (raw === null) {
-          const seeded = getDefaultSeededApplications();
-          localStorage.setItem(STORAGE_KEYS.APPS, JSON.stringify(seeded));
-          localStorage.setItem('mpsedc_eoi_seed_v2', '1');
-          return seeded;
+          localStorage.setItem('mpsedc_zero_clean_v1', '1');
+          return [];
         }
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length === 0 && !localStorage.getItem('mpsedc_eoi_seed_v2')) {
-          const seeded = getDefaultSeededApplications();
-          localStorage.setItem(STORAGE_KEYS.APPS, JSON.stringify(seeded));
-          localStorage.setItem('mpsedc_eoi_seed_v2', '1');
-          return seeded;
-        }
-        return Array.isArray(parsed) ? parsed : [];
+        return Array.isArray(parsed) ? parsed.map(sanitizeApplicationRecord).filter(Boolean) : [];
       } catch (e) {
-        return getDefaultSeededApplications();
+        return [];
       }
     }
 
@@ -9866,13 +9551,7 @@
     }
 
     function resetDemoState() {
-      try {
-        Object.values(STORAGE_KEYS).forEach(k => localStorage.removeItem(k));
-        localStorage.removeItem('mpsedc_eoi_draft');
-        localStorage.removeItem('mpsedc_eoi_seed_v2');
-      } catch (e) { }
-      if (typeof showGlobalToast === 'function') showGlobalToast('Demo state reset to defaults. Reloading...', 'info');
-      setTimeout(() => { location.reload(); }, 250);
+      resetAllPortalStorage(true);
     }
 
     function clearApplicantQueryRectificationMode(clearStorage = true) {
@@ -10207,7 +9886,10 @@
       }
 
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" style="padding:28px;text-align:center;color:#64748b;">No applications in this category yet. Publish a plot from <b>OIC IT Park</b> and apply from <b>Apply for EOI</b>.</td></tr>`;
+        const invEmptyMsg = allApps.length === 0
+          ? 'No applications submitted yet. Configure &amp; publish a plot from <b>OIC IT Park</b> and apply from <b>Apply for EOI</b>.'
+          : 'No applications in this category yet.';
+        tbody.innerHTML = `<tr><td colspan="10" style="padding:28px;text-align:center;color:#64748b;">${invEmptyMsg}</td></tr>`;
         return;
       }
 
@@ -10240,17 +9922,13 @@
       }).join('');
     }
 
-    function resetAllPortalStorage() {
-      if (!confirm('Reset all saved OIC plots, Investor drafts, and submitted Land Allotment applications?')) return;
+    function resetAllPortalStorage(skipConfirm = false) {
+      if (!skipConfirm && !confirm('Reset all saved OIC plots, Investor drafts, and submitted Land Allotment applications to 0?')) return;
       try {
-        localStorage.removeItem(STORAGE_KEYS.PLOTS);
-        localStorage.removeItem(STORAGE_KEYS.APPS);
-        localStorage.removeItem(STORAGE_KEYS.DRAFTS);
-        localStorage.removeItem(STORAGE_KEYS.VIEW);
-        localStorage.removeItem(STORAGE_KEYS.SCRUTINY_APP);
-        localStorage.removeItem(STORAGE_KEYS.RECTIFY_APP);
-        localStorage.removeItem(STORAGE_KEYS.ACTIVE_PLOT);
+        Object.values(STORAGE_KEYS).forEach(k => localStorage.removeItem(k));
         localStorage.removeItem('mpsedc_eoi_draft');
+        localStorage.removeItem('mpsedc_eoi_seed_v2');
+        localStorage.setItem('mpsedc_zero_clean_v1', '1');
         sessionStorage.removeItem('mpsedc_eoi_draft');
       } catch (e) { }
       if (typeof clearApplicantQueryRectificationMode === 'function') clearApplicantQueryRectificationMode(true);
@@ -10259,15 +9937,27 @@
       window.oicLandApplications = [];
       window.submittedApplicationsMap = {};
       eoiDraftMemory = {};
-      renderOicPlotTable();
-      syncPlotsWithInvestorView();
-      updateOicStats();
-      updateOicProcessStats();
-      renderOicApplicationsTable();
-      renderInvestorDashboard();
-      showGlobalToast('All saved portal data cleared. Counters reset to 0.', 'info');
+      window.currentLoaAppNo = null;
+      window.currentLoaItPark = '';
+      window.currentLoaPlotNo = '';
+      currentSelectedPlot = null;
+      const bannerContainer = document.getElementById('dashboard-banner-container');
+      if (bannerContainer) bannerContainer.innerHTML = '';
+      if (typeof renderOicPlotTable === 'function') renderOicPlotTable();
+      if (typeof syncPlotsWithInvestorView === 'function') syncPlotsWithInvestorView();
+      if (typeof updateOicStats === 'function') updateOicStats();
+      if (typeof updateOicProcessStats === 'function') updateOicProcessStats();
+      if (typeof renderOicApplicationsTable === 'function') renderOicApplicationsTable();
+      if (typeof renderInvestorDashboard === 'function') renderInvestorDashboard();
+      if (typeof renderSubsidyDashboard === 'function') renderSubsidyDashboard();
+      if (typeof renderAuthorityWorkbench === 'function' && window.currentOfficerRole) renderAuthorityWorkbench(window.currentOfficerRole);
+      if (typeof showGlobalToast === 'function') showGlobalToast('All portal data cleared. All dashboard counters reset to 0.', 'info');
     }
-
+  </script>
+  <script>
+    // =========================================================================
+    // MODULE: OIC IT PARK SCRUTINY & ACTION ENGINE
+    // =========================================================================
     function isOicPendingScrutiny(app) {
       return app.stage === 'initial_scrutiny' || app.stage === 'post_approval' || app.stage === 'lease_deed';
     }
@@ -10452,7 +10142,6 @@
 
       tbody.innerHTML = '';
       if (rows.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="13" class="p-6 text-center text-slate-500 text-xs">No Land Allotment applications match the selected filter criteria.</td></tr>`;
         const emptyMsg = (window.oicLandApplications || []).length === 0
           ? 'No Land Allotment applications submitted yet. Configure &amp; publish a plot under Plot &rarr; Vacant Plot List, then apply from the Investor Dashboard.'
           : 'No Land Allotment applications match the selected filter criteria.';
@@ -11328,6 +11017,8 @@
       `).join('');
     }
 
+  </script>
+  <script>
     // =========================================================================
     // STAGE 2: SUBSIDY ADMIN (SUBSIDY_ADMIN) SCRUTINY & HIGHER AUTHORITY ENGINE
     // =========================================================================
@@ -12428,14 +12119,36 @@
       renderInvestorDashboard();
     }
 
+  </script>
+  <script>
     // =========================================================================
-    // OIC IT PARK - GENERATE LOA (OFFICIAL LETTER OF ALLOTMENT) ENGINE
+    // OIC IT PARK - GENERATE LOA (CASCADING SELECTION, E-BIDDING PREMIUM & LOA)
     // =========================================================================
     window.currentLoaAppNo = null;
+    window.currentLoaItPark = '';
+    window.currentLoaPlotNo = '';
+
+    function parseLoaCurrency(val) {
+      if (typeof val === 'number') return Number.isFinite(val) ? val : 0;
+      const cleaned = String(val || '').replace(/[^0-9.-]/g, '');
+      const n = parseFloat(cleaned);
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function formatLoaAmountPlain(num) {
+      const n = Number(num);
+      if (!Number.isFinite(n)) return '0.00';
+      return n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
 
     function openOicGenerateLoaForApp(appNo) {
       if (appNo) {
         window.currentLoaAppNo = appNo;
+        const app = (window.oicLandApplications || []).find(a => a.appNo === appNo) || window.submittedApplicationsMap[appNo];
+        if (app) {
+          window.currentLoaItPark = app.itPark || '';
+          window.currentLoaPlotNo = app.plotNo || app.plotKey || '';
+        }
         try {
           if (typeof STORAGE_KEYS !== 'undefined') localStorage.setItem(STORAGE_KEYS.LOA_APP, appNo);
         } catch (e) { }
@@ -12445,7 +12158,6 @@
 
     function getEligibleLoaApplications() {
       const apps = (window.oicLandApplications || []).slice();
-      // Prioritize MD/PS approved, LOA-generated, or post-approval records first
       const rank = a => {
         const st = String(a?.status || '').toLowerCase();
         if (a?.stage === 'post_approval' || st.includes('approved by md') || st.includes('approved by ps')) return 0;
@@ -12455,33 +12167,240 @@
       return apps.sort((a, b) => rank(a) - rank(b));
     }
 
-    function initGenerateLoaView(preselectAppNo) {
-      const selectEl = document.getElementById('loa-app-select');
-      const apps = getEligibleLoaApplications();
+    function getLoaParkOptionsList() {
+      const parks = [];
+      const addPark = p => {
+        const clean = String(p || '').trim();
+        if (clean && !parks.includes(clean)) parks.push(clean);
+      };
+      (typeof oicPlotInventory !== 'undefined' ? oicPlotInventory : []).forEach(p => addPark(p.itPark || p.park));
+      (window.oicLandApplications || []).forEach(a => addPark(a.itPark));
+      (typeof FLOAT_TENDER_PARK_CATALOG !== 'undefined' ? FLOAT_TENDER_PARK_CATALOG : [
+        'Crystal IT Park, Indore',
+        'IT Park Badwai, Bhopal',
+        'IT Park Sinhasa, Indore',
+        'IT Park Purva, Jabalpur',
+        'IT Park Ganga Malanpur, Gwalior'
+      ]).forEach(addPark);
+      return parks;
+    }
 
-      if (!window.currentLoaAppNo && preselectAppNo) window.currentLoaAppNo = preselectAppNo;
-      if (!window.currentLoaAppNo) {
+    function getLoaPlotsForPark(itPark) {
+      const target = String(itPark || '').trim();
+      const map = new Map();
+      const upsertPlot = (plotNo, info) => {
+        const key = String(plotNo || '').trim();
+        if (!key) return;
+        const existing = map.get(key) || { plotNo: key, itPark: target, sizeAcres: 0, purpose: '', premium: 0, devCharges: 0 };
+        map.set(key, {
+          plotNo: key,
+          itPark: info.itPark || existing.itPark || target,
+          sizeAcres: info.sizeAcres || existing.sizeAcres || 0,
+          purpose: info.purpose || existing.purpose || 'IT/ITeS',
+          premium: info.premium || existing.premium || 0,
+          devCharges: info.devCharges || existing.devCharges || 0
+        });
+      };
+
+      (typeof oicPlotInventory !== 'undefined' ? oicPlotInventory : []).forEach(p => {
+        const pPark = String(p.itPark || p.park || '').trim();
+        if (pPark === target) {
+          upsertPlot(p.plotNo || p.id, {
+            itPark: pPark,
+            sizeAcres: p.sizeAcres || p.acres || 0,
+            purpose: p.purpose || p.landUse || '',
+            premium: parseLoaCurrency(p.premium || p.payablePremium),
+            devCharges: parseLoaCurrency(p.dev || p.devCharges)
+          });
+        }
+      });
+
+      (window.oicLandApplications || []).forEach(a => {
+        if (String(a.itPark || '').trim() === target) {
+          upsertPlot(a.plotNo || a.plotKey, {
+            itPark: target,
+            sizeAcres: parseFloat(String(a.plotSizeAcres || '').replace(/[^0-9.]/g, '')) || 0,
+            purpose: a.purpose || a.businessDomain || '',
+            premium: parseLoaCurrency(a.oldLandPremium ?? a.landPremium),
+            devCharges: parseLoaCurrency(a.devCharges)
+          });
+        }
+      });
+
+      if (map.size === 0 && typeof FLOAT_TENDER_PRESET_PLOTS !== 'undefined' && Array.isArray(FLOAT_TENDER_PRESET_PLOTS[target])) {
+        FLOAT_TENDER_PRESET_PLOTS[target].forEach(p => {
+          upsertPlot(p.plotNo, {
+            itPark: target,
+            sizeAcres: p.sizeAcres || 0,
+            purpose: p.purpose || 'IT/ITeS',
+            premium: Math.round((p.sizeAcres || 1) * 20000000),
+            devCharges: Math.round((p.sizeAcres || 1) * 3484800)
+          });
+        });
+      }
+
+      return Array.from(map.values());
+    }
+
+    function findSelectedLoaPlotRecord(itPark, plotNo) {
+      const plots = getLoaPlotsForPark(itPark);
+      return plots.find(p => p.plotNo === plotNo) || null;
+    }
+
+    function initGenerateLoaView(preselectAppNo) {
+      const parkEl = document.getElementById('loa-it-park-select');
+      const bannerEl = document.getElementById('loa-success-banner');
+      if (bannerEl) bannerEl.classList.add('hidden');
+
+      const apps = getEligibleLoaApplications();
+      let targetAppNo = preselectAppNo || window.currentLoaAppNo || '';
+      if (!targetAppNo) {
         try {
           const storedLoa = localStorage.getItem(STORAGE_KEYS.LOA_APP);
-          if (storedLoa && apps.some(a => a.appNo === storedLoa)) window.currentLoaAppNo = storedLoa;
+          if (storedLoa && apps.some(a => a.appNo === storedLoa)) targetAppNo = storedLoa;
         } catch (e) { }
       }
-      if (!window.currentLoaAppNo && apps.length > 0) {
-        window.currentLoaAppNo = apps[0].appNo;
+      if (!targetAppNo && apps.length > 0) {
+        targetAppNo = apps[0].appNo;
       }
 
-      if (selectEl) {
-        if (apps.length === 0) {
-          selectEl.innerHTML = `<option value="">-- No Land Allotment applications found --</option>`;
+      const targetApp = apps.find(a => a.appNo === targetAppNo) || null;
+      const parks = getLoaParkOptionsList();
+      const resolvedPark = (targetApp && targetApp.itPark) || window.currentLoaItPark || parks[0] || '';
+      const resolvedPlot = (targetApp && (targetApp.plotNo || targetApp.plotKey)) || window.currentLoaPlotNo || '';
+
+      window.currentLoaItPark = resolvedPark;
+      window.currentLoaPlotNo = resolvedPlot;
+      window.currentLoaAppNo = targetApp ? targetApp.appNo : (window.currentLoaAppNo || null);
+
+      if (parkEl) {
+        parkEl.innerHTML = `<option value="">-- Select IT Park --</option>` + parks.map(p =>
+          `<option value="${escapePlotHtml(p)}">${escapePlotHtml(p)}</option>`
+        ).join('');
+        parkEl.value = resolvedPark;
+      }
+
+      populateLoaPlotDropdown(resolvedPark, resolvedPlot, window.currentLoaAppNo || '');
+    }
+
+    function handleLoaItParkChange(parkName) {
+      window.currentLoaItPark = parkName || '';
+      window.currentLoaPlotNo = '';
+      window.currentLoaAppNo = null;
+      const bannerEl = document.getElementById('loa-success-banner');
+      if (bannerEl) bannerEl.classList.add('hidden');
+      populateLoaPlotDropdown(window.currentLoaItPark, '', '');
+    }
+
+    function populateLoaPlotDropdown(parkName, preselectPlotNo, preselectAppNo) {
+      const plotEl = document.getElementById('loa-plot-no-select');
+      const plots = parkName ? getLoaPlotsForPark(parkName) : [];
+      const chosenPlot = (preselectPlotNo && plots.some(p => p.plotNo === preselectPlotNo))
+        ? preselectPlotNo
+        : (plots[0]?.plotNo || '');
+      window.currentLoaPlotNo = chosenPlot;
+
+      if (plotEl) {
+        if (!parkName) {
+          plotEl.innerHTML = `<option value="">-- Select IT Park first --</option>`;
+        } else if (plots.length === 0) {
+          plotEl.innerHTML = `<option value="">-- No Plots available for selected IT Park --</option>`;
         } else {
-          selectEl.innerHTML = `<option value="">-- Select Application --</option>` + apps.map(a => {
-            const loaTag = a.loaGeneratedAt ? ' [LOA Generated]' : (a.stage === 'post_approval' ? ' [Approved - Ready for LOA]' : ` [${a.status}]`);
-            return `<option value="${escapePlotHtml(a.appNo)}">${escapePlotHtml(a.appNo)} — ${escapePlotHtml(a.orgName)} (${escapePlotHtml(a.plotNo)})${escapePlotHtml(loaTag)}</option>`;
+          plotEl.innerHTML = `<option value="">-- Select Plot No. --</option>` + plots.map(p => {
+            const areaTxt = p.sizeAcres ? formatAcres(p.sizeAcres) : 'Area N/A';
+            return `<option value="${escapePlotHtml(p.plotNo)}">${escapePlotHtml(p.plotNo)} (${escapePlotHtml(areaTxt)})</option>`;
           }).join('');
-          if (window.currentLoaAppNo) selectEl.value = window.currentLoaAppNo;
+          plotEl.value = chosenPlot;
         }
       }
-      selectLoaApplication(window.currentLoaAppNo || '');
+
+      populateLoaEligibleAppsDropdown(parkName, chosenPlot, preselectAppNo);
+    }
+
+    function handleLoaPlotNoChange(plotNo) {
+      window.currentLoaPlotNo = plotNo || '';
+      window.currentLoaAppNo = null;
+      const bannerEl = document.getElementById('loa-success-banner');
+      if (bannerEl) bannerEl.classList.add('hidden');
+      populateLoaEligibleAppsDropdown(window.currentLoaItPark, window.currentLoaPlotNo, '');
+    }
+
+    function populateLoaEligibleAppsDropdown(parkName, plotNo, preselectAppNo) {
+      const appEl = document.getElementById('loa-eligible-app-select');
+      const allApps = getEligibleLoaApplications();
+      const matchingApps = (parkName && plotNo)
+        ? allApps.filter(a => String(a.itPark || '').trim() === String(parkName).trim() && (a.plotNo === plotNo || a.plotKey === plotNo))
+        : [];
+
+      const chosenApp = (preselectAppNo && matchingApps.some(a => a.appNo === preselectAppNo))
+        ? preselectAppNo
+        : (matchingApps[0]?.appNo || '');
+
+      if (appEl) {
+        if (!plotNo) {
+          appEl.innerHTML = `<option value="">-- Select Plot No. first --</option>`;
+        } else if (matchingApps.length === 0) {
+          appEl.innerHTML = `<option value="">-- No applications filed for Plot ${escapePlotHtml(plotNo)} --</option>`;
+        } else {
+          appEl.innerHTML = `<option value="">-- Select Eligible Application --</option>` + matchingApps.map(a => {
+            const tag = a.loaGeneratedAt ? 'LOA Generated' : (a.status || 'Eligible');
+            return `<option value="${escapePlotHtml(a.appNo)}">${escapePlotHtml(a.appNo)} — ${escapePlotHtml(a.orgName)} (${escapePlotHtml(tag)})</option>`;
+          }).join('');
+          appEl.value = chosenApp;
+        }
+      }
+
+      selectLoaApplication(chosenApp);
+    }
+
+    function computeLoaFinancialBreakdown(app, plotRec, updatedInputRaw) {
+      const oldPremium = app
+        ? parseLoaCurrency(app.oldLandPremium ?? app.baseLandPremium ?? app.landPremium)
+        : parseLoaCurrency(plotRec?.premium);
+
+      let effectivePremium = oldPremium;
+      const rawStr = String(updatedInputRaw !== undefined ? updatedInputRaw : (document.getElementById('loa-updated-premium-input')?.value ?? '')).trim();
+      if (rawStr !== '') {
+        const parsed = parseFloat(rawStr);
+        if (Number.isFinite(parsed) && parsed >= 0) {
+          effectivePremium = parsed;
+        }
+      } else if (app && app.updatedLandPremium !== undefined && app.updatedLandPremium !== null && app.updatedLandPremium !== '' && updatedInputRaw === undefined) {
+        const savedUpd = parseFloat(app.updatedLandPremium);
+        if (Number.isFinite(savedUpd) && savedUpd >= 0) {
+          effectivePremium = savedUpd;
+        }
+      }
+
+      const leaseRentBase = +(effectivePremium * 0.02).toFixed(2);
+      const leaseRentGst = +(leaseRentBase * 0.18).toFixed(2);
+      const leaseRentTotal = +(leaseRentBase + leaseRentGst).toFixed(2);
+      const devCharges = app
+        ? parseLoaCurrency(app.devCharges)
+        : parseLoaCurrency(plotRec?.devCharges);
+      const grandTotal = +(effectivePremium + leaseRentTotal + devCharges).toFixed(2);
+
+      return {
+        oldPremium,
+        effectivePremium,
+        isUpdated: Math.abs(effectivePremium - oldPremium) > 0.005,
+        leaseRentBase,
+        leaseRentGst,
+        leaseRentTotal,
+        devCharges,
+        grandTotal
+      };
+    }
+
+    function syncLoaSummaryDisplay(fin) {
+      const setTxt = (id, txt) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = txt;
+      };
+      setTxt('loa-calc-effective-premium', `Rs. ${formatLoaAmountPlain(fin.effectivePremium)}`);
+      setTxt('loa-calc-lease-total', `Rs. ${formatLoaAmountPlain(fin.leaseRentTotal)}`);
+      setTxt('loa-calc-dev-charges', `Rs. ${formatLoaAmountPlain(fin.devCharges)}`);
+      setTxt('loa-calc-grand-total', `Rs. ${formatLoaAmountPlain(fin.grandTotal)}`);
     }
 
     function selectLoaApplication(appNo) {
@@ -12493,9 +12412,27 @@
         }
       } catch (e) { }
 
-      const app = (window.oicLandApplications || []).find(a => a.appNo === appNo) || window.submittedApplicationsMap[appNo] || null;
+      const app = appNo ? ((window.oicLandApplications || []).find(a => a.appNo === appNo) || window.submittedApplicationsMap[appNo] || null) : null;
+      const plotRec = findSelectedLoaPlotRecord(app?.itPark || window.currentLoaItPark, app?.plotNo || window.currentLoaPlotNo);
+
+      const oldPremiumVal = app
+        ? parseLoaCurrency(app.oldLandPremium ?? app.baseLandPremium ?? app.landPremium)
+        : parseLoaCurrency(plotRec?.premium);
+      const initialUpdatedVal = (app && app.updatedLandPremium !== undefined && app.updatedLandPremium !== null && app.updatedLandPremium !== '')
+        ? parseLoaCurrency(app.updatedLandPremium)
+        : oldPremiumVal;
+
+      const oldInput = document.getElementById('loa-old-premium-input');
+      if (oldInput) oldInput.value = `Rs. ${formatLoaAmountPlain(oldPremiumVal)}`;
+
+      const updInput = document.getElementById('loa-updated-premium-input');
+      if (updInput) {
+        updInput.disabled = !app && !plotRec;
+        updInput.value = (oldPremiumVal > 0 || initialUpdatedVal > 0) ? String(initialUpdatedVal) : '';
+      }
+
       const badge = document.getElementById('loa-status-badge');
-      const btn = document.getElementById('btn-generate-loa-action');
+      const btn = document.getElementById('btn-generate-loa-submit');
       if (badge) {
         if (!app) {
           badge.textContent = 'No Application Selected';
@@ -12517,52 +12454,62 @@
       if (btn) {
         btn.disabled = !app;
         btn.style.opacity = app ? '1' : '0.55';
+        btn.style.cursor = app ? 'pointer' : 'not-allowed';
         btn.textContent = (app && (app.loaGeneratedAt || String(app.status || '').toLowerCase().includes('loa generated')))
           ? 'Regenerate / Update LOA'
           : 'Generate LOA';
       }
-      renderLoaLetterSheet(app);
+
+      const fin = computeLoaFinancialBreakdown(app, plotRec, updInput ? updInput.value : undefined);
+      syncLoaSummaryDisplay(fin);
+      renderLoaLetterSheet(app, plotRec, fin);
+    }
+
+    function handleLoaUpdatedPremiumInput(val) {
+      const appNo = document.getElementById('loa-eligible-app-select')?.value || window.currentLoaAppNo;
+      const app = appNo ? ((window.oicLandApplications || []).find(a => a.appNo === appNo) || window.submittedApplicationsMap[appNo] || null) : null;
+      const plotRec = findSelectedLoaPlotRecord(app?.itPark || window.currentLoaItPark, app?.plotNo || window.currentLoaPlotNo);
+      const fin = computeLoaFinancialBreakdown(app, plotRec, val);
+      syncLoaSummaryDisplay(fin);
+      renderLoaLetterSheet(app, plotRec, fin);
     }
 
     function formatLoaDisplayDate(dateStr) {
-      if (dateStr && /^\d{2}\/\d{2}\/\d{4}/.test(dateStr)) return dateStr.slice(0, 10).replace(/\//g, '.');
+      if (dateStr && /^\d{2}\/\d{2}\/\d{4}/.test(dateStr)) return dateStr.slice(0, 10);
       const now = new Date();
       const pad = n => String(n).padStart(2, '0');
-      return `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${now.getFullYear()}`;
+      return `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
     }
 
-    function renderLoaLetterSheet(app) {
+    function renderLoaLetterSheet(app, plotRec, financials) {
       const sheet = document.getElementById('loa-letter-sheet');
       if (!sheet) return;
 
+      const fin = financials || computeLoaFinancialBreakdown(app, plotRec);
       const todayStr = formatLoaDisplayDate('');
       const orgName = app?.orgName || 'Applicant / Organization Name';
       const regAddress = app?.regAddress || 'Registered Office Address, Madhya Pradesh';
+      const emailId = app?.email || 'applicant@organization.in';
       const appNo = app?.appNo || '—';
-      const plotNo = app?.plotNo || '—';
-      const itPark = app?.itPark || 'MPSEDC IT Park';
-      const plotSizeAcres = app?.plotSizeAcres || '0.00 Acre';
-      const plotSizeSqFt = app?.plotSizeSqFt ? ` (${app.plotSizeSqFt})` : '';
-      const policyName = app?.policyName || 'MP IT, ITeS & ESDM Policy 2023';
-      const landPremium = app?.landPremium || '₹ 0.00';
-      const devCharges = app?.devCharges || '₹ 0.00';
-      const appFee = app?.appFee || '₹ 10,000.00';
-      const advanceEmd = app?.advanceEmd || '₹ 0.00';
-      const maintCharges = app?.maintCharges || '₹ 0.00';
-      const leaseRent = app?.leaseRent || '₹ 0.00';
-      const totalLandAmount = app?.totalLandAmount || '₹ 0.00';
-      const timeline = app?.timeline || 'Commercial commencement within the approved milestone schedule.';
-      const headcount = app?.headcount || 'As committed in DPR';
-      const submittedDate = app?.submissionDate || app?.pendingSince || app?.appDate || todayStr;
-      const isMega = String(app?.applicationType || '').toLowerCase().includes('mega');
-      const slaDays = isMega ? '30' : '15';
-      const loaRefLine = app?.loaRefNo ? ` | Ref: ${app.loaRefNo}` : '';
+      const plotNo = app?.plotNo || plotRec?.plotNo || window.currentLoaPlotNo || '—';
+      const itPark = app?.itPark || plotRec?.itPark || window.currentLoaItPark || 'MPSEDC IT Park';
+      const plotSizeAcres = app?.plotSizeAcres || (plotRec?.sizeAcres ? formatAcres(plotRec.sizeAcres) : '0.00 Acre');
+      const acresNumeric = parseFloat(String(plotSizeAcres).replace(/[^0-9.]/g, '')) || 0;
+      const devRateStr = (acresNumeric > 0 && fin.devCharges > 0)
+        ? ` @ Rs. ${formatLoaAmountPlain(Math.round(fin.devCharges / acresNumeric))}/- per Acre`
+        : '';
+      const policyName = app?.policyName || 'Madhya Pradesh IT, ITeS and ESDM Investment Promotion Policy 2023';
+      const trackDesc = app?.projTitle || app?.applicationType || 'IT/ITeS/ESDM Project';
+      const submittedDate = app?.appDate || (app?.pendingSince ? app.pendingSince.slice(0, 10) : todayStr);
+      const loiRefStr = app?.loaRefNo
+        ? `${app.loaRefNo} (dated ${todayStr})`
+        : `Application No. ${appNo} dated ${submittedDate}`;
 
       sheet.innerHTML = `
-        <!-- Header Row matching Screenshot 2026-11-26 115343.png -->
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:14px;border-bottom:1px solid #e2e8f0;margin-bottom:22px;">
+        <!-- Header Row (MPSEDC Logo | Center Title | GoMP Emblem) -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:14px;border-bottom:2px solid #3b5998;margin-bottom:18px;">
           <div style="flex-shrink:0;">
-            <svg width="74" height="56" viewBox="0 0 80 62" xmlns="http://www.w3.org/2000/svg" aria-label="MPSEDC Logo">
+            <svg width="78" height="58" viewBox="0 0 80 62" xmlns="http://www.w3.org/2000/svg" aria-label="MPSEDC Logo">
               <path d="M10 18 L24 8 L42 12 L58 6 L72 20 L65 36 L52 44 L36 38 L22 46 L10 34 Z" fill="none" stroke="#3b5998" stroke-width="2" stroke-linejoin="round"/>
               <circle cx="24" cy="20" r="2.2" fill="#3b5998"/>
               <circle cx="48" cy="18" r="2.2" fill="#3b5998"/>
@@ -12572,15 +12519,18 @@
             </svg>
           </div>
           <div style="text-align:center;flex:1;">
-            <div style="font-size:15.5px;font-weight:700;color:#1e293b;letter-spacing:0.02em;text-transform:uppercase;line-height:1.3;">
+            <div style="font-size:16px;font-weight:800;color:#0f172a;letter-spacing:0.02em;text-transform:uppercase;line-height:1.3;">
               M.P. STATE ELECTRONICS DEVELOPMENT CORPORATION LTD.
             </div>
-            <div style="font-size:12px;font-weight:600;color:#2563eb;margin-top:3px;">
+            <div style="font-size:12px;font-weight:700;color:#2563eb;margin-top:3px;">
               A Government of MP Undertaking
+            </div>
+            <div style="font-size:10.5px;color:#475569;margin-top:2px;">
+              State IT Centre, 47-A, Arera Hills, Bhopal - 462011 (M.P.)
             </div>
           </div>
           <div style="flex-shrink:0;">
-            <svg width="56" height="56" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="Government of Madhya Pradesh Emblem">
+            <svg width="58" height="58" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="Government of Madhya Pradesh Emblem">
               <circle cx="32" cy="32" r="28" fill="#fef3c7" stroke="#991b1b" stroke-width="3"/>
               <circle cx="32" cy="32" r="22" fill="#fffbeb" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3 2"/>
               <path d="M24 38 L32 16 L40 38 Z" fill="#b45309"/>
@@ -12591,76 +12541,180 @@
           </div>
         </div>
 
-        <!-- Reference & Date Line -->
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;font-size:12px;color:#475569;margin-bottom:14px;">
-          <div>
-            <span>MPSEDC: Land Allotment</span>
-            <span style="margin-left:8px;color:#64748b;">(Application No.: <b>${escapePlotHtml(appNo)}</b> &bull; Plot No.: <b>${escapePlotHtml(plotNo)}</b>${escapePlotHtml(loaRefLine)})</span>
+        <!-- Reference & Date -->
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;font-size:12.5px;color:#0f172a;font-weight:700;margin-bottom:16px;">
+          <div>Ref. MPSEDC: ITIA: ALLOT: 2026: ${escapePlotHtml(appNo !== '—' ? appNo : plotNo)}</div>
+          <div>Bhopal, Dated: ${escapePlotHtml(todayStr)}</div>
+        </div>
+
+        <!-- Applicant Addressee Block -->
+        <div style="font-size:12.5px;line-height:1.6;color:#1e293b;margin-bottom:16px;">
+          <div style="font-weight:700;color:#0f172a;">${escapePlotHtml(orgName)},</div>
+          <div>${escapePlotHtml(regAddress)}</div>
+          <div style="margin-top:4px;"><b>E-Mail ID:</b> &nbsp; 1) ${escapePlotHtml(emailId)}</div>
+        </div>
+
+        <!-- Document Title -->
+        <div style="text-align:center;font-size:13.5px;font-weight:800;color:#0f172a;text-decoration:underline;letter-spacing:0.03em;margin:14px 0 14px;">
+          PROVISIONAL LETTER OF ALLOTMENT (LOA)
+        </div>
+
+        <!-- Subject & Reference Line -->
+        <div style="font-size:12.5px;line-height:1.65;color:#1e293b;margin-bottom:14px;">
+          <div style="display:flex;gap:12px;">
+            <b style="min-width:42px;">Sub:</b>
+            <b>Letter of Allotment (LOA) for Plot No. ${escapePlotHtml(plotNo)} at ${escapePlotHtml(itPark)} (${escapePlotHtml(trackDesc)}).</b>
           </div>
-          <div>Bhopal, Dated <b>${escapePlotHtml(todayStr)}</b></div>
+          <div style="display:flex;gap:12px;margin-top:4px;">
+            <b style="min-width:42px;">Ref:</b>
+            <span>${escapePlotHtml(loiRefStr)} &amp; Parcel Allocation at ${escapePlotHtml(itPark)} (Plot No. ${escapePlotHtml(plotNo)}).</span>
+          </div>
         </div>
 
-        <!-- Addressee & Subject -->
-        <div style="font-size:12px;line-height:1.65;color:#334155;margin-bottom:18px;">
-          <div style="font-weight:700;color:#1e3a8a;">M/s ${escapePlotHtml(orgName)}</div>
-          <div style="font-weight:700;color:#1e3a8a;">${escapePlotHtml(regAddress)}</div>
-          <div style="margin-top:16px;">Subject: <b style="color:#0f172a;">Letter of Allotment (LOA)</b></div>
+        <!-- Greeting & Opening Paragraph -->
+        <div style="font-size:12.5px;line-height:1.7;color:#1e293b;margin-bottom:12px;">
+          <div style="margin-bottom:8px;">Dear Sir/Madam,</div>
+          <p style="margin:0 0 8px 0;">
+            We are pleased to allot <b>Plot No. ${escapePlotHtml(plotNo)}</b> measuring <b>${escapePlotHtml(plotSizeAcres)}</b> at <b>${escapePlotHtml(itPark)}</b> as per Terms and Conditions of <b>${escapePlotHtml(policyName)}</b> for setting up <b>${escapePlotHtml(trackDesc)}</b> proposal submitted under Application No. <b>${escapePlotHtml(appNo)}</b>.
+          </p>
+          <p style="margin:0 0 8px 0;">
+            You are requested to deposit the amount within a period of <b>45 days</b> from the date of issue of this LoA as per Implementation Guidelines for Madhya Pradesh IT, ITeS and ESDM Investment Promotion Policy 2023.
+          </p>
+          <div style="margin-top:6px;font-weight:600;">The details are as follows:</div>
         </div>
 
-        <!-- Greeting -->
-        <div style="font-size:12px;color:#3b5998;margin-bottom:14px;">Dear Sir/Madam,</div>
+        <!-- Particulars & Financial Table -->
+        <table style="width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:18px;border:1px solid #475569;">
+          <thead>
+            <tr style="background:#eef2f7;color:#0f172a;">
+              <th style="border:1px solid #475569;padding:8px 10px;text-align:center;width:64px;">S.No.</th>
+              <th style="border:1px solid #475569;padding:8px 12px;text-align:left;">Particulars</th>
+              <th style="border:1px solid #475569;padding:8px 12px;text-align:right;width:190px;">Amount in Rs.</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="border:1px solid #475569;padding:8px 10px;text-align:center;font-weight:600;">a</td>
+              <td style="border:1px solid #475569;padding:8px 12px;">
+                Land Premium (after rebate / post e-bidding)
+                ${fin.isUpdated
+          ? `<div style="font-size:11px;color:#1d4ed8;margin-top:2px;">Updated after e-bidding (Previous Land Premium: Rs. ${escapePlotHtml(formatLoaAmountPlain(fin.oldPremium))})</div>`
+          : `<div style="font-size:11px;color:#64748b;margin-top:2px;">As per policy rebate &amp; approved plot valuation</div>`}
+              </td>
+              <td style="border:1px solid #475569;padding:8px 12px;text-align:right;font-family:monospace;font-weight:700;">
+                ${escapePlotHtml(formatLoaAmountPlain(fin.effectivePremium))}
+              </td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #475569;padding:8px 10px;text-align:center;font-weight:600;vertical-align:top;">b</td>
+              <td style="border:1px solid #475569;padding:8px 12px;">
+                <div>Lease rent @2% of land premium is Rs. ${escapePlotHtml(formatLoaAmountPlain(fin.leaseRentBase))}</div>
+                <div style="margin-top:4px;color:#334155;">(+) GST @18% Rs. ${escapePlotHtml(formatLoaAmountPlain(fin.leaseRentGst))}</div>
+              </td>
+              <td style="border:1px solid #475569;padding:8px 12px;text-align:right;font-family:monospace;font-weight:700;vertical-align:top;">
+                ${escapePlotHtml(formatLoaAmountPlain(fin.leaseRentTotal))}
+              </td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #475569;padding:8px 10px;text-align:center;font-weight:600;">c</td>
+              <td style="border:1px solid #475569;padding:8px 12px;">
+                Development Charges${escapePlotHtml(devRateStr)}
+              </td>
+              <td style="border:1px solid #475569;padding:8px 12px;text-align:right;font-family:monospace;font-weight:700;">
+                ${escapePlotHtml(formatLoaAmountPlain(fin.devCharges))}
+              </td>
+            </tr>
+            <tr style="background:#f8fafc;">
+              <td style="border:1px solid #475569;padding:9px 10px;text-align:center;font-weight:800;">d</td>
+              <td style="border:1px solid #475569;padding:9px 12px;font-weight:800;color:#0f172a;">Total</td>
+              <td style="border:1px solid #475569;padding:9px 12px;text-align:right;font-family:monospace;font-weight:800;color:#1e3a8a;font-size:13px;">
+                ${escapePlotHtml(formatLoaAmountPlain(fin.grandTotal))}
+              </td>
+            </tr>
+          </tbody>
+        </table>
 
-        <!-- Opening Paragraph -->
-        <div style="font-size:12px;line-height:1.8;color:#3b5998;margin-bottom:14px;">
-          We refer to your application dated <b>${escapePlotHtml(submittedDate)}</b> expressing your interest in securing industrial IT/ITeS land at <b>${escapePlotHtml(itPark)}, Plot No. ${escapePlotHtml(plotNo)}</b>. We are pleased to inform you that your request for the allotment of plot has been approved by the competent authority under the following terms and conditions:
+        <!-- Terms & Conditions -->
+        <div style="font-size:12.2px;line-height:1.72;color:#1e293b;margin-bottom:20px;">
+          <div style="font-weight:800;color:#0f172a;text-decoration:underline;margin-bottom:6px;">Terms &amp; Conditions:</div>
+          <div style="margin-bottom:8px;">
+            As per the Policy and Guidelines of Madhya Pradesh IT, ITeS and ESDM Investment Promotion Policy 2023, the terms and conditions are as follows:
+          </div>
+          <ol style="margin:0 0 0 22px;padding:0;display:flex;flex-direction:column;gap:6px;">
+            <li>This allotment will be governed by the approved Letter of Intent / Allotment Order (${escapePlotHtml(loiRefStr)}) issued by MPSEDC and applicable provisions of <b>${escapePlotHtml(policyName)}</b>.</li>
+            <li>Deposit the charges towards land premium, development charges and lease rent for one year within a period of <b>45 days</b> from the date of issue of LoA.</li>
+            <li>In case you fail to deposit the amount towards land premium, development charge and lease rent within <b>45 days</b>, this Letter of Allotment shall be deemed cancelled and the authorized agency shall be free to allot the land to another applicant.</li>
+            <li>After depositing the necessary charges towards land allotment as provided above, the lease deed (Appendix given in Implementation Guidelines for MP IT, ITeS and ESDM Investment Promotion Policy, 2023 – Part II – Land Management) must be executed between the nodal agency and the applicant within <b>45 days</b>.</li>
+            <li>In case you fail to execute/register the lease deed within <b>45 days</b> from the date of completely depositing the necessary charges, the allotment shall be deemed cancelled and the nodal agency shall be free to allot the land to another applicant.</li>
+            <li>Every year lease rent will be payable within <b>10 days</b> of the start of the financial year (i.e. <b>1st April</b>). If there is any delay in depositing the lease rent for any particular year, an interest of <b>one (1) percent per month (simple interest)</b> shall be levied on the outstanding amount of lease rent. If lease rent remains unpaid for more than one (1) year, the nodal agency may take action towards cancellation of the lease deed.</li>
+            <li>You are advised to install a signboard size <b>4x2 Feet</b> at the allotted plot immediately to avoid any encroachment etc.</li>
+            <li>You are also advised to go through Implementation Guidelines for <b>Madhya Pradesh IT, ITeS and ESDM Investment Promotion Policy 2023</b> (and applicable GCC Policy guidelines) and be thorough with the provisions provided therein for claiming any assistance or information sought by you.</li>
+            <li>The possession of the plot shall be effective from the date of execution/registration of the lease deed.</li>
+            <li>Please note that in case you fail to fulfil the conditions as per Implementation Guidelines for Madhya Pradesh IT, ITeS and ESDM Investment Promotion Policy 2023 within the stipulated period, the allotment shall be deemed to be cancelled and MPSEDC (nodal agency) shall be free to allot this land to another applicant.</li>
+          </ol>
         </div>
 
-        <!-- Numbered Clauses 1 to 9 -->
-        <ol style="margin:0 0 18px 26px;padding:0;font-size:12px;line-height:1.8;color:#3b5998;display:flex;flex-direction:column;gap:5px;">
-          <li><b>Plot Allocation:</b> Plot No. <b>${escapePlotHtml(plotNo)}</b> admeasuring an area of <b>${escapePlotHtml(plotSizeAcres)}</b>${escapePlotHtml(plotSizeSqFt)} at <b>${escapePlotHtml(itPark)}</b> has been allotted to you as per your application (${escapePlotHtml(app?.applicationType || 'EOI Allotment')}).</li>
-          <li><b>Land Premium &amp; Development Charges:</b> The net payable land premium is <b>${escapePlotHtml(landPremium)}</b> (under <b>${escapePlotHtml(policyName)}</b>) and development charges are <b>${escapePlotHtml(devCharges)}</b>. Applicable taxes and stamp duty will be charged at actuals.</li>
-          <li><b>Application / Advance EMD:</b> Non-refundable application fee of <b>${escapePlotHtml(appFee)}</b> and 25% Advance EMD of <b>${escapePlotHtml(advanceEmd)}</b> have been accounted against the land allotment consideration.</li>
-          <li><b>Maintenance Charges:</b> You will be required to pay annual maintenance charges of <b>${escapePlotHtml(maintCharges)}</b> for the upkeep of the IT Park campus, internal roads, street lighting, common utilities, etc., on a shared basis.</li>
-          <li><b>Annual Lease Rent:</b> Annual lease rent of <b>${escapePlotHtml(leaseRent)}</b> will be payable annually in accordance with MPSEDC Land Allotment Policy guidelines.</li>
-          <li><b>Implementation &amp; Construction Term:</b> The project implementation period shall adhere to your approved schedule (<b>${escapePlotHtml(timeline)}</b>) along with the committed employment target (<b>${escapePlotHtml(headcount)}</b>).</li>
-          <li><b>Possession:</b> Physical possession of the allotted plot will be deemed effective following acceptance of this LOA, full balance payment, and execution of the Lease Deed.</li>
-          <li><b>Payment Schedule:</b> Balance land premium and allied charges (Total Land Amount: <b>${escapePlotHtml(totalLandAmount)}</b>) shall be remitted within the statutory SLA window of <b>${slaDays} days</b> from the date of issuance of this LOA.</li>
-          <li><b>Lease Deed Execution SLA:</b> A copy of the Lease Deed format will be issued for execution upon balance payment verification. The Lease Deed must be signed and executed within <b>30 days</b> (${slaDays}-day payment compliance SLA) from the date of this LOA. Failure to complete payment or execute the Lease Deed within this time frame will result in the cancellation of the allotment.</li>
-        </ol>
+        <!-- Signatory Block -->
+        <div style="font-size:12.5px;line-height:1.7;color:#0f172a;margin-top:20px;">
+          <div>Thanking you,</div>
+          <div style="margin-top:6px;font-style:italic;color:#334155;">(As approved by Managing Director)</div>
+          <div style="margin-top:18px;font-weight:700;">Yours sincerely,</div>
+          <div style="margin-top:24px;font-weight:800;color:#1e3a8a;">Executive Director</div>
+          <div style="font-weight:700;color:#334155;">MPSEDC</div>
+        </div>
 
-        <!-- Closing & Sign-Off -->
-        <div style="font-size:12px;line-height:1.9;color:#3b5998;display:flex;flex-direction:column;gap:8px;">
-          <div>We kindly request that you complete all necessary formalities related to the allotment at the earliest.</div>
-          <div>Thank you for your attention to this matter.</div>
-          <div style="margin-top:6px;">
-            <div>Sincerely,</div>
-            <div style="margin-top:4px;font-weight:600;color:#1e3a8a;">ED / OIC IT Park</div>
-            <div>Competent Authority</div>
+        <!-- CC Distribution List -->
+        <div style="font-size:11.8px;line-height:1.65;color:#334155;margin-top:20px;padding-top:14px;border-top:1px dashed #cbd5e1;display:flex;gap:14px;align-items:flex-start;">
+          <div style="font-weight:700;color:#0f172a;white-space:nowrap;">CC:</div>
+          <div>
+            <div>1) Principal Secretary, Department of Science and Technology, GoMP, Mantralaya Bhopal</div>
+            <div>2) O/o MD, MPSEDC for kind information</div>
+            <div>3) Executive Director (Investment Promotion), MPSEDC</div>
+            <div>4) Finance Controller/OIC (F&amp;A), MPSEDC Ltd.</div>
+            <div>5) OIC IT Park, MPSEDC</div>
           </div>
         </div>
       `;
     }
 
     function executeGenerateLoaAction() {
-      const appNo = document.getElementById('loa-app-select')?.value || window.currentLoaAppNo;
-      const app = (window.oicLandApplications || []).find(a => a.appNo === appNo) || window.submittedApplicationsMap[appNo];
-      if (!app) {
-        showGlobalToast('Please select a Land Allotment application before generating LOA.', 'error');
+      const itPark = document.getElementById('loa-it-park-select')?.value || '';
+      const plotNo = document.getElementById('loa-plot-no-select')?.value || '';
+      const appNo = document.getElementById('loa-eligible-app-select')?.value || window.currentLoaAppNo;
+      const app = appNo ? ((window.oicLandApplications || []).find(a => a.appNo === appNo) || window.submittedApplicationsMap[appNo]) : null;
+
+      if (!itPark || !plotNo || !app) {
+        showGlobalToast('Please select IT Park, Plot No., and an eligible application before generating LOA.', 'error');
         return;
       }
+
+      const updRaw = document.getElementById('loa-updated-premium-input')?.value?.trim() || '';
+      if (updRaw !== '' && (!Number.isFinite(parseFloat(updRaw)) || parseFloat(updRaw) < 0)) {
+        showGlobalToast('Please enter a valid non-negative Updated Land Premium amount.', 'error');
+        document.getElementById('loa-updated-premium-input')?.focus();
+        return;
+      }
+
+      const plotRec = findSelectedLoaPlotRecord(itPark, plotNo);
+      const fin = computeLoaFinancialBreakdown(app, plotRec, updRaw);
 
       const ts = formatCurrentOicTimestamp();
       const suffix = String(app.appNo || '').split('-').pop() || '0001';
       const loaRef = app.loaRefNo || `LOA/MPSEDC/2026/${suffix}`;
       const isMega = String(app.applicationType || '').toLowerCase().includes('mega');
 
+      app.oldLandPremium = fin.oldPremium;
+      app.updatedLandPremium = fin.effectivePremium;
+      app.landPremium = `₹ ${formatLoaAmountPlain(fin.effectivePremium)}`;
+      app.leaseRent = `₹ ${formatLoaAmountPlain(fin.leaseRentTotal)}`;
+      app.totalLandAmount = `₹ ${formatLoaAmountPlain(fin.grandTotal)}`;
       app.loaRefNo = loaRef;
       app.loaGeneratedAt = ts;
       app.oicVerifiedAt = app.oicVerifiedAt || ts;
       app.stage = 'post_approval';
       app.status = isMega
         ? 'LOA Generated (Direct Allotment) - Pending ED2 DSC Sign'
-        : 'LOA Generated (15-Day SLA) - Pending ED DSC Sign';
+        : 'LOA Generated (Post E-Bidding / 45-Day SLA) - Pending ED DSC Sign';
       app.applicationAt = isMega ? 'ED2' : 'Executive Director (ED)';
       app.pendingSince = ts;
       app.history = app.history || [];
@@ -12668,9 +12722,12 @@
         actor: 'OIC IT Park',
         timestamp: ts,
         status: `LOA Generated (${loaRef})`,
-        remark: `Official Letter of Allotment (${loaRef}) generated for ${app.orgName} (${app.plotNo}, ${app.itPark}).`
+        remark: `Official LOA (${loaRef}) generated for ${app.orgName} (${app.plotNo}, ${app.itPark}). Old Premium: Rs. ${formatLoaAmountPlain(fin.oldPremium)}, Post E-Bidding Updated Land Premium: Rs. ${formatLoaAmountPlain(fin.effectivePremium)}, Total LOA Payable: Rs. ${formatLoaAmountPlain(fin.grandTotal)}.`
       });
 
+      window.currentLoaItPark = app.itPark || itPark;
+      window.currentLoaPlotNo = app.plotNo || plotNo;
+      window.currentLoaAppNo = app.appNo;
       window.submittedApplicationsMap[app.appNo] = app;
       savePersistedApplications();
       updateOicStats();
@@ -12681,9 +12738,17 @@
       if (typeof renderAuthorityWorkbench === 'function' && window.currentOfficerRole) renderAuthorityWorkbench(window.currentOfficerRole);
 
       initGenerateLoaView(app.appNo);
+      const bannerEl = document.getElementById('loa-success-banner');
+      const bannerTxt = document.getElementById('loa-success-banner-text');
+      if (bannerEl && bannerTxt) {
+        bannerTxt.innerHTML = `<strong>LOA Generated:</strong> ${escapePlotHtml(loaRef)} for <b>${escapePlotHtml(app.orgName)}</b> (${escapePlotHtml(app.appNo)}) &bull; Updated Land Premium: <span class="font-mono font-bold">Rs. ${escapePlotHtml(formatLoaAmountPlain(fin.effectivePremium))}</span> &bull; Total Payable: <span class="font-mono font-bold">Rs. ${escapePlotHtml(formatLoaAmountPlain(fin.grandTotal))}</span>`;
+        bannerEl.classList.remove('hidden');
+      }
       showGlobalToast(`Official LOA (${loaRef}) generated & persisted for ${app.appNo}.`, 'success');
     }
 
+  </script>
+  <script>
     // =========================================================================
     // OIC IT PARK - FLOAT TENDER FOR EOI ENGINE (#view-oic-float-tender)
     // =========================================================================
@@ -12790,10 +12855,15 @@
       const parkName = parkSel?.value || '';
       if (!plotSel) return;
 
+      const setElVal = (id, v) => {
+        const el = document.getElementById(id);
+        if (el) el.value = v;
+      };
+
       if (!parkName) {
         plotSel.innerHTML = `<option value="">-- Select Plot No. --</option>`;
-        document.getElementById('ft-plot-name').value = '';
-        document.getElementById('ft-total-area').value = '';
+        setElVal('ft-plot-name', '');
+        setElVal('ft-total-area', '');
         return;
       }
 
@@ -12805,8 +12875,8 @@
         plotSel.value = candidates[0].plotNo;
         loadFloatTenderPlotDetails(false);
       } else {
-        document.getElementById('ft-plot-name').value = '';
-        document.getElementById('ft-total-area').value = '';
+        setElVal('ft-plot-name', '');
+        setElVal('ft-total-area', '');
       }
     }
 
@@ -12978,21 +13048,30 @@
       showGlobalToast(`Tender floated & published live for ${plotNo} (${parkName}).`, 'success');
     }
 
-    // Initialize state on DOM ready (Load all persisted plots, drafts, applications & restore view)
+    // Initialize state on DOM ready (Fault-isolated per module so any partial UI edit never breaks the rest of the portal)
     window.addEventListener('DOMContentLoaded', () => {
-      setDefaultEoiDates();
-      renderOicPlotTable();
-      syncPlotsWithInvestorView();
-      updateOicStats();
-      updateOicProcessStats();
-      updateKpiCardActiveState();
-      renderOicApplicationsTable();
-      renderSubsidyDashboard();
-      renderInvestorDashboard();
-      renderDocuments();
-      initEoiFormStepper();
-      applyIncDateRestrictions();
-      setupTextareaCharCounters();
+      const safeBoot = (label, fn) => {
+        if (typeof fn !== 'function') return;
+        try {
+          fn();
+        } catch (err) {
+          console.warn(`[Portal Boot] Skipped ${label}:`, err);
+        }
+      };
+
+      safeBoot('setDefaultEoiDates', () => setDefaultEoiDates());
+      safeBoot('renderOicPlotTable', () => renderOicPlotTable());
+      safeBoot('syncPlotsWithInvestorView', () => syncPlotsWithInvestorView());
+      safeBoot('updateOicStats', () => updateOicStats());
+      safeBoot('updateOicProcessStats', () => updateOicProcessStats());
+      safeBoot('updateKpiCardActiveState', () => updateKpiCardActiveState());
+      safeBoot('renderOicApplicationsTable', () => renderOicApplicationsTable());
+      safeBoot('renderSubsidyDashboard', () => renderSubsidyDashboard());
+      safeBoot('renderInvestorDashboard', () => renderInvestorDashboard());
+      safeBoot('renderDocuments', () => renderDocuments());
+      safeBoot('initEoiFormStepper', () => initEoiFormStepper());
+      safeBoot('applyIncDateRestrictions', () => applyIncDateRestrictions());
+      safeBoot('setupTextareaCharCounters', () => setupTextareaCharCounters());
 
       try {
         const savedView = localStorage.getItem(STORAGE_KEYS.VIEW);
@@ -13006,7 +13085,7 @@
           window.currentOfficerRole = savedRole;
         }
 
-        if (savedView === 'oic-scrutiny-detail' && savedScrutinyApp && window.submittedApplicationsMap[savedScrutinyApp]) {
+        if (savedView === 'oic-scrutiny-detail' && savedScrutinyApp && window.submittedApplicationsMap?.[savedScrutinyApp]) {
           openOicScrutinyDetail(savedScrutinyApp);
         } else if (savedView === 'oic-generate-loa') {
           const savedLoaApp = localStorage.getItem(STORAGE_KEYS.LOA_APP);
@@ -13014,16 +13093,19 @@
           switchView('oic-generate-loa');
         } else if (savedView === 'oic-float-tender') {
           switchView('oic-float-tender');
-        } else if (savedView === 'subsidy-scrutiny' && savedSubsidyApp && window.submittedApplicationsMap[savedSubsidyApp]) {
+        } else if (savedView === 'subsidy-scrutiny' && savedSubsidyApp && window.submittedApplicationsMap?.[savedSubsidyApp]) {
           openSubsidyScrutinyDetail(savedSubsidyApp);
-        } else if (savedView === 'eoi-form' && savedRectifyApp && window.submittedApplicationsMap[savedRectifyApp]) {
+        } else if (savedView === 'eoi-form' && savedRectifyApp && window.submittedApplicationsMap?.[savedRectifyApp]) {
           openApplicantQueryRectification(savedRectifyApp);
-        } else if (savedView === 'eoi-form' && savedActivePlot && (plotsDatabase[savedActivePlot] || oicPlotInventory.some(p => p.id === savedActivePlot || p.plotNo === savedActivePlot))) {
+        } else if (savedView === 'eoi-form' && savedActivePlot && (plotsDatabase?.[savedActivePlot] || (oicPlotInventory || []).some(p => p.id === savedActivePlot || p.plotNo === savedActivePlot))) {
           openEoiFormForPlot(savedActivePlot);
         } else if (savedView && savedView !== 'eoi-form' && savedView !== 'eoi-preview' && savedView !== 'oic-scrutiny-detail' && savedView !== 'subsidy-scrutiny') {
           switchView(savedView);
         }
-      } catch (e) { }
+      } catch (e) {
+        console.warn('[Portal Boot] Restore fallback to dashboard:', e);
+        if (typeof switchView === 'function') switchView('dashboard');
+      }
     });
   </script>
   <!-- Modal: Confirmation for Plot Publish / Unpublish Toggle -->
@@ -13440,7 +13522,7 @@
 
       <div class="bg-slate-100 px-5 py-3 border-t border-slate-200 flex justify-between items-center flex-shrink-0">
         <button type="button"
-          onclick="showGlobalToast('Downloading certified copy of ' + document.getElementById('doc-modal-filename').textContent, 'success')"
+          onclick="showGlobalToast('Downloading certified copy of ' + (document.getElementById('doc-modal-filename')?.textContent || 'document.pdf'), 'success')"
           class="text-xs font-semibold text-blue-700 hover:text-blue-900 inline-flex items-center gap-1.5 cursor-pointer">
           <span>⬇</span><span>Download Certified Copy</span>
         </button>
