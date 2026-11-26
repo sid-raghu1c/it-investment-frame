@@ -82,6 +82,7 @@
       VIEW: 'mpsedc_active_view_v1',
       SCRUTINY_APP: 'mpsedc_active_scrutiny_app_v1',
       SUBSIDY_APP: 'mpsedc_active_subsidy_app_v1',
+      LOA_APP: 'mpsedc_active_loa_app_v1',
       RECTIFY_APP: 'mpsedc_active_rectification_app_v1',
       ACTIVE_PLOT: 'mpsedc_active_plot_key_v1',
       ROLE: 'mpsedc_active_role_v1'
@@ -3126,28 +3127,49 @@
         repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0px, rgba(255, 255, 255, 0.03) 20px, transparent 20px, transparent 40px);
     }
 
+    .oic-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    @media (max-width: 1024px) {
+      .oic-kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .oic-kpi-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
     .oic-kpi-card {
       background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 6px;
+      border: 1px solid #eef2f7;
+      border-radius: 4px;
       padding: 18px 20px;
       min-height: 112px;
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+      box-shadow: 0 3px 10px rgba(15, 23, 42, 0.08);
       position: relative;
       cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
       transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
     }
 
     .oic-kpi-card:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 14px rgba(59, 89, 152, 0.14);
-      border-color: #93b4eb;
+      border-color: #cbd8f3;
     }
 
     .oic-kpi-card.active {
-      background: #dfe5f5;
-      border-color: #4267b2;
-      box-shadow: 0 4px 12px rgba(66, 103, 178, 0.18);
+      background: #e8eefb;
+      border-color: #d6e1f7;
+      box-shadow: 0 4px 12px rgba(66, 103, 178, 0.16);
     }
 
     .scrutiny-speech-bubble {
@@ -3372,9 +3394,9 @@
       </div>
       <!-- User Profile Box: Higher Authority Officers (Finance Admin / ED / MD) -->
       <div class="user hidden" id="user-box-officer">
-        <div class="av" style="background:#ede9fe;color:#5b21b6;">&#128100;</div>
+        <div class="av" style="background:#dfe5f5;color:#4267b2;">&#128100;</div>
         <b id="officer-box-username">FinanceAdmin</b>
-        <small id="officer-box-role" style="color:#5b21b6;font-weight:700">Finance Admin</small>
+        <small id="officer-box-role" style="color:#4267b2;font-weight:700">Finance Admin</small>
       </div>
       <!-- Navigation: Investor Portal (100% Intact) -->
       <nav id="nav-investor">
@@ -3429,16 +3451,84 @@
       </nav>
       <!-- Navigation: Higher Authority Officers (FINANCE_ADMIN / ED / MD) -->
       <nav id="nav-officer" class="hidden">
-        <a class="on" href="javascript:void(0)" onclick="switchView('authority-workbench')" id="nav-officer-dashboard">
-          <span class="i">&#9638;</span><span>Authority Dashboard</span>
-        </a>
-        <a href="javascript:void(0)"
-          onclick="renderAuthorityWorkbench(window.currentOfficerRole || 'FINANCE_ADMIN'); showGlobalToast('Authority Queue refreshed from persisted state.', 'info');">
-          <span class="i">&#9776;</span><span>Scrutiny Queue</span>
-        </a>
-        <a href="javascript:void(0)" onclick="openAuthorityControlPanel()">
-          <span class="i">&#9881;</span><span>Control Panel</span>
-        </a>
+        <!-- Finance Admin Sidebar (Matches Image 2) -->
+        <div id="nav-officer-finance">
+          <a class="on" href="javascript:void(0)" onclick="toggleOfficerSidebarGroup('fin-auth')"
+            id="nav-fin-authority">
+            <span class="i">&#9638;</span>
+            <span>Authority Dashboard</span>
+            <span class="c" id="nav-fin-chev-auth">&#8964;</span>
+          </a>
+          <div id="nav-fin-group-auth">
+            <a href="javascript:void(0)" onclick="switchView('authority-workbench')"
+              style="padding-left:28px;background:#fafbfc;position:relative;font-weight:700;color:#1e3a8a">
+              <span
+                style="position:absolute;left:14px;top:10px;bottom:10px;width:3px;background:#4267b2;border-radius:2px"></span>
+              <span style="font-size:13px">Portal 2.0</span>
+            </a>
+            <a href="javascript:void(0)"
+              onclick="showGlobalToast('Portal 1.0 legacy archive is read-only. Active applications run on Portal 2.0.', 'info')"
+              style="padding-left:28px;background:#fafbfc;position:relative">
+              <span
+                style="position:absolute;left:14px;top:10px;bottom:10px;width:3px;background:#4267b2;border-radius:2px"></span>
+              <span style="font-size:13px">Portal 1.0</span>
+            </a>
+          </div>
+          <a href="javascript:void(0)" onclick="switchView('authority-workbench'); filterAuthorityByKpi('all');">
+            <span class="i">&#9776;</span><span>Tiles Dashboard</span>
+          </a>
+          <a href="javascript:void(0)"
+            onclick="filterAuthorityByKpi('pending'); showGlobalToast('Filtered Finance Admin queue to pending fee &amp; EMD verifications.', 'info');">
+            <span class="i">&#36;</span><span>Payment</span><span class="c">&#8964;</span>
+          </a>
+          <a href="javascript:void(0)" onclick="openAuthorityControlPanel()">
+            <span class="i">&#9776;</span><span>Login to Unipay</span>
+          </a>
+        </div>
+
+        <!-- Executive Director (ED) / Managing Director (MD) Sidebar (Matches Images 1 & 5) -->
+        <div id="nav-officer-exec" class="hidden">
+          <a href="javascript:void(0)"
+            onclick="showGlobalToast('BI Dashboard metrics synced with active Portal 2.0 applications.', 'info')">
+            <span class="i">&#8962;</span><span>BI Dashboard</span>
+          </a>
+          <a class="on" href="javascript:void(0)" onclick="toggleOfficerSidebarGroup('exec-auth')"
+            id="nav-exec-authority">
+            <span class="i">&#9638;</span>
+            <span>Authority Dashboard</span>
+            <span class="c" id="nav-exec-chev-auth">&#8964;</span>
+          </a>
+          <div id="nav-exec-group-auth">
+            <a href="javascript:void(0)" onclick="switchView('authority-workbench')"
+              style="padding-left:28px;background:#fafbfc;position:relative;font-weight:700;color:#1e3a8a">
+              <span
+                style="position:absolute;left:14px;top:10px;bottom:10px;width:3px;background:#4267b2;border-radius:2px"></span>
+              <span style="font-size:13px">Portal 2.0</span>
+            </a>
+            <a href="javascript:void(0)"
+              onclick="showGlobalToast('Portal 1.0 legacy archive is read-only. Active scrutiny runs on Portal 2.0.', 'info')"
+              style="padding-left:28px;background:#fafbfc;position:relative">
+              <span
+                style="position:absolute;left:14px;top:10px;bottom:10px;width:3px;background:#4267b2;border-radius:2px"></span>
+              <span style="font-size:13px">Portal 1.0</span>
+            </a>
+          </div>
+          <a href="javascript:void(0)" onclick="switchView('authority-workbench'); filterAuthorityByKpi('all');">
+            <span class="i">&#9776;</span><span>Tiles Dashboard</span>
+          </a>
+          <a href="javascript:void(0)"
+            onclick="showGlobalToast('Space/Tenant Dashboard summary is read-only in this prototype.', 'info')">
+            <span class="i">&#9638;</span><span>Space/Tenant Dashboard</span>
+          </a>
+          <a href="javascript:void(0)"
+            onclick="showGlobalToast('Space module is separate. Active workflow is Land Allotment (Plot).', 'info')">
+            <span class="i">&#9636;</span><span>Space</span><span class="c">&#8964;</span>
+          </a>
+          <a href="javascript:void(0)" onclick="openAuthorityControlPanel()">
+            <span class="i">&#9678;</span><span>Plot</span><span class="c">&#8964;</span>
+          </a>
+        </div>
+
         <a href="javascript:void(0)" onclick="selectRoleView('dashboard')"
           style="margin-top:14px;border-top:1px dashed #cbd5e1;color:#4267b2;font-weight:700">
           <span class="i">&#8592;</span><span>Investor Dashboard</span>
@@ -3483,7 +3573,7 @@
         <a href="javascript:void(0)" onclick="toggleOicSidebarGroup('plot')" id="nav-oic-plot"
           style="border-bottom:none"><span class="i">&#9678;</span><span>Plot</span><span class="c"
             id="nav-chev-plot">&#8964;</span></a>
-        <div id="nav-group-plot">
+        <div id="nav-group-plot" class="hidden">
           <a href="javascript:void(0)" onclick="switchView('oic-vacant-list')" id="nav-oic-vacant-list"
             style="padding-left:28px;position:relative">
             <span class="i">&#128203;</span>
@@ -3493,6 +3583,16 @@
             style="padding-left:28px;position:relative">
             <span class="i">&#10133;</span>
             <span style="font-size:13px;font-weight:600">Configure Plot for EOI</span>
+          </a>
+          <a href="javascript:void(0)" onclick="switchView('oic-float-tender')" id="nav-oic-float-tender"
+            style="padding-left:28px;position:relative">
+            <span class="i">&#128227;</span>
+            <span style="font-size:13px;font-weight:600">Float Tender for EOI</span>
+          </a>
+          <a href="javascript:void(0)" onclick="switchView('oic-generate-loa')" id="nav-oic-generate-loa"
+            style="padding-left:28px;position:relative">
+            <span class="i">&#128221;</span>
+            <span style="font-size:13px;font-weight:600">Generate LOA</span>
           </a>
           <a href="javascript:void(0)" onclick="openOicFilteredView('Approved - Pending LOA')" id="nav-oic-loa-sign"
             style="padding-left:28px;background:#fafbfc;position:relative">
@@ -5259,13 +5359,240 @@
 
       </div>
 
-      <div id="view-oic-it-park" class="hidden px-8 py-6 flex-1 space-y-6" style="margin-top: 0; padding-top: 24px;">
-        <div class="bg-white rounded border border-slate-200 shadow-sm p-5 md:p-6 space-y-4">
+      <div id="view-oic-it-park" class="hidden px-6 py-5 flex-1 space-y-5" style="margin-top: 0; padding-top: 20px;">
+        <div class="bg-white rounded border border-slate-200 shadow-sm p-4 md:p-5 space-y-5">
 
-          <!-- Accordion 1: Plot Management Dashboard (Collapsible bar in #3b5998) -->
-          <div class="border border-slate-200 rounded overflow-hidden shadow-sm">
+          <!-- Accordion 1: Process Dashboard (OPEN BY DEFAULT, Exact Screenshot Layout) -->
+          <div class="border border-slate-200 rounded overflow-hidden shadow-xs bg-white">
+            <button type="button" onclick="toggleAccordion('process-dash')"
+              class="w-full flex items-center justify-between px-5 py-3 bg-[#3b5998] hover:bg-[#324c82] text-white font-semibold text-sm tracking-wide transition select-none cursor-pointer"
+              style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:11px 18px;background:#3b5998;color:#ffffff;font-weight:600;font-size:13.5px;border:0;cursor:pointer;">
+              <span>Process Dashboard</span>
+              <span id="chevron-process-dash"
+                class="text-base font-mono transition-transform duration-200">&#9652;</span>
+            </button>
+            <div id="content-process-dash" class="p-5 bg-white border-t border-slate-200"
+              style="padding:20px;background:#ffffff;">
+              <div class="oic-kpi-grid">
+                <!-- Card 1: Pending (Amber count, Active Light Blue Tint, Cycle Arrows Icon) -->
+                <div id="kpi-card-pending" onclick="filterOicByKpi('pending')" class="oic-kpi-card active">
+                  <div style="font-size:13px;font-weight:600;color:#334155;">Pending</div>
+                  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-top:14px;">
+                    <div id="oic-kpi-pending" style="font-size:28px;font-weight:500;color:#f59e0b;line-height:1;">0
+                    </div>
+                    <svg style="width:28px;height:28px;color:#3b5998;flex-shrink:0;" fill="none" stroke="currentColor"
+                      stroke-width="1.8" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M4 12a8 8 0 0113.66-5.66L20 8.5M20 4v4.5h-4.5" />
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M20 12a8 8 0 01-13.66 5.66L4 15.5M4 20v-4.5h4.5" />
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Card 2: Verified (Amber count, Single Circular Arrow Icon) -->
+                <div id="kpi-card-verified" onclick="filterOicByKpi('verified')" class="oic-kpi-card">
+                  <div style="font-size:13px;font-weight:600;color:#334155;">Verified</div>
+                  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-top:14px;">
+                    <div id="oic-kpi-verified" style="font-size:28px;font-weight:500;color:#f59e0b;line-height:1;">0
+                    </div>
+                    <svg style="width:26px;height:26px;color:#3b5998;flex-shrink:0;" fill="none" stroke="currentColor"
+                      stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M19.5 12a7.5 7.5 0 11-2.2-5.3L19.5 9M19.5 4.5V9H15" />
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Card 3: Queried (Red count, Raised Hand Person Icon) -->
+                <div id="kpi-card-queried" onclick="filterOicByKpi('queried')" class="oic-kpi-card">
+                  <div style="font-size:13px;font-weight:600;color:#334155;">Queried</div>
+                  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-top:14px;">
+                    <div id="oic-kpi-queried" style="font-size:28px;font-weight:500;color:#ef4444;line-height:1;">0
+                    </div>
+                    <svg style="width:26px;height:26px;color:#3b5998;flex-shrink:0;" fill="currentColor"
+                      viewBox="0 0 24 24">
+                      <circle cx="12" cy="5.5" r="2.1" />
+                      <path
+                        d="M16.5 4.5a1 1 0 00-1 1v4.2l-1.6-.7H9.8a1.8 1.8 0 00-1.8 1.8V15a1 1 0 002 0v-3.5h.5V21a1 1 0 002 0v-4.5h.8V21a1 1 0 002 0v-9.4l1.4.6a1 1 0 001.4-.9V5.5a1 1 0 00-1-1z" />
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Card 4: All application (Green count, Framed Checklist Icon) -->
+                <div id="kpi-card-all" onclick="filterOicByKpi('all')" class="oic-kpi-card">
+                  <div style="font-size:13px;font-weight:600;color:#334155;">All application</div>
+                  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-top:14px;">
+                    <div id="oic-kpi-all" style="font-size:28px;font-weight:500;color:#22c55e;line-height:1;">0</div>
+                    <svg style="width:28px;height:28px;color:#3b5998;flex-shrink:0;" fill="none" stroke="currentColor"
+                      stroke-width="1.7" viewBox="0 0 24 24">
+                      <rect x="3" y="5" width="18" height="14" rx="2" />
+                      <circle cx="7.5" cy="9.5" r="1" fill="currentColor" stroke="none" />
+                      <path stroke-linecap="round" d="M10.5 9.5h6.5" />
+                      <circle cx="7.5" cy="14.5" r="1" fill="currentColor" stroke="none" />
+                      <path stroke-linecap="round" d="M10.5 14.5h6.5" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Accordion 2: Pending Application list (OPEN BY DEFAULT, #3b5998 header) -->
+          <div class="border border-slate-200 rounded overflow-hidden shadow-xs bg-white">
+            <button type="button" onclick="toggleAccordion('pending-app-list')"
+              class="w-full flex items-center justify-between px-5 py-3 bg-[#3b5998] hover:bg-[#324c82] text-white font-semibold text-sm tracking-wide transition select-none cursor-pointer"
+              style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:11px 18px;background:#3b5998;color:#ffffff;font-weight:600;font-size:13.5px;border:0;cursor:pointer;">
+              <span>Pending Application list</span>
+              <span id="chevron-pending-app-list"
+                class="text-base font-mono transition-transform duration-200">&#9652;</span>
+            </button>
+            <div id="content-pending-app-list" class="p-5 bg-white border-t border-slate-200 space-y-4"
+              style="padding:20px;background:#ffffff;">
+
+              <!-- Search By Filter Bar -->
+              <div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;">
+                <div>
+                  <label for="oic-search-type"
+                    style="display:block;font-size:12px;font-weight:500;color:#3b5998;margin-bottom:6px;">Search
+                    By:</label>
+                  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;">
+                    <select id="oic-search-type" onchange="filterOicTable()"
+                      style="border:1px solid #cbd5e1;border-radius:4px;padding:7px 12px;font-size:12.5px;color:#334155;background:#ffffff;min-width:225px;outline:none;">
+                      <option value="all" selected>All</option>
+                      <option value="EOI Allotment">EOI Allotment</option>
+                      <option value="Mega Project Allotment">Mega Project Allotment</option>
+                      <option value="Pending Scrutiny">Pending Scrutiny</option>
+                      <option value="Verified / Forwarded">Verified / Forwarded</option>
+                      <option value="Approved - Pending LOA">Approved - Pending LOA</option>
+                      <option value="Lease Deed Verification">Lease Deed Verification</option>
+                    </select>
+                    <button type="button" onclick="filterOicTable()"
+                      style="background:#3b5998;color:#ffffff;font-size:12px;font-weight:600;padding:8px 16px;border-radius:4px;border:0;display:inline-flex;align-items:center;gap:6px;cursor:pointer;">
+                      <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                      </svg>
+                      <span>Search</span>
+                    </button>
+                  </div>
+                </div>
+                <div id="oic-active-filter-chip"
+                  class="hidden items-center gap-2 text-xs bg-blue-50 border border-blue-200 text-blue-900 px-3 py-1.5 rounded-full font-semibold">
+                  <span id="oic-active-filter-label">Showing: Pending</span>
+                  <button type="button" onclick="filterOicByKpi('all')"
+                    class="text-blue-700 hover:text-blue-950 font-bold ml-1 cursor-pointer">&times; Show
+                    All</button>
+                </div>
+              </div>
+
+              <!-- Sortable Data Table (13 Columns with #dfe5f5 Header & Sort Arrows matching Screenshot) -->
+              <div style="overflow-x:auto;border:1px solid #e2e8f0;border-radius:4px;">
+                <table style="width:100%;font-size:12px;text-align:left;border-collapse:collapse;min-width:1380px;">
+                  <thead
+                    style="background:#dfe5f5;color:#1e293b;font-weight:600;border-bottom:1px solid #cbd5e1;user-select:none;">
+                    <tr>
+                      <th onclick="sortOicTable('sno')" class="oic-sortable-th"
+                        style="padding:10px 12px;text-align:center;white-space:nowrap;">S<br>No. <span id="sort-ind-sno"
+                          style="font-size:10px;color:#64748b;"></span></th>
+                      <th onclick="sortOicTable('orgName')" class="oic-sortable-th"
+                        style="padding:10px 12px;white-space:nowrap;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                          <span>Applicant Name<br>(Organization Name)</span>
+                          <span id="sort-ind-orgName"
+                            style="font-size:9px;line-height:1;color:#64748b;display:flex;flex-direction:column;"><span>&#9652;</span><span
+                              style="margin-top:-2px">&#9662;</span></span>
+                        </div>
+                      </th>
+                      <th onclick="sortOicTable('applicationType')" class="oic-sortable-th"
+                        style="padding:10px 12px;white-space:nowrap;">
+                        Application<br>Type <span id="sort-ind-applicationType"
+                          style="font-size:10px;color:#94a3b8;"></span>
+                      </th>
+                      <th onclick="sortOicTable('policyName')" class="oic-sortable-th"
+                        style="padding:10px 12px;white-space:nowrap;">Policy<br>Name <span id="sort-ind-policyName"
+                          style="font-size:10px;color:#94a3b8;"></span>
+                      </th>
+                      <th onclick="sortOicTable('plotDisplay')" class="oic-sortable-th"
+                        style="padding:10px 12px;white-space:nowrap;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                          <span>Project/Assistance<br>Type</span>
+                          <span id="sort-ind-plotDisplay"
+                            style="font-size:9px;line-height:1;color:#94a3b8;display:flex;flex-direction:column;"><span>&#9652;</span><span
+                              style="margin-top:-2px">&#9662;</span></span>
+                        </div>
+                      </th>
+                      <th onclick="sortOicTable('cin')" class="oic-sortable-th"
+                        style="padding:10px 12px;white-space:nowrap;">
+                        CIN/LLP/Registration<br>Number <span id="sort-ind-cin"
+                          style="font-size:10px;color:#94a3b8;"></span>
+                      </th>
+                      <th onclick="sortOicTable('appNo')" class="oic-sortable-th"
+                        style="padding:10px 12px;white-space:nowrap;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                          <span>Application<br>Number</span>
+                          <span id="sort-ind-appNo"
+                            style="font-size:9px;line-height:1;color:#94a3b8;display:flex;flex-direction:column;"><span>&#9652;</span><span
+                              style="margin-top:-2px">&#9662;</span></span>
+                        </div>
+                      </th>
+                      <th onclick="sortOicTable('appDate')" class="oic-sortable-th"
+                        style="padding:10px 12px;white-space:nowrap;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                          <span>Application<br>Date</span>
+                          <span id="sort-ind-appDate"
+                            style="font-size:9px;line-height:1;color:#94a3b8;display:flex;flex-direction:column;"><span>&#9652;</span><span
+                              style="margin-top:-2px">&#9662;</span></span>
+                        </div>
+                      </th>
+                      <th onclick="sortOicTable('status')" class="oic-sortable-th"
+                        style="padding:10px 12px;white-space:nowrap;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                          <span>Application<br>Status</span>
+                          <span id="sort-ind-status"
+                            style="font-size:9px;line-height:1;color:#94a3b8;display:flex;flex-direction:column;"><span>&#9652;</span><span
+                              style="margin-top:-2px">&#9662;</span></span>
+                        </div>
+                      </th>
+                      <th onclick="sortOicTable('applicationAt')" class="oic-sortable-th"
+                        style="padding:10px 12px;white-space:nowrap;">
+                        Application<br>At <span id="sort-ind-applicationAt"
+                          style="font-size:10px;color:#94a3b8;"></span>
+                      </th>
+                      <th onclick="sortOicTable('pendingSince')" class="oic-sortable-th"
+                        style="padding:10px 12px;white-space:nowrap;">Pending<br>Since <span id="sort-ind-pendingSince"
+                          style="font-size:10px;color:#94a3b8;"></span>
+                      </th>
+                      <th style="padding:10px 12px;white-space:nowrap;text-align:center;">Download Documents</th>
+                      <th style="padding:10px 12px;white-space:nowrap;text-align:center;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="oic-pending-tbody" class="divide-y divide-slate-200 font-medium text-slate-700">
+                    <!-- Populated dynamically by renderOicApplicationsTable() -->
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Pagination / Count Footer -->
+              <div class="flex items-center justify-between text-xs text-slate-500 pt-2">
+                <div id="oic-table-footer-count">Showing 0 entries</div>
+                <div class="flex items-center gap-1">
+                  <button type="button"
+                    class="px-2.5 py-1 border rounded bg-slate-50 text-slate-400 cursor-not-allowed">Previous</button>
+                  <button type="button" class="px-2.5 py-1 border rounded bg-[#4267b2] text-white font-bold">1</button>
+                  <button type="button"
+                    class="px-2.5 py-1 border rounded bg-slate-50 text-slate-400 cursor-not-allowed">Next</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Accordion 3: Plot Management Dashboard (Collapsed by default below list) -->
+          <div class="border border-slate-200 rounded overflow-hidden shadow-xs bg-white">
             <button type="button" onclick="toggleAccordion('plot-mgmt')"
-              class="w-full flex items-center justify-between px-5 py-3.5 bg-[#3b5998] hover:bg-[#324c82] text-white font-bold text-sm tracking-wide transition select-none cursor-pointer">
+              class="w-full flex items-center justify-between px-5 py-3 bg-[#3b5998] hover:bg-[#324c82] text-white font-semibold text-sm tracking-wide transition select-none cursor-pointer"
+              style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:11px 18px;background:#3b5998;color:#ffffff;font-weight:600;font-size:13.5px;border:0;cursor:pointer;">
               <span class="flex items-center gap-2">
                 <span>Plot Management Dashboard</span>
               </span>
@@ -5310,180 +5637,6 @@
                   <span class="text-2xl text-purple-600 opacity-80">&#9998;</span>
                 </div>
               </div>
-            </div>
-          </div>
-
-          <!-- Accordion 2: Process Dashboard (OPEN BY DEFAULT, #3b5998 header) -->
-          <div class="border border-slate-200 rounded overflow-hidden shadow-sm">
-            <button type="button" onclick="toggleAccordion('process-dash')"
-              class="w-full flex items-center justify-between px-5 py-3.5 bg-[#3b5998] hover:bg-[#324c82] text-white font-bold text-sm tracking-wide transition select-none cursor-pointer">
-              <span>Process Dashboard</span>
-              <span id="chevron-process-dash"
-                class="text-base font-mono transition-transform duration-200">&#9652;</span>
-            </button>
-            <div id="content-process-dash" class="p-5 bg-[#f7f9fc] border-t border-slate-200">
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                <!-- Card 1: Pending (Amber) -->
-                <div id="kpi-card-pending" onclick="filterOicByKpi('pending')"
-                  class="oic-kpi-card active flex flex-col justify-between">
-                  <div class="flex items-start justify-between">
-                    <span class="text-[13px] font-bold text-slate-800">Pending</span>
-                    <svg class="w-6 h-6 text-[#3b5998] mt-1" fill="none" stroke="currentColor" stroke-width="2"
-                      viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                  </div>
-                  <div class="text-3xl font-bold text-[#f59e0b] font-sans mt-2" id="oic-kpi-pending">0
-                  </div>
-                </div>
-
-                <!-- Card 2: Queried (Red) -->
-                <div id="kpi-card-queried" onclick="filterOicByKpi('queried')"
-                  class="oic-kpi-card flex flex-col justify-between">
-                  <div class="flex items-start justify-between">
-                    <span class="text-[13px] font-bold text-slate-800">Queried</span>
-                    <svg class="w-6 h-6 text-[#3b5998] mt-1" fill="none" stroke="currentColor" stroke-width="2"
-                      viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div class="text-3xl font-bold text-[#ef4444] font-sans mt-2" id="oic-kpi-queried">0
-                  </div>
-                </div>
-
-                <!-- Card 3: All application (Green) -->
-                <div id="kpi-card-all" onclick="filterOicByKpi('all')"
-                  class="oic-kpi-card flex flex-col justify-between">
-                  <div class="flex items-start justify-between">
-                    <span class="text-[13px] font-bold text-slate-800">All application</span>
-                    <svg class="w-6 h-6 text-[#3b5998] mt-1" fill="none" stroke="currentColor" stroke-width="2"
-                      viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-                  <div class="text-3xl font-bold text-[#22c55e] font-sans mt-2" id="oic-kpi-all">0</div>
-                </div>
-
-                <!-- Card 4: Draft / Post-Approval LOA (Orange/Blue) -->
-                <div id="kpi-card-loa" onclick="filterOicByKpi('loa')"
-                  class="oic-kpi-card flex flex-col justify-between">
-                  <div class="flex items-start justify-between">
-                    <span class="text-[13px] font-bold text-slate-800">Draft / Post-Approval LOA</span>
-                    <svg class="w-6 h-6 text-[#3b5998] mt-1" fill="none" stroke="currentColor" stroke-width="2"
-                      viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div class="text-3xl font-bold text-[#f97316] font-sans mt-2" id="oic-kpi-loa">0</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Accordion 3: Pending Application list (OPEN BY DEFAULT, #3b5998 header) -->
-          <div class="border border-slate-200 rounded overflow-hidden shadow-sm">
-            <button type="button" onclick="toggleAccordion('pending-app-list')"
-              class="w-full flex items-center justify-between px-5 py-3.5 bg-[#3b5998] hover:bg-[#324c82] text-white font-bold text-sm tracking-wide transition select-none cursor-pointer">
-              <span>Pending Application list</span>
-              <span id="chevron-pending-app-list"
-                class="text-base font-mono transition-transform duration-200">&#9652;</span>
-            </button>
-            <div id="content-pending-app-list" class="p-5 bg-white border-t border-slate-200 space-y-4">
-
-              <!-- Search By Filter Bar -->
-              <div class="flex flex-wrap items-end justify-between gap-4">
-                <div class="space-y-1.5">
-                  <label for="oic-search-type" class="text-xs font-bold text-[#3b5998] block">Search
-                    By:</label>
-                  <div class="flex flex-wrap items-center gap-3">
-                    <select id="oic-search-type" onchange="filterOicTable()"
-                      class="border border-slate-300 rounded px-3 py-1.5 text-xs text-slate-700 bg-white min-w-[230px] focus:outline-none focus:border-[#3b5998]">
-                      <option value="all" selected>All</option>
-                      <option value="EOI Allotment">EOI Allotment</option>
-                      <option value="Mega Project Allotment">Mega Project Allotment</option>
-                      <option value="Pending Scrutiny">Pending Scrutiny</option>
-                      <option value="Approved - Pending LOA">Approved - Pending LOA</option>
-                      <option value="Lease Deed Verification">Lease Deed Verification</option>
-                    </select>
-                    <button type="button" onclick="filterOicTable()"
-                      class="bg-[#3b5998] hover:bg-[#2b4c8a] text-white text-xs font-semibold px-4 py-1.5 rounded flex items-center gap-1.5 shadow-sm transition cursor-pointer">
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                      </svg>
-                      <span>Search</span>
-                    </button>
-                  </div>
-                </div>
-                <div id="oic-active-filter-chip"
-                  class="hidden items-center gap-2 text-xs bg-blue-50 border border-blue-200 text-blue-900 px-3 py-1.5 rounded-full font-semibold">
-                  <span id="oic-active-filter-label">Showing: Pending</span>
-                  <button type="button" onclick="filterOicByKpi('all')"
-                    class="text-blue-700 hover:text-blue-950 font-bold ml-1 cursor-pointer">&times; Show
-                    All</button>
-                </div>
-              </div>
-
-              <!-- Sortable Data Table (13 Columns with #dfe5f5 Header & Sort Arrows) -->
-              <div class="overflow-x-auto border border-slate-200 rounded">
-                <table class="w-full text-xs text-left border-collapse min-w-[1450px]">
-                  <thead class="bg-[#dfe5f5] text-slate-800 font-semibold border-b border-slate-300 select-none">
-                    <tr>
-                      <th onclick="sortOicTable('sno')" class="oic-sortable-th p-2.5 whitespace-nowrap text-center">S
-                        No. <span id="sort-ind-sno" class="text-[10px] text-slate-500">▴</span></th>
-                      <th onclick="sortOicTable('orgName')" class="oic-sortable-th p-2.5 whitespace-nowrap">Applicant
-                        Name<br>(Organization Name) <span id="sort-ind-orgName"
-                          class="text-[10px] text-slate-400">▴</span></th>
-                      <th onclick="sortOicTable('applicationType')" class="oic-sortable-th p-2.5 whitespace-nowrap">
-                        Application Type <span id="sort-ind-applicationType" class="text-[10px] text-slate-400">▴</span>
-                      </th>
-                      <th onclick="sortOicTable('policyName')" class="oic-sortable-th p-2.5 whitespace-nowrap">Policy
-                        Name <span id="sort-ind-policyName" class="text-[10px] text-slate-400">▴</span>
-                      </th>
-                      <th onclick="sortOicTable('plotDisplay')" class="oic-sortable-th p-2.5 whitespace-nowrap">Plot No.
-                        &amp; IT Park <span id="sort-ind-plotDisplay" class="text-[10px] text-slate-400">▴</span></th>
-                      <th onclick="sortOicTable('cin')" class="oic-sortable-th p-2.5 whitespace-nowrap">
-                        CIN/LLP/Registration<br>Number <span id="sort-ind-cin"
-                          class="text-[10px] text-slate-400">▴</span></th>
-                      <th onclick="sortOicTable('appNo')" class="oic-sortable-th p-2.5 whitespace-nowrap">
-                        Application
-                        Number <span id="sort-ind-appNo" class="text-[10px] text-slate-400">▴</span></th>
-                      <th onclick="sortOicTable('appDate')" class="oic-sortable-th p-2.5 whitespace-nowrap">Application
-                        Date <span id="sort-ind-appDate" class="text-[10px] text-slate-400">▴</span></th>
-                      <th onclick="sortOicTable('status')" class="oic-sortable-th p-2.5 whitespace-nowrap">Application
-                        Status <span id="sort-ind-status" class="text-[10px] text-slate-400">▴</span></th>
-                      <th onclick="sortOicTable('applicationAt')" class="oic-sortable-th p-2.5 whitespace-nowrap">
-                        Application At <span id="sort-ind-applicationAt" class="text-[10px] text-slate-400">▴</span>
-                      </th>
-                      <th onclick="sortOicTable('pendingSince')" class="oic-sortable-th p-2.5 whitespace-nowrap">Pending
-                        Since <span id="sort-ind-pendingSince" class="text-[10px] text-slate-400">▴</span>
-                      </th>
-                      <th class="p-2.5 whitespace-nowrap text-center">Download Documents</th>
-                      <th class="p-2.5 whitespace-nowrap text-center">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody id="oic-pending-tbody" class="divide-y divide-slate-200 font-medium text-slate-700">
-                    <!-- Populated dynamically by renderOicApplicationsTable() -->
-                  </tbody>
-                </table>
-              </div>
-
-              <!-- Pagination / Count Footer -->
-              <div class="flex items-center justify-between text-xs text-slate-500 pt-2">
-                <div id="oic-table-footer-count">Showing 0 entries</div>
-                <div class="flex items-center gap-1">
-                  <button type="button"
-                    class="px-2.5 py-1 border rounded bg-slate-50 text-slate-400 cursor-not-allowed">Previous</button>
-                  <button type="button" class="px-2.5 py-1 border rounded bg-[#4267b2] text-white font-bold">1</button>
-                  <button type="button"
-                    class="px-2.5 py-1 border rounded bg-slate-50 text-slate-400 cursor-not-allowed">Next</button>
-                </div>
-              </div>
-
             </div>
           </div>
 
@@ -6088,12 +6241,184 @@
       </div>
 
       <!-- ========================================================================= -->
+      <!-- VIEW 6B: OIC IT PARK - GENERATE LOA OFFICIAL LETTER (#view-oic-generate-loa) -->
+      <!-- Modeled on Official MPSEDC LOA Letter Sheet adapted to Land Allotment     -->
+      <!-- ========================================================================= -->
+      <div id="view-oic-generate-loa" class="hidden px-6 py-5 flex-1" style="margin-top: 0; padding-top: 20px;">
+        <div style="max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:16px;">
+
+          <!-- Top Application Selector & Status Bar -->
+          <div
+            style="background:#ffffff;border:1px solid #dbe1ea;border-radius:4px;padding:12px 18px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 1px 4px rgba(15,23,42,0.05);">
+            <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
+              <label for="loa-app-select"
+                style="font-size:12px;font-weight:700;color:#3b5998;white-space:nowrap;">Select Approved / Eligible
+                Application:</label>
+              <select id="loa-app-select" onchange="selectLoaApplication(this.value)"
+                style="border:1px solid #cbd5e1;border-radius:4px;padding:6px 12px;font-size:12.5px;color:#1e293b;background:#ffffff;min-width:340px;outline:none;">
+                <option value="">-- Select Application --</option>
+              </select>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span id="loa-status-badge"
+                style="display:inline-block;background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;font-size:11px;font-weight:700;padding:4px 10px;border-radius:9999px;">
+                Ready for LOA
+              </span>
+              <button type="button" onclick="switchView('oic-it-park')"
+                style="background:#f8fafc;color:#3b5998;border:1px solid #cbd5e1;border-radius:4px;padding:5px 12px;font-size:11.5px;font-weight:600;cursor:pointer;">
+                &larr; Back to Dashboard
+              </button>
+            </div>
+          </div>
+
+          <!-- Official White LOA Letter Sheet (Matching Screenshot Layout) -->
+          <div id="loa-letter-sheet"
+            style="background:#ffffff;border:1px solid #cbd5e1;border-radius:4px;padding:34px 42px;box-shadow:0 2px 8px rgba(15,23,42,0.06);color:#334155;">
+            <!-- Populated dynamically by renderLoaLetterSheet(app) -->
+          </div>
+
+          <!-- Bottom Centered Action Button (Matching Screenshot) -->
+          <div style="display:flex;justify-content:center;padding:6px 0 18px;">
+            <button type="button" id="btn-generate-loa-action" onclick="executeGenerateLoaAction()"
+              style="background:#4267b2;color:#ffffff;font-size:12.5px;font-weight:600;padding:8px 20px;border-radius:3px;border:0;box-shadow:0 2px 6px rgba(59,89,152,0.28);cursor:pointer;">
+              Generate LOA
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- VIEW 6C: OIC IT PARK - FLOAT TENDER FOR EOI (#view-oic-float-tender)      -->
+      <!-- Matches Reference Screen (image_d63fbe.png)                               -->
+      <!-- ========================================================================= -->
+      <div id="view-oic-float-tender" class="hidden flex-1"
+        style="background:#dfe5ed;padding:24px 28px 36px;margin-top:0;">
+        <div style="max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:18px;">
+
+          <!-- Page Header -->
+          <div>
+            <h2 style="font-size:20px;font-weight:700;color:#0f172a;margin:0;line-height:1.3;">Float Tender for EOI
+              Applications</h2>
+            <p style="font-size:12.5px;color:#64748b;margin:4px 0 0 0;">Review and act upon investor proposals</p>
+          </div>
+
+          <!-- Main White Card -->
+          <div
+            style="background:#ffffff;border:1px solid #e2e8f0;border-radius:8px;padding:24px 28px;box-shadow:0 2px 10px rgba(15,23,42,0.06);">
+            <h3 style="font-size:15px;font-weight:700;color:#0f172a;margin:0 0 18px 0;">Float &amp; Publish IT Park Land
+              Tender Notice</h3>
+
+            <!-- Confirmation Banner (Hidden until valid submission) -->
+            <div id="ft-success-banner" class="hidden"
+              style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:6px;padding:12px 16px;margin-bottom:16px;font-size:12.5px;color:#065f46;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+              <div id="ft-success-banner-text"></div>
+              <button type="button" onclick="switchView('oic-vacant-list')"
+                style="background:#059669;color:#ffffff;border:0;border-radius:4px;padding:5px 12px;font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap;">
+                View Vacant Plot List &rarr;
+              </button>
+            </div>
+
+            <form id="float-tender-form" onsubmit="submitFloatTenderForm(event)"
+              style="display:flex;flex-direction:column;gap:16px;" novalidate>
+
+              <!-- Row 1: Select IT Park * + Get Details -->
+              <div>
+                <label for="ft-it-park"
+                  style="display:block;font-size:12.5px;font-weight:600;color:#334155;margin-bottom:6px;">
+                  Select IT Park <span style="color:#ef4444;">*</span>
+                </label>
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;">
+                  <select id="ft-it-park" onchange="handleFloatTenderParkChange()"
+                    style="flex:1;min-width:220px;border:1px solid #cbd5e1;border-radius:5px;padding:8px 12px;font-size:13px;color:#1e293b;background:#ffffff;outline:none;">
+                  </select>
+                  <button type="button" id="ft-get-details-btn" onclick="loadFloatTenderPlotDetails(true)"
+                    style="background:#29415c;color:#ffffff;font-size:12.5px;font-weight:600;padding:9px 18px;border-radius:5px;border:0;cursor:pointer;white-space:nowrap;">
+                    Get Details
+                  </button>
+                </div>
+                <div id="ft-park-err" class="hidden"
+                  style="color:#dc2626;font-size:11px;font-weight:600;margin-top:4px;">Please select an IT Park.</div>
+              </div>
+
+              <!-- Row 2: Select Plot No. * (Dependent Dropdown) -->
+              <div>
+                <label for="ft-plot-no"
+                  style="display:block;font-size:12.5px;font-weight:600;color:#334155;margin-bottom:6px;">
+                  Select Plot No. <span style="color:#ef4444;">*</span>
+                </label>
+                <select id="ft-plot-no" onchange="loadFloatTenderPlotDetails(false)"
+                  style="width:100%;border:1px solid #cbd5e1;border-radius:5px;padding:8px 12px;font-size:13px;color:#1e293b;background:#ffffff;outline:none;">
+                </select>
+                <div id="ft-plot-err" class="hidden"
+                  style="color:#dc2626;font-size:11px;font-weight:600;margin-top:4px;">Please select a Plot No.</div>
+              </div>
+
+              <!-- Row 3: Two-Column Read-Only Row (Plot Name & Total Area (Acres)) -->
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;">
+                <div>
+                  <label for="ft-plot-name"
+                    style="display:block;font-size:12.5px;font-weight:600;color:#334155;margin-bottom:6px;">Plot
+                    Name</label>
+                  <input type="text" id="ft-plot-name" readonly placeholder="Plot Name"
+                    style="width:100%;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:5px;padding:8px 12px;font-size:13px;color:#334155;background:#e9edf2;outline:none;">
+                </div>
+                <div>
+                  <label for="ft-total-area"
+                    style="display:block;font-size:12.5px;font-weight:600;color:#334155;margin-bottom:6px;">Total Area
+                    (Acres)</label>
+                  <input type="text" id="ft-total-area" readonly placeholder="Total Area (Acres)"
+                    style="width:100%;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:5px;padding:8px 12px;font-size:13px;color:#334155;background:#e9edf2;outline:none;">
+                </div>
+              </div>
+
+              <!-- Row 4: Two-Column Date Row (Bidding Start Date * & Bidding End Date *) -->
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;">
+                <div>
+                  <label for="ft-start-date"
+                    style="display:block;font-size:12.5px;font-weight:600;color:#334155;margin-bottom:6px;">
+                    Bidding Start Date <span style="color:#ef4444;">*</span>
+                  </label>
+                  <input type="date" id="ft-start-date" onchange="clearFloatTenderValidation('start')"
+                    style="width:100%;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:5px;padding:8px 12px;font-size:13px;color:#1e293b;background:#ffffff;outline:none;">
+                  <div id="ft-start-err" class="hidden"
+                    style="color:#dc2626;font-size:11px;font-weight:600;margin-top:4px;">Bidding Start Date is required.
+                  </div>
+                </div>
+                <div>
+                  <label for="ft-end-date"
+                    style="display:block;font-size:12.5px;font-weight:600;color:#334155;margin-bottom:6px;">
+                    Bidding End Date <span style="color:#ef4444;">*</span>
+                  </label>
+                  <input type="date" id="ft-end-date" onchange="clearFloatTenderValidation('end')"
+                    style="width:100%;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:5px;padding:8px 12px;font-size:13px;color:#1e293b;background:#ffffff;outline:none;">
+                  <div id="ft-end-err" class="hidden"
+                    style="color:#dc2626;font-size:11px;font-weight:600;margin-top:4px;">Bidding End Date must be on or
+                    after Bidding Start Date.</div>
+                </div>
+              </div>
+
+              <!-- Row 5: Bottom-Right Submit Button -->
+              <div style="display:flex;justify-content:flex-end;margin-top:6px;">
+                <button type="submit" id="ft-submit-btn"
+                  style="background:#4267b2;color:#ffffff;font-size:13px;font-weight:600;padding:9px 22px;border-radius:5px;border:0;box-shadow:0 2px 6px rgba(66,103,178,0.28);cursor:pointer;">
+                  Submit
+                </button>
+              </div>
+
+            </form>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ========================================================================= -->
       <!-- VIEW 7: SUBSIDY ADMIN AUTHORITY DASHBOARD (#view-subsidy-dashboard)       -->
       <!-- Stage 2 EOI Scrutiny: Policy & Progressive Rebate Verification            -->
       <!-- ========================================================================= -->
-      <div id="view-subsidy-dashboard" class="hidden px-6 md:px-8 py-6 flex-1"
-        style="margin-top: 0; padding-top: 20px;">
-        <div class="space-y-5">
+      <div id="view-subsidy-dashboard" class="hidden px-6 py-5 flex-1" style="margin-top: -18px; padding: 0 24px 24px;">
+        <div class="bg-white rounded border border-slate-200 shadow-sm p-4 md:p-5 space-y-5"
+          style="background:#ffffff;border:1px solid #e2e8f0;border-radius:4px;padding:18px;box-shadow:0 2px 8px rgba(15,23,42,0.06);display:flex;flex-direction:column;gap:16px;">
 
           <!-- Contextual Payment / Advance EMD Verification Drawer (shown when Payment nav clicked) -->
           <div id="subsidy-payment-panel"
@@ -6110,9 +6435,10 @@
           </div>
 
           <!-- Accordion 1: Subsidy Approval Dashboard (#3b5998 header) -->
-          <div class="border border-slate-200 rounded overflow-hidden shadow-sm">
+          <div class="border border-slate-200 rounded overflow-hidden shadow-xs bg-white">
             <button type="button" onclick="toggleAccordion('subsidy-approval-dash')"
-              class="w-full flex items-center justify-between px-5 py-3.5 bg-[#3b5998] hover:bg-[#324c82] text-white font-bold text-sm tracking-wide transition select-none cursor-pointer">
+              class="w-full flex items-center justify-between px-5 py-3.5 bg-[#3b5998] hover:bg-[#324c82] text-white font-semibold text-sm tracking-wide transition select-none cursor-pointer"
+              style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:11px 18px;background:#3b5998;color:#ffffff;font-weight:600;font-size:13.5px;border:0;cursor:pointer;">
               <span>Subsidy Approval Dashboard</span>
               <span id="chevron-subsidy-approval-dash"
                 class="text-base font-mono transition-transform duration-200">&#9662;</span>
@@ -6147,107 +6473,118 @@
             </div>
           </div>
 
-          <!-- Accordion 2: Process Dashboard (OPEN BY DEFAULT, #3b5998 header) -->
-          <div class="border border-slate-200 rounded overflow-hidden shadow-sm">
+          <!-- Accordion 2: Process Dashboard (OPEN BY DEFAULT, Exact Screenshot Layout) -->
+          <div class="border border-slate-200 rounded overflow-hidden shadow-xs bg-white">
             <button type="button" onclick="toggleAccordion('subsidy-process-dash')"
-              class="w-full flex items-center justify-between px-5 py-3.5 bg-[#3b5998] hover:bg-[#324c82] text-white font-bold text-sm tracking-wide transition select-none cursor-pointer">
+              class="w-full flex items-center justify-between px-5 py-3 bg-[#3b5998] hover:bg-[#324c82] text-white font-semibold text-sm tracking-wide transition select-none cursor-pointer"
+              style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:11px 18px;background:#3b5998;color:#ffffff;font-weight:600;font-size:13.5px;border:0;cursor:pointer;">
               <span>Process Dashboard</span>
               <span id="chevron-subsidy-process-dash"
                 class="text-base font-mono transition-transform duration-200">&#9652;</span>
             </button>
-            <div id="content-subsidy-process-dash" class="p-5 bg-[#f7f9fc] border-t border-slate-200">
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div id="content-subsidy-process-dash" class="p-5 bg-white border-t border-slate-200"
+              style="padding:20px;background:#ffffff;">
+              <div class="oic-kpi-grid">
                 <!-- Card 1: Pending -->
-                <div id="subsidy-kpi-card-pending" onclick="filterSubsidyByKpi('pending')"
-                  class="oic-kpi-card active flex flex-col justify-between">
-                  <div class="flex items-start justify-between">
-                    <span class="text-[13px] font-bold text-slate-800 leading-snug">Pending<br><span
-                        class="text-[10.5px] font-normal text-slate-500">Incl. Queried Back</span></span>
-                    <svg class="w-6 h-6 text-[#3b5998] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor"
-                      stroke-width="2" viewBox="0 0 24 24">
+                <div id="subsidy-kpi-card-pending" onclick="filterSubsidyByKpi('pending')" class="oic-kpi-card active">
+                  <div style="font-size:13px;font-weight:600;color:#334155;">Pending</div>
+                  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-top:14px;">
+                    <div id="subsidy-kpi-pending" style="font-size:28px;font-weight:500;color:#f59e0b;line-height:1;">0
+                    </div>
+                    <svg style="width:28px;height:28px;color:#3b5998;flex-shrink:0;" fill="none" stroke="currentColor"
+                      stroke-width="1.8" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        d="M4 12a8 8 0 0113.66-5.66L20 8.5M20 4v4.5h-4.5" />
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M20 12a8 8 0 01-13.66 5.66L4 15.5M4 20v-4.5h4.5" />
                     </svg>
                   </div>
-                  <div class="text-3xl font-bold text-[#f59e0b] font-sans mt-2" id="subsidy-kpi-pending">0</div>
                 </div>
 
-                <!-- Card 2: Forwarded to Finance / Next Stage -->
-                <div id="subsidy-kpi-card-forwarded" onclick="filterSubsidyByKpi('forwarded')"
-                  class="oic-kpi-card flex flex-col justify-between">
-                  <div class="flex items-start justify-between">
-                    <span class="text-[13px] font-bold text-slate-800 leading-snug">Forwarded to Finance / Next
-                      Stage</span>
-                    <svg class="w-6 h-6 text-[#3b5998] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor"
-                      stroke-width="2" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </div>
-                  <div class="text-3xl font-bold text-[#2563eb] font-sans mt-2" id="subsidy-kpi-forwarded">0</div>
-                </div>
-
-                <!-- Card 3: Recommended / Approved -->
-                <div id="subsidy-kpi-card-approved" onclick="filterSubsidyByKpi('approved')"
-                  class="oic-kpi-card flex flex-col justify-between">
-                  <div class="flex items-start justify-between">
-                    <span class="text-[13px] font-bold text-slate-800 leading-snug">Recommended / Approved</span>
-                    <svg class="w-6 h-6 text-[#3b5998] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor"
+                <!-- Card 2: Forwarded to ITPM -->
+                <div id="subsidy-kpi-card-forwarded" onclick="filterSubsidyByKpi('forwarded')" class="oic-kpi-card">
+                  <div style="font-size:13px;font-weight:600;color:#334155;">Forwarded to ITPM</div>
+                  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-top:14px;">
+                    <div id="subsidy-kpi-forwarded" style="font-size:28px;font-weight:500;color:#f59e0b;line-height:1;">
+                      0</div>
+                    <svg style="width:26px;height:26px;color:#3b5998;flex-shrink:0;" fill="none" stroke="currentColor"
                       stroke-width="2" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        d="M19.5 12a7.5 7.5 0 11-2.2-5.3L19.5 9M19.5 4.5V9H15" />
                     </svg>
                   </div>
-                  <div class="text-3xl font-bold text-[#10b981] font-sans mt-2" id="subsidy-kpi-approved">0</div>
+                </div>
+
+                <!-- Card 3: Recommended -->
+                <div id="subsidy-kpi-card-approved" onclick="filterSubsidyByKpi('approved')" class="oic-kpi-card">
+                  <div style="font-size:13px;font-weight:600;color:#334155;">Recommended</div>
+                  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-top:14px;">
+                    <div id="subsidy-kpi-approved" style="font-size:28px;font-weight:500;color:#f59e0b;line-height:1;">0
+                    </div>
+                    <svg style="width:26px;height:26px;color:#3b5998;flex-shrink:0;" fill="none" stroke="currentColor"
+                      stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M19.5 12a7.5 7.5 0 11-2.2-5.3L19.5 9M19.5 4.5V9H15" />
+                    </svg>
+                  </div>
                 </div>
 
                 <!-- Card 4: Queried -->
-                <div id="subsidy-kpi-card-queried" onclick="filterSubsidyByKpi('queried')"
-                  class="oic-kpi-card flex flex-col justify-between">
-                  <div class="flex items-start justify-between">
-                    <span class="text-[13px] font-bold text-slate-800 leading-snug">Queried</span>
-                    <svg class="w-6 h-6 text-[#3b5998] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor"
-                      stroke-width="2" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <div id="subsidy-kpi-card-queried" onclick="filterSubsidyByKpi('queried')" class="oic-kpi-card">
+                  <div style="font-size:13px;font-weight:600;color:#334155;">Queried</div>
+                  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-top:14px;">
+                    <div id="subsidy-kpi-queried" style="font-size:28px;font-weight:500;color:#ef4444;line-height:1;">0
+                    </div>
+                    <svg style="width:26px;height:26px;color:#3b5998;flex-shrink:0;" fill="currentColor"
+                      viewBox="0 0 24 24">
+                      <circle cx="12" cy="5.5" r="2.1" />
+                      <path
+                        d="M16.5 4.5a1 1 0 00-1 1v4.2l-1.6-.7H9.8a1.8 1.8 0 00-1.8 1.8V15a1 1 0 002 0v-3.5h.5V21a1 1 0 002 0v-4.5h.8V21a1 1 0 002 0v-9.4l1.4.6a1 1 0 001.4-.9V5.5a1 1 0 00-1-1z" />
                     </svg>
                   </div>
-                  <div class="text-3xl font-bold text-[#ef4444] font-sans mt-2" id="subsidy-kpi-queried">0</div>
                 </div>
 
-                <!-- Card 5: All Applications -->
-                <div id="subsidy-kpi-card-all" onclick="filterSubsidyByKpi('all')"
-                  class="oic-kpi-card flex flex-col justify-between">
-                  <div class="flex items-start justify-between">
-                    <span class="text-[13px] font-bold text-slate-800 leading-snug">All Applications</span>
-                    <svg class="w-6 h-6 text-[#3b5998] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor"
-                      stroke-width="2" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <!-- Card 5: All application (Wraps cleanly onto Row 2 Left matching Screenshot) -->
+                <div id="subsidy-kpi-card-all" onclick="filterSubsidyByKpi('all')" class="oic-kpi-card">
+                  <div style="font-size:13px;font-weight:600;color:#334155;">All application</div>
+                  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-top:14px;">
+                    <div id="subsidy-kpi-all" style="font-size:28px;font-weight:500;color:#22c55e;line-height:1;">0
+                    </div>
+                    <svg style="width:28px;height:28px;color:#3b5998;flex-shrink:0;" fill="none" stroke="currentColor"
+                      stroke-width="1.7" viewBox="0 0 24 24">
+                      <rect x="3" y="5" width="18" height="14" rx="2" />
+                      <circle cx="7.5" cy="9.5" r="1" fill="currentColor" stroke="none" />
+                      <path stroke-linecap="round" d="M10.5 9.5h6.5" />
+                      <circle cx="7.5" cy="14.5" r="1" fill="currentColor" stroke="none" />
+                      <path stroke-linecap="round" d="M10.5 14.5h6.5" />
                     </svg>
                   </div>
-                  <div class="text-3xl font-bold text-[#22c55e] font-sans mt-2" id="subsidy-kpi-all">0</div>
                 </div>
               </div>
             </div>
           </div>
 
           <!-- Accordion 3: Pending Application List (OPEN BY DEFAULT, #3b5998 header) -->
-          <div class="border border-slate-200 rounded overflow-hidden shadow-sm">
+          <div class="border border-slate-200 rounded overflow-hidden shadow-xs bg-white">
             <button type="button" onclick="toggleAccordion('subsidy-pending-list')"
-              class="w-full flex items-center justify-between px-5 py-3.5 bg-[#3b5998] hover:bg-[#324c82] text-white font-bold text-sm tracking-wide transition select-none cursor-pointer">
+              class="w-full flex items-center justify-between px-5 py-3 bg-[#3b5998] hover:bg-[#324c82] text-white font-semibold text-sm tracking-wide transition select-none cursor-pointer"
+              style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:11px 18px;background:#3b5998;color:#ffffff;font-weight:600;font-size:13.5px;border:0;cursor:pointer;">
               <span>Pending Application List</span>
               <span id="chevron-subsidy-pending-list"
                 class="text-base font-mono transition-transform duration-200">&#9652;</span>
             </button>
-            <div id="content-subsidy-pending-list" class="p-5 bg-white border-t border-slate-200 space-y-4">
+            <div id="content-subsidy-pending-list" style="padding:20px;background:#ffffff;border-top:1px solid #e2e8f0;"
+              class="space-y-4">
 
               <!-- Search By Filter Bar -->
-              <div class="flex flex-wrap items-end justify-between gap-4">
-                <div class="space-y-1.5">
-                  <label for="subsidy-search-by" class="text-xs font-bold text-[#3b5998] block">Search By:</label>
-                  <div class="flex flex-wrap items-center gap-2.5">
+              <div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;">
+                <div>
+                  <label for="subsidy-search-by"
+                    style="display:block;font-size:12px;font-weight:500;color:#3b5998;margin-bottom:6px;">Search
+                    By:</label>
+                  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
                     <select id="subsidy-search-by" onchange="filterSubsidyTable()"
-                      class="border border-slate-300 rounded px-3 py-1.5 text-xs text-slate-700 bg-white min-w-[210px] focus:outline-none focus:border-[#3b5998]">
+                      style="border:1px solid #cbd5e1;border-radius:4px;padding:7px 12px;font-size:12.5px;color:#334155;background:#ffffff;min-width:210px;outline:none;">
                       <option value="all" selected>All</option>
                       <option value="appNo">Application Number</option>
                       <option value="orgName">Applicant / Organization Name</option>
@@ -6257,10 +6594,10 @@
                     </select>
                     <input type="text" id="subsidy-search-query" placeholder="Enter search value..."
                       onkeydown="if(event.key==='Enter'){event.preventDefault();filterSubsidyTable();}"
-                      class="border border-slate-300 rounded px-3 py-1.5 text-xs text-slate-700 bg-white min-w-[210px] focus:outline-none focus:border-[#3b5998]">
+                      style="border:1px solid #cbd5e1;border-radius:4px;padding:7px 12px;font-size:12.5px;color:#334155;background:#ffffff;min-width:210px;outline:none;">
                     <button type="button" onclick="filterSubsidyTable()"
-                      class="bg-[#3b5998] hover:bg-[#2b4c8a] text-white text-xs font-semibold px-4 py-1.5 rounded flex items-center gap-1.5 shadow-sm transition cursor-pointer">
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      style="background:#3b5998;color:#ffffff;font-size:12px;font-weight:600;padding:8px 16px;border-radius:4px;border:0;display:inline-flex;align-items:center;gap:6px;cursor:pointer;">
+                      <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                           d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                       </svg>
@@ -6277,9 +6614,10 @@
               </div>
 
               <!-- Sortable 12-Column Data Table (#dfe5f5 Header) -->
-              <div class="overflow-x-auto border border-slate-200 rounded">
-                <table class="w-full text-xs text-left border-collapse min-w-[1420px]">
-                  <thead class="bg-[#dfe5f5] text-slate-800 font-semibold border-b border-slate-300 select-none">
+              <div style="overflow-x:auto;border:1px solid #e2e8f0;border-radius:4px;">
+                <table style="width:100%;font-size:12px;text-align:left;border-collapse:collapse;min-width:1420px;">
+                  <thead
+                    style="background:#dfe5f5;color:#1e293b;font-weight:600;border-bottom:1px solid #cbd5e1;user-select:none;">
                     <tr>
                       <th onclick="sortSubsidyTable('sno')" class="oic-sortable-th p-2.5 whitespace-nowrap text-center">
                         S No. <span id="sub-sort-ind-sno" class="text-[10px] text-slate-500">▴</span></th>
@@ -6556,57 +6894,209 @@
       <!-- VIEW 9: HIGHER AUTHORITY WORKBENCH (#view-authority-workbench)            -->
       <!-- Supports FINANCE_ADMIN, ED, MD Stage 2/3 Verification & Query-Back Flow  -->
       <!-- ========================================================================= -->
-      <div id="view-authority-workbench" class="hidden px-6 md:px-8 py-6 flex-1"
-        style="margin-top: 0; padding-top: 20px;">
-        <div class="space-y-5">
-          <div class="border border-slate-200 rounded overflow-hidden shadow-sm bg-white">
-            <div
-              class="px-5 py-3.5 bg-[#3b5998] text-white font-bold text-sm tracking-wide flex items-center justify-between">
-              <span id="authority-workbench-title">Authority Queue</span>
-              <span id="authority-workbench-role-badge"
-                class="text-[11px] bg-white/20 px-2.5 py-0.5 rounded font-mono">FINANCE_ADMIN</span>
+      <div id="view-authority-workbench" class="hidden px-6 py-5 flex-1" style="margin-top: 0; padding-top: 20px;">
+        <div class="bg-white rounded border border-slate-200 shadow-sm p-4 md:p-5 space-y-5">
+
+          <!-- Top 3 Summary Accordions (Visible for ED & MD matching Images 1 & 5) -->
+          <div id="authority-top-accordions" class="hidden space-y-4">
+            <div class="border border-slate-200 rounded overflow-hidden shadow-xs bg-white">
+              <button type="button" onclick="toggleAccordion('auth-subsidy-top')"
+                style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:11px 18px;background:#3b5998;color:#ffffff;font-weight:600;font-size:13.5px;border:0;cursor:pointer;">
+                <span>Subsidy Approval Dashboard</span>
+                <span id="chevron-auth-subsidy-top" class="text-base font-mono">&#9662;</span>
+              </button>
+              <div id="content-auth-subsidy-top"
+                class="hidden p-4 bg-[#f8fafc] border-t border-slate-200 text-xs text-slate-600">
+                Stage 2 Policy &amp; Progressive Rebate summary synced with active EOI applications (<span
+                  id="authority-top-total-eoi" class="font-bold text-[#3b5998]">0</span> tracked).
+              </div>
             </div>
-            <div class="p-5 space-y-4">
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="bg-[#f8fafc] border border-slate-200 rounded-md p-4">
-                  <div class="text-xs font-semibold text-slate-600">Pending My Action</div>
-                  <div class="text-2xl font-bold text-[#f59e0b] mt-1 font-mono" id="authority-kpi-pending">0</div>
+            <div class="border border-slate-200 rounded overflow-hidden shadow-xs bg-white">
+              <button type="button" onclick="toggleAccordion('auth-rental-top')"
+                style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:11px 18px;background:#3b5998;color:#ffffff;font-weight:600;font-size:13.5px;border:0;cursor:pointer;">
+                <span>Rental Space Dashboard</span>
+                <span id="chevron-auth-rental-top" class="text-base font-mono">&#9662;</span>
+              </button>
+              <div id="content-auth-rental-top"
+                class="hidden p-4 bg-[#f8fafc] border-t border-slate-200 text-xs text-slate-600">
+                IT Park space occupancy &amp; tenant allotment summary (read-only).
+              </div>
+            </div>
+            <div class="border border-slate-200 rounded overflow-hidden shadow-xs bg-white">
+              <button type="button" onclick="toggleAccordion('auth-ccip-top')"
+                style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:11px 18px;background:#3b5998;color:#ffffff;font-weight:600;font-size:13.5px;border:0;cursor:pointer;">
+                <span>Intention To Invest and CCIP Proposal Dashboard</span>
+                <span id="chevron-auth-ccip-top" class="text-base font-mono">&#9652;</span>
+              </button>
+              <div id="content-auth-ccip-top"
+                class="hidden p-4 bg-[#f8fafc] border-t border-slate-200 text-xs text-slate-600">
+                CCIP &amp; Intention To Invest proposal tracker synced with Authority Queue.
+              </div>
+            </div>
+          </div>
+
+          <!-- Accordion: Process Dashboard (OPEN BY DEFAULT) -->
+          <div class="border border-slate-200 rounded overflow-hidden shadow-xs bg-white">
+            <button type="button" onclick="toggleAccordion('authority-process-dash')"
+              style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:11px 18px;background:#3b5998;color:#ffffff;font-weight:600;font-size:13.5px;border:0;cursor:pointer;">
+              <span>Process Dashboard</span>
+              <span id="chevron-authority-process-dash" class="text-base font-mono">&#9652;</span>
+            </button>
+            <div id="content-authority-process-dash"
+              style="padding:20px;background:#ffffff;border-top:1px solid #e2e8f0;">
+              <div id="authority-kpi-grid" class="oic-kpi-grid">
+                <!-- Populated dynamically per FINANCE_ADMIN / ED / MD role -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Hidden compatibility counters kept synced for any references -->
+          <span id="authority-workbench-title" class="hidden">Authority Queue</span>
+          <span id="authority-workbench-role-badge" class="hidden">FINANCE_ADMIN</span>
+          <span id="authority-kpi-pending" class="hidden">0</span>
+          <span id="authority-kpi-all" class="hidden">0</span>
+
+          <!-- Accordion: Pending Application list / All Application list (OPEN BY DEFAULT) -->
+          <div class="border border-slate-200 rounded overflow-hidden shadow-xs bg-white">
+            <button type="button" onclick="toggleAccordion('authority-app-list')"
+              style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:11px 18px;background:#3b5998;color:#ffffff;font-weight:600;font-size:13.5px;border:0;cursor:pointer;">
+              <span id="authority-list-title">Pending Application list</span>
+              <span id="chevron-authority-app-list" class="text-base font-mono">&#9652;</span>
+            </button>
+            <div id="content-authority-app-list" style="padding:20px;background:#ffffff;border-top:1px solid #e2e8f0;"
+              class="space-y-4">
+
+              <!-- Search By Filter Bar -->
+              <div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;">
+                <div>
+                  <label for="authority-search-by"
+                    style="display:block;font-size:12px;font-weight:500;color:#3b5998;margin-bottom:6px;">Search
+                    By:</label>
+                  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;">
+                    <select id="authority-search-by" onchange="renderAuthorityWorkbench()"
+                      style="border:1px solid #cbd5e1;border-radius:4px;padding:7px 12px;font-size:12.5px;color:#334155;background:#ffffff;min-width:225px;outline:none;">
+                      <option value="all" selected>All</option>
+                      <option value="pending_mine">Pending With Me</option>
+                      <option value="EOI Allotment">EOI Allotment</option>
+                      <option value="Approved">Approved / Recommended</option>
+                      <option value="Queried">Queried</option>
+                    </select>
+                    <button type="button" onclick="renderAuthorityWorkbench()"
+                      style="background:#3b5998;color:#ffffff;font-size:12px;font-weight:600;padding:8px 16px;border-radius:4px;border:0;display:inline-flex;align-items:center;gap:6px;cursor:pointer;">
+                      <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                      </svg>
+                      <span>Search</span>
+                    </button>
+                  </div>
                 </div>
-                <div class="bg-[#f8fafc] border border-slate-200 rounded-md p-4">
-                  <div class="text-xs font-semibold text-slate-600">All EOI Applications</div>
-                  <div class="text-2xl font-bold text-[#3b5998] mt-1 font-mono" id="authority-kpi-all">0</div>
-                </div>
-                <div class="bg-[#f8fafc] border border-slate-200 rounded-md p-4">
-                  <div class="text-xs font-semibold text-slate-600">Active Hierarchy Chain</div>
-                  <div class="text-[11.5px] font-bold text-slate-800 mt-2">OIC IT Park &rarr; Subsidy Admin &rarr;
-                    Finance Admin &rarr; ED &rarr; MD</div>
+                <div id="authority-active-filter-chip"
+                  class="hidden items-center gap-2 text-xs bg-blue-50 border border-blue-200 text-blue-900 px-3 py-1.5 rounded-full font-semibold">
+                  <span id="authority-active-filter-label">Showing: Pending</span>
+                  <button type="button" onclick="filterAuthorityByKpi('all')"
+                    class="text-blue-700 hover:text-blue-950 font-bold ml-1 cursor-pointer">&times; Show All</button>
                 </div>
               </div>
 
-              <div class="overflow-x-auto border border-slate-200 rounded">
-                <table class="w-full text-xs text-left border-collapse min-w-[1050px]">
-                  <thead class="bg-[#dfe5f5] text-slate-800 font-semibold border-b border-slate-300">
+              <!-- 13-Column Sortable Table matching Images 1, 2, 6 -->
+              <div style="overflow-x:auto;border:1px solid #e2e8f0;border-radius:4px;">
+                <table style="width:100%;font-size:12px;text-align:left;border-collapse:collapse;min-width:1380px;">
+                  <thead
+                    style="background:#dfe5f5;color:#1e293b;font-weight:600;border-bottom:1px solid #cbd5e1;user-select:none;">
                     <tr>
-                      <th class="p-2.5 text-center">S No.</th>
-                      <th class="p-2.5">Applicant Name</th>
-                      <th class="p-2.5">Plot &amp; IT Park</th>
-                      <th class="p-2.5">Application No.</th>
-                      <th class="p-2.5">Policy &amp; Financials</th>
-                      <th class="p-2.5">Application Status</th>
-                      <th class="p-2.5">Application At</th>
-                      <th class="p-2.5 text-center">Action</th>
+                      <th onclick="sortAuthorityTable('sno')" class="oic-sortable-th"
+                        style="padding:10px 12px;text-align:center;white-space:nowrap;">S<br>No.</th>
+                      <th onclick="sortAuthorityTable('orgName')" class="oic-sortable-th"
+                        style="padding:10px 12px;white-space:nowrap;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                          <span>Applicant Name<br>(Organization Name)</span>
+                          <span id="auth-sort-ind-orgName"
+                            style="font-size:9px;line-height:1;color:#64748b;display:flex;flex-direction:column;"><span>&#9652;</span><span
+                              style="margin-top:-2px">&#9662;</span></span>
+                        </div>
+                      </th>
+                      <th onclick="sortAuthorityTable('applicationType')" class="oic-sortable-th"
+                        style="padding:10px 12px;white-space:nowrap;">Application<br>Type</th>
+                      <th onclick="sortAuthorityTable('policyName')" class="oic-sortable-th"
+                        style="padding:10px 12px;white-space:nowrap;">Policy<br>Name</th>
+                      <th onclick="sortAuthorityTable('plotDisplay')" class="oic-sortable-th"
+                        style="padding:10px 12px;white-space:nowrap;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                          <span>Project/Assistance<br>Type</span>
+                          <span id="auth-sort-ind-plotDisplay"
+                            style="font-size:9px;line-height:1;color:#94a3b8;display:flex;flex-direction:column;"><span>&#9652;</span><span
+                              style="margin-top:-2px">&#9662;</span></span>
+                        </div>
+                      </th>
+                      <th onclick="sortAuthorityTable('cin')" class="oic-sortable-th"
+                        style="padding:10px 12px;white-space:nowrap;">CIN/LLP/Registration<br>Number</th>
+                      <th onclick="sortAuthorityTable('appNo')" class="oic-sortable-th"
+                        style="padding:10px 12px;white-space:nowrap;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                          <span>Application<br>Number</span>
+                          <span id="auth-sort-ind-appNo"
+                            style="font-size:9px;line-height:1;color:#94a3b8;display:flex;flex-direction:column;"><span>&#9652;</span><span
+                              style="margin-top:-2px">&#9662;</span></span>
+                        </div>
+                      </th>
+                      <th onclick="sortAuthorityTable('appDate')" class="oic-sortable-th"
+                        style="padding:10px 12px;white-space:nowrap;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                          <span>Application<br>Date</span>
+                          <span id="auth-sort-ind-appDate"
+                            style="font-size:9px;line-height:1;color:#94a3b8;display:flex;flex-direction:column;"><span>&#9652;</span><span
+                              style="margin-top:-2px">&#9662;</span></span>
+                        </div>
+                      </th>
+                      <th onclick="sortAuthorityTable('status')" class="oic-sortable-th"
+                        style="padding:10px 12px;white-space:nowrap;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                          <span>Application<br>Status</span>
+                          <span id="auth-sort-ind-status"
+                            style="font-size:9px;line-height:1;color:#94a3b8;display:flex;flex-direction:column;"><span>&#9652;</span><span
+                              style="margin-top:-2px">&#9662;</span></span>
+                        </div>
+                      </th>
+                      <th onclick="sortAuthorityTable('applicationAt')" class="oic-sortable-th"
+                        style="padding:10px 12px;white-space:nowrap;">Application<br>At</th>
+                      <th onclick="sortAuthorityTable('pendingSince')" class="oic-sortable-th"
+                        style="padding:10px 12px;white-space:nowrap;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                          <span>Pending<br>Since</span>
+                          <span id="auth-sort-ind-pendingSince"
+                            style="font-size:9px;line-height:1;color:#94a3b8;display:flex;flex-direction:column;"><span>&#9652;</span><span
+                              style="margin-top:-2px">&#9662;</span></span>
+                        </div>
+                      </th>
+                      <th style="padding:10px 12px;white-space:nowrap;text-align:center;">Download<br>Documents</th>
+                      <th style="padding:10px 12px;white-space:nowrap;text-align:center;">Action</th>
                     </tr>
                   </thead>
                   <tbody id="authority-queue-tbody" class="divide-y divide-slate-200"></tbody>
                 </table>
               </div>
+
+              <!-- Pagination matching Screenshot -->
+              <div
+                style="display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#64748b;padding-top:6px;">
+                <div id="authority-table-footer-count">Showing 0 entries</div>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <span style="color:#94a3b8;padding:0 4px;">&laquo;</span>
+                  <span style="color:#94a3b8;padding:0 4px;">&lsaquo;</span>
+                  <button type="button"
+                    style="padding:4px 10px;border:1px solid #3b5998;border-radius:3px;background:#ffffff;color:#1e293b;font-weight:700;">1</button>
+                  <span style="color:#94a3b8;padding:0 4px;">&rsaquo;</span>
+                  <span style="color:#94a3b8;padding:0 4px;">&raquo;</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Inline Selected File Action Card -->
+          <!-- Inline Selected File Action Card (Preserved Workflow Controls) -->
           <div id="authority-action-card"
             class="hidden border border-slate-200 rounded overflow-hidden shadow-sm bg-white">
-            <div class="px-5 py-3 bg-[#2b579a] text-white font-bold text-sm flex items-center justify-between">
+            <div class="px-5 py-3 bg-[#3b5998] text-white font-bold text-sm flex items-center justify-between">
               <span id="authority-action-heading">Review Application</span>
               <button type="button" onclick="document.getElementById('authority-action-card')?.classList.add('hidden')"
                 class="text-xs bg-white/15 hover:bg-white/25 px-2.5 py-1 rounded cursor-pointer">&times; Close</button>
@@ -6644,6 +7134,7 @@
               </form>
             </div>
           </div>
+
         </div>
       </div>
 
@@ -7681,6 +8172,8 @@
       const oicScrutiny = document.getElementById('view-oic-scrutiny-detail');
       const oicVacant = document.getElementById('view-oic-vacant-list') || document.getElementById('view-oic-fill-plot');
       const oicAdd = document.getElementById('view-oic-add-plot');
+      const oicGenerateLoa = document.getElementById('view-oic-generate-loa');
+      const oicFloatTender = document.getElementById('view-oic-float-tender');
       const subsidyDash = document.getElementById('view-subsidy-dashboard');
       const subsidyScrutiny = document.getElementById('view-subsidy-scrutiny');
       const authWorkbench = document.getElementById('view-authority-workbench');
@@ -7707,8 +8200,10 @@
       const navOicPortal2 = document.getElementById('nav-oic-portal-2');
       const navOicVacant = document.getElementById('nav-oic-vacant-list') || document.getElementById('nav-oic-vacant-plot');
       const navOicAdd = document.getElementById('nav-oic-add-plot');
+      const navOicLoa = document.getElementById('nav-oic-generate-loa');
+      const navOicFloatTender = document.getElementById('nav-oic-float-tender');
 
-      [dash, land, eoi, eoiPreview, oic, oicScrutiny, oicVacant, oicAdd, subsidyDash, subsidyScrutiny, authWorkbench].forEach(v => {
+      [dash, land, eoi, eoiPreview, oic, oicScrutiny, oicVacant, oicAdd, oicGenerateLoa, oicFloatTender, subsidyDash, subsidyScrutiny, authWorkbench].forEach(v => {
         if (v) v.classList.add('hidden');
       });
 
@@ -7747,6 +8242,9 @@
           }
           if (viewName === 'subsidy-scrutiny' && typeof currentSubsidyAppNo !== 'undefined' && currentSubsidyAppNo) {
             localStorage.setItem(STORAGE_KEYS.SUBSIDY_APP, currentSubsidyAppNo);
+          }
+          if (viewName === 'oic-generate-loa' && typeof window.currentLoaAppNo !== 'undefined' && window.currentLoaAppNo) {
+            localStorage.setItem(STORAGE_KEYS.LOA_APP, window.currentLoaAppNo);
           }
           if (viewName !== 'eoi-form' && viewName !== 'eoi-preview' && typeof clearApplicantQueryRectificationMode === 'function') {
             clearApplicantQueryRectificationMode(true);
@@ -7840,6 +8338,28 @@
         if (navOicAdd) navOicAdd.classList.add('on');
         setDefaultEoiDates();
         updateFinancialCalculations();
+      } else if (viewName === 'oic-generate-loa') {
+        window.currentActiveRole = 'OIC_IT_PARK';
+        if (oicGenerateLoa) oicGenerateLoa.classList.remove('hidden');
+        if (heroSub) heroSub.innerHTML = '<span>Plot Management &gt;&gt; Generate LOA</span><span>&#8681; Official Letter of Allotment</span>';
+        if (heroH1) heroH1.textContent = 'Authority Dashboard - Generate LOA';
+        if (userPillName) userPillName.textContent = 'OIC IT Park';
+        if (userBoxOic) userBoxOic.classList.remove('hidden');
+        if (navOic) navOic.classList.remove('hidden');
+        document.getElementById('nav-group-plot')?.classList.remove('hidden');
+        if (navOicLoa) navOicLoa.classList.add('on');
+        if (typeof initGenerateLoaView === 'function') initGenerateLoaView(window.currentLoaAppNo);
+      } else if (viewName === 'oic-float-tender') {
+        window.currentActiveRole = 'OIC_IT_PARK';
+        if (oicFloatTender) oicFloatTender.classList.remove('hidden');
+        if (heroSub) heroSub.innerHTML = '<span>Plot Management &gt;&gt; Float Tender for EOI</span><span>&#8681; Land Tender Publication</span>';
+        if (heroH1) heroH1.textContent = 'Authority Dashboard - Float Tender for EOI';
+        if (userPillName) userPillName.textContent = 'OIC IT Park';
+        if (userBoxOic) userBoxOic.classList.remove('hidden');
+        if (navOic) navOic.classList.remove('hidden');
+        document.getElementById('nav-group-plot')?.classList.remove('hidden');
+        if (navOicFloatTender) navOicFloatTender.classList.add('on');
+        if (typeof initFloatTenderView === 'function') initFloatTenderView();
       } else if (viewName === 'subsidy-dashboard') {
         window.currentActiveRole = 'SUBSIDY_ADMIN';
         if (subsidyDash) subsidyDash.classList.remove('hidden');
@@ -7864,10 +8384,10 @@
         const activeRole = window.currentOfficerRole || 'FINANCE_ADMIN';
         window.currentActiveRole = activeRole;
         const roleMeta = {
-          FINANCE_ADMIN: { user: 'FinanceAdmin', label: 'Finance Admin', sub: 'Stage 2 Finance & EMD Verification' },
-          ED: { user: 'ExecutiveDirector', label: 'Executive Director (ED)', sub: 'Stage 2 Executive Review & LOA Signatory' },
-          MD: { user: 'ManagingDirector', label: 'Managing Director (MD)', sub: 'Final Authority Allotment Sanction' }
-        }[activeRole] || { user: 'FinanceAdmin', label: 'Finance Admin', sub: 'Stage 2 Scrutiny' };
+          FINANCE_ADMIN: { user: 'FinanceAdmin', label: 'Finance Admin', sub: 'Stage 2 Finance & EMD Verification', exec: false },
+          ED: { user: 'CGMMPSEDC', label: 'Executive Director', sub: 'Stage 2 Executive Review & LOA Signatory', exec: true },
+          MD: { user: 'MDMPSEDC', label: 'Managing Director', sub: 'Final Authority Allotment Sanction', exec: true }
+        }[activeRole] || { user: 'FinanceAdmin', label: 'Finance Admin', sub: 'Stage 2 Scrutiny', exec: false };
         if (authWorkbench) authWorkbench.classList.remove('hidden');
         if (heroSub) heroSub.innerHTML = `<span>Authority Dashboard &bull; ${roleMeta.sub}</span><span>&#8681; ${roleMeta.label}</span>`;
         if (heroH1) heroH1.textContent = 'Authority Dashboard';
@@ -7875,10 +8395,15 @@
         const obUser = document.getElementById('officer-box-username');
         const obRole = document.getElementById('officer-box-role');
         if (obUser) obUser.textContent = roleMeta.user;
-        if (obRole) obRole.textContent = `${roleMeta.label} (${activeRole})`;
+        if (obRole) obRole.textContent = roleMeta.label;
         if (userBoxOfficer) userBoxOfficer.classList.remove('hidden');
         if (navOfficer) navOfficer.classList.remove('hidden');
-        document.getElementById('nav-officer-dashboard')?.classList.add('on');
+        document.getElementById('nav-officer-finance')?.classList.toggle('hidden', roleMeta.exec);
+        document.getElementById('nav-officer-exec')?.classList.toggle('hidden', !roleMeta.exec);
+        document.getElementById('authority-top-accordions')?.classList.toggle('hidden', !roleMeta.exec);
+        const listTitle = document.getElementById('authority-list-title');
+        if (listTitle) listTitle.textContent = activeRole === 'FINANCE_ADMIN' ? 'All Application list' : 'Pending Application list';
+        window.authorityActiveKpiFilter = activeRole === 'FINANCE_ADMIN' ? 'all' : 'pending';
         if (typeof renderAuthorityWorkbench === 'function') renderAuthorityWorkbench(activeRole);
       }
       try {
@@ -9336,214 +9861,12 @@
 
     function resetDemoState() {
       try {
-        localStorage.removeItem(STORAGE_KEYS.DRAFTS);
-        localStorage.removeItem(STORAGE_KEYS.RECTIFY_APP);
-        localStorage.removeItem(STORAGE_KEYS.ACTIVE_PLOT);
+        Object.values(STORAGE_KEYS).forEach(k => localStorage.removeItem(k));
         localStorage.removeItem('mpsedc_eoi_draft');
-        sessionStorage.removeItem('mpsedc_eoi_draft');
-        localStorage.setItem('mpsedc_eoi_seed_v2', '1');
+        localStorage.removeItem('mpsedc_eoi_seed_v2');
       } catch (e) { }
-      if (typeof clearApplicantQueryRectificationMode === 'function') clearApplicantQueryRectificationMode(true);
-      oicPlotInventory = getDefaultSeededPlots();
-      window.plotMasterDB = oicPlotInventory;
-      savePersistedPlots();
-      window.oicLandApplications = getDefaultSeededApplications();
-      window.submittedApplicationsMap = {};
-      window.oicLandApplications.forEach(a => { window.submittedApplicationsMap[a.appNo] = a; });
-      savePersistedApplications();
-      eoiDraftMemory = {};
-      renderOicPlotTable();
-      syncPlotsWithInvestorView();
-      updateOicStats();
-      updateOicProcessStats();
-      renderOicApplicationsTable();
-      renderInvestorDashboard();
-      if (typeof renderSubsidyDashboard === 'function') renderSubsidyDashboard();
-      if (typeof renderAuthorityWorkbench === 'function' && window.currentOfficerRole) renderAuthorityWorkbench(window.currentOfficerRole);
-      showGlobalToast('Demo state reset to realistic seeded EOI workflow records.', 'success');
-    }
-
-    // Real Land Allotment Applications (Starts empty; populated from Investor submissions & persisted in localStorage)
-    window.oicLandApplications = loadPersistedApplications();
-
-    // Populate submittedApplicationsMap for unified lookup
-    window.oicLandApplications.forEach(app => {
-      window.submittedApplicationsMap[app.appNo] = app;
-    });
-
-    let investorActiveKpiFilter = 'applied';
-
-    function selectInvestorKpi(elem, filterKey) {
-      document.querySelectorAll('#view-dashboard .k').forEach(k => k.classList.remove('act'));
-      if (elem) elem.classList.add('act');
-      investorActiveKpiFilter = filterKey || 'applied';
-      renderInvestorDashboard();
-    }
-
-    function resumeInvestorDraft(plotKey) {
-      if (!plotKey) {
-        switchView('land-allotment');
-        return;
-      }
-      openEoiFormForPlot(plotKey);
-    }
-
-    function clearApplicantQueryRectificationMode(clearStorage = true) {
-      window.activeQueryRectificationAppNo = null;
-      const banner = document.getElementById('eoi-query-rectification-banner');
-      if (banner) banner.remove();
-
-      const submitBtn = document.getElementById('btn-submit-affix-dsc');
-      if (submitBtn) {
-        submitBtn.innerHTML = '<span>Submit</span>';
-        const consentBox = document.getElementById('declaration-consent');
-        if (consentBox && consentBox.checked) {
-          submitBtn.removeAttribute('disabled');
-          submitBtn.classList.remove('cursor-not-allowed', 'opacity-50');
-          submitBtn.classList.add('cursor-pointer');
-        } else {
-          submitBtn.setAttribute('disabled', 'true');
-          submitBtn.classList.add('cursor-not-allowed', 'opacity-50');
-          submitBtn.classList.remove('cursor-pointer');
-        }
-      }
-      if (clearStorage) {
-        try {
-          if (typeof STORAGE_KEYS !== 'undefined') localStorage.removeItem(STORAGE_KEYS.RECTIFY_APP);
-        } catch (e) { }
-      }
-    }
-
-    function cancelApplicantQueryRectification() {
-      clearApplicantQueryRectificationMode(true);
-      switchView('dashboard');
-      showGlobalToast('Returned to Investor Dashboard.', 'info');
-    }
-
-    function restoreEoiAttachmentsFromApplication(app) {
-      const attachments = Array.isArray(app?.attachments) ? app.attachments : [];
-      if (!Array.isArray(currentDocs) || currentDocs.length === 0) return;
-
-      currentDocs.forEach((docObj, i) => {
-        const match = attachments.find(a => a.title === docObj.name) || attachments[i];
-        if (!match || !match.fileName || match.fileName === '—' || match.fileName === '–') return;
-
-        const fileBox = document.getElementById('doc-file-' + i);
-        const fileNameEl = document.getElementById('doc-name-' + i);
-        const btn = document.getElementById('doc-btn-' + i);
-        if (fileBox && fileNameEl && btn) {
-          fileNameEl.textContent = match.fileName;
-          fileBox.style.display = 'flex';
-          if (typeof eoiDraftMemory !== 'undefined') eoiDraftMemory['doc_' + i] = match.fileName;
-          btn.innerHTML = '<input type="file" id="doc-file-input-' + i + '" accept=".pdf" style="display:none;" onchange="handleDocFileChange(' + i + ', this)" onclick="event.stopPropagation()">✓ Replace';
-          btn.style.background = '#dff3e7';
-          btn.style.borderColor = '#1f9d5a';
-          btn.style.color = '#1f9d5a';
-          const docRow = document.querySelectorAll('#docList .doc')[i];
-          if (docRow) docRow.classList.remove('doc-invalid', 'border-red-500');
-        }
-      });
-    }
-
-    function applyEoiFormSnapshotForRectification(app) {
-      const snap = (app && app.formSnapshot && typeof app.formSnapshot === 'object') ? { ...app.formSnapshot } : {};
-
-      // Fallback field mapping from top-level app record if formSnapshot has gaps
-      const fallbackFields = {
-        'applicant-name': app.orgName,
-        'applicant-inc-date': app.incDate,
-        'applicant-cin': app.cin,
-        'applicant-pan': app.pan,
-        'applicant-gstin': app.gstin,
-        'applicant-reg-address': app.regAddress,
-        'auth-name': app.signatory,
-        'auth-designation': app.designation,
-        'auth-mobile': app.mobile,
-        'auth-email': app.email,
-        'primary-business-type': app.businessDomain,
-        'unit-emp-count': app.currentEmployees,
-        'unit-turnover': app.turnover3FY,
-        'unit-past-inv': app.pastInvestment,
-        'dev-bua': app.devBua,
-        'dev-inv': app.devInv,
-        'proj-title': app.projTitle,
-        'proj-timeline': app.timeline,
-        'proj-manpower': app.headcount,
-        'declaration-consent': true
-      };
-      Object.entries(fallbackFields).forEach(([k, v]) => {
-        if (snap[k] === undefined && v !== undefined && v !== null && v !== '—') {
-          snap[k] = v;
-        }
-      });
-
-      const catEl = document.getElementById('applicant-category');
-      if (catEl && !catEl.disabled) {
-        const savedCat = snap['applicant-category'] || (app.formType === 'Form 1-A' ? 'developer' : 'unit');
-        catEl.value = savedCat;
-        if (typeof handleApplicantCategoryChange === 'function') {
-          handleApplicantCategoryChange(savedCat);
-        }
-      }
-
-      const consVal = snap['applicant-consortium'] || (String(app.consortiumStatus || '').startsWith('Yes') ? 'Yes' : 'No');
-      const consEl = document.getElementById('applicant-consortium');
-      if (consEl) consEl.value = consVal;
-      handleConsortiumChange(consVal);
-
-      Object.keys(snap).forEach(k => {
-        if (k === 'directors' || k.startsWith('_') || k === 'applicant-query-reply-note') return;
-        const val = snap[k];
-        const byId = document.getElementById(k);
-        if (byId) {
-          if (byId.type === 'file') return;
-          if (byId.type === 'checkbox') {
-            byId.checked = Boolean(val);
-          } else {
-            byId.value = val ?? '';
-          }
-          clearFieldInvalid(byId);
-          return;
-        }
-        const radios = document.querySelectorAll(`#view-eoi-form input[type="radio"][name="${k}"]`);
-        if (radios.length > 0) {
-          radios.forEach(r => { r.checked = (r.value === val); });
-        }
-      });
-
-      const dirTbody = document.getElementById('directors-tbody');
-      const directorsList = (Array.isArray(snap.directors) && snap.directors.length > 0)
-        ? snap.directors
-        : (Array.isArray(app.directors) ? app.directors : []);
-      if (dirTbody) {
-        dirTbody.innerHTML = '';
-        if (directorsList.length > 0) {
-          directorsList.forEach(d => addDirectorRow(d.name, d.designation, d.din, d.contact));
-        } else {
-          appendBlankDirectorRow();
-        }
-      }
-
-      renderDocuments();
-      restoreEoiAttachmentsFromApplication(app);
-      calculateProjectFinancials();
-
-      const consentBox = document.getElementById('declaration-consent');
-      if (consentBox) handleDeclarationConsentChange(consentBox.checked);
-
-      // Keep accordions open and accessible for smooth editing
-      for (let s = 1; s <= 5; s++) {
-        const panel = getSectionPanel(s);
-        if (panel) {
-          panel.classList.remove('is-collapsed');
-          panel.classList.add('is-expanded');
-        }
-        const badge = document.getElementById('badge-sec-' + s);
-        if (badge) {
-          badge.className = 'accordion-badge badge-active';
-          badge.textContent = 'Rectify / Review';
-        }
-      }
+      if (typeof showGlobalToast === 'function') showGlobalToast('Demo state reset to defaults. Reloading...', 'info');
+      setTimeout(() => { location.reload(); }, 250);
     }
 
     function openApplicantQueryRectification(appNo) {
@@ -9871,6 +10194,24 @@
       return app.stage === 'initial_scrutiny' || app.stage === 'post_approval' || app.stage === 'lease_deed';
     }
 
+    function isOicVerifiedItem(app) {
+      const st = String(app?.status || '').toLowerCase();
+      return Boolean(app?.oicVerifiedAt) ||
+        app.stage === 'subsidy_scrutiny' ||
+        app.stage === 'finance_scrutiny' ||
+        app.stage === 'ed_scrutiny' ||
+        app.stage === 'md_scrutiny' ||
+        app.stage === 'forwarded' ||
+        app.stage === 'approved' ||
+        st.includes('verified') ||
+        st.includes('forwarded');
+    }
+
+    function isOicQueriedItem(app) {
+      const st = String(app?.status || '').toLowerCase();
+      return app.stage === 'queried' || st.includes('queried');
+    }
+
     function isOicPostApprovalOrRegistry(app) {
       return app.stage === 'post_approval' || app.stage === 'lease_deed' || (app.status || '').toLowerCase().includes('loa') || (app.status || '').toLowerCase().includes('e-bidding');
     }
@@ -9878,18 +10219,18 @@
     function updateOicProcessStats() {
       const allApps = window.oicLandApplications || [];
       const pendingCount = allApps.filter(a => isOicPendingScrutiny(a)).length;
-      const queriedCount = allApps.filter(a => a.stage === 'queried').length;
+      const verifiedCount = allApps.filter(a => isOicVerifiedItem(a)).length;
+      const queriedCount = allApps.filter(a => isOicQueriedItem(a)).length;
       const allCount = allApps.length;
-      const loaCount = allApps.filter(a => isOicPostApprovalOrRegistry(a)).length;
 
       const setNum = (id, val) => {
         const el = document.getElementById(id);
         if (el) el.textContent = val;
       };
       setNum('oic-kpi-pending', pendingCount);
+      setNum('oic-kpi-verified', verifiedCount);
       setNum('oic-kpi-queried', queriedCount);
       setNum('oic-kpi-all', allCount);
-      setNum('oic-kpi-loa', loaCount);
 
       // Keep Plot Management Dashboard LOA / Agreement counters synced
       const loaStat = allApps.filter(a => (a.status || '').toLowerCase().includes('loa')).length;
@@ -9899,7 +10240,7 @@
     }
 
     function updateKpiCardActiveState() {
-      ['pending', 'queried', 'all', 'loa'].forEach(k => {
+      ['pending', 'verified', 'queried', 'all'].forEach(k => {
         const card = document.getElementById('kpi-card-' + k);
         if (!card) return;
         if (oicActiveKpiFilter === k) card.classList.add('active');
@@ -9909,8 +10250,9 @@
       const chip = document.getElementById('oic-active-filter-chip');
       const lbl = document.getElementById('oic-active-filter-label');
       const labels = {
-        pending: 'Showing: Pending OIC Action',
-        queried: 'Showing: Queried to Applicant',
+        pending: 'Showing: Pending',
+        verified: 'Showing: Verified',
+        queried: 'Showing: Queried',
         loa: 'Showing: Post-Approval LOA / Registry',
         all: ''
       };
@@ -9941,14 +10283,25 @@
         oicSortKey = key;
         oicSortAsc = true;
       }
-      document.querySelectorAll('[id^="sort-ind-"]').forEach(el => {
-        el.textContent = '▴';
-        el.className = 'text-[10px] text-slate-400';
+      const dualKeys = ['orgName', 'plotDisplay', 'appNo', 'appDate', 'status'];
+      dualKeys.forEach(k => {
+        const el = document.getElementById('sort-ind-' + k);
+        if (el) {
+          el.innerHTML = '<span>&#9652;</span><span style="margin-top:-2px">&#9662;</span>';
+          el.className = 'text-[9px] leading-none text-slate-400 flex flex-col';
+        }
       });
       const activeInd = document.getElementById('sort-ind-' + key);
       if (activeInd) {
-        activeInd.textContent = oicSortAsc ? '▴' : '▾';
-        activeInd.className = 'text-[10px] text-[#3b5998] font-bold';
+        if (dualKeys.includes(key)) {
+          activeInd.innerHTML = oicSortAsc
+            ? '<span style="color:#3b5998">&#9652;</span><span style="margin-top:-2px;opacity:0.3">&#9662;</span>'
+            : '<span style="opacity:0.3">&#9652;</span><span style="margin-top:-2px;color:#3b5998">&#9662;</span>';
+          activeInd.className = 'text-[9px] leading-none flex flex-col font-bold';
+        } else {
+          activeInd.textContent = oicSortAsc ? '▴' : '▾';
+          activeInd.className = 'text-[10px] text-[#3b5998] font-bold';
+        }
       }
       renderOicApplicationsTable();
     }
@@ -9983,8 +10336,10 @@
       // Apply KPI card filter
       if (oicActiveKpiFilter === 'pending') {
         rows = rows.filter(a => isOicPendingScrutiny(a));
+      } else if (oicActiveKpiFilter === 'verified') {
+        rows = rows.filter(a => isOicVerifiedItem(a));
       } else if (oicActiveKpiFilter === 'queried') {
-        rows = rows.filter(a => a.stage === 'queried');
+        rows = rows.filter(a => isOicQueriedItem(a));
       } else if (oicActiveKpiFilter === 'loa') {
         rows = rows.filter(a => isOicPostApprovalOrRegistry(a));
       }
@@ -9996,6 +10351,8 @@
         rows = rows.filter(a => a.applicationType === 'Mega Project Allotment');
       } else if (selectVal === 'Pending Scrutiny') {
         rows = rows.filter(a => a.stage === 'initial_scrutiny');
+      } else if (selectVal === 'Verified / Forwarded') {
+        rows = rows.filter(a => isOicVerifiedItem(a));
       } else if (selectVal === 'Approved - Pending LOA') {
         rows = rows.filter(a => a.stage === 'post_approval' || (a.status || '').includes('LOA') || (a.status || '').includes('E-Bidding'));
       } else if (selectVal === 'Lease Deed Verification') {
@@ -10031,36 +10388,36 @@
             : `<span class="inline-block bg-blue-50 text-blue-800 border border-blue-200 px-2 py-0.5 rounded text-[11px] font-semibold whitespace-nowrap">EOI Allotment</span>`;
 
           tr.innerHTML = `
-            <td class="p-3 text-center font-mono text-slate-600">${idx + 1}</td>
-            <td class="p-3 font-semibold text-slate-900">
+            <td style="padding:12px;text-align:center;font-family:monospace;color:#475569;border-bottom:1px solid #e2e8f0;">${idx + 1}</td>
+            <td style="padding:12px;font-weight:600;color:#0f172a;border-bottom:1px solid #e2e8f0;">
               <div>${escapePlotHtml(app.orgName)}</div>
-              <div class="text-[11px] text-slate-500 font-normal">${escapePlotHtml(app.signatory)} (${escapePlotHtml(app.formType)})</div>
+              <div style="font-size:11px;color:#64748b;font-weight:400;">${escapePlotHtml(app.signatory)} (${escapePlotHtml(app.formType)})</div>
             </td>
-            <td class="p-3">${trackBadge}</td>
-            <td class="p-3 text-slate-700 text-[11.5px]">${escapePlotHtml(app.policyName)}</td>
-            <td class="p-3">
-              <div class="font-semibold text-slate-800">${escapePlotHtml(app.plotNo)}</div>
-              <div class="text-[11px] text-slate-500">${escapePlotHtml(app.itPark)}</div>
+            <td style="padding:12px;border-bottom:1px solid #e2e8f0;">${trackBadge}</td>
+            <td style="padding:12px;color:#334155;font-size:11.5px;border-bottom:1px solid #e2e8f0;">${escapePlotHtml(app.policyName)}</td>
+            <td style="padding:12px;border-bottom:1px solid #e2e8f0;">
+              <div style="font-weight:600;color:#1e293b;">${escapePlotHtml(app.plotNo)}</div>
+              <div style="font-size:11px;color:#64748b;">${escapePlotHtml(app.itPark)}</div>
             </td>
-            <td class="p-3 font-mono text-slate-700">${escapePlotHtml(app.cin)}</td>
-            <td class="p-3 font-mono font-bold text-[#3b5998]">${escapePlotHtml(app.appNo)}</td>
-            <td class="p-3 font-mono text-slate-700 whitespace-nowrap">${escapePlotHtml(app.appDate)}</td>
-            <td class="p-3">${getOicStatusBadgeHtml(app)}</td>
-            <td class="p-3 font-semibold text-slate-800 whitespace-nowrap">${escapePlotHtml(getRoleDisplayLabel(app.applicationAt))}</td>
-            <td class="p-3 font-mono text-[11px] text-slate-600 whitespace-nowrap">${escapePlotHtml(app.pendingSince)}</td>
-            <td class="p-3 text-center">
+            <td style="padding:12px;font-family:monospace;color:#334155;border-bottom:1px solid #e2e8f0;">${escapePlotHtml(app.cin)}</td>
+            <td style="padding:12px;font-family:monospace;font-weight:700;color:#3b5998;border-bottom:1px solid #e2e8f0;">${escapePlotHtml(app.appNo)}</td>
+            <td style="padding:12px;font-family:monospace;color:#334155;white-space:nowrap;border-bottom:1px solid #e2e8f0;">${escapePlotHtml(app.appDate)}</td>
+            <td style="padding:12px;border-bottom:1px solid #e2e8f0;">${getOicStatusBadgeHtml(app)}</td>
+            <td style="padding:12px;font-weight:600;color:#1e293b;white-space:nowrap;border-bottom:1px solid #e2e8f0;">${escapePlotHtml(getRoleDisplayLabel(app.applicationAt))}</td>
+            <td style="padding:12px;font-family:monospace;font-size:11px;color:#475569;white-space:nowrap;border-bottom:1px solid #e2e8f0;">${escapePlotHtml(app.pendingSince)}</td>
+            <td style="padding:12px;text-align:center;border-bottom:1px solid #e2e8f0;">
               <button type="button" onclick="downloadOicDossierBundle('${escapePlotHtml(app.appNo)}')"
-                class="bg-[#3557a0] hover:bg-[#2b4c8a] text-white text-[11px] font-semibold px-3 py-1.5 rounded inline-flex items-center gap-1 shadow-sm transition cursor-pointer whitespace-nowrap">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                style="background:#3557a0;color:#ffffff;font-size:11px;font-weight:600;padding:6px 12px;border-radius:4px;border:0;display:inline-flex;align-items:center;gap:5px;cursor:pointer;white-space:nowrap;">
+                <svg style="width:14px;height:14px;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                 </svg>
                 <span>Download</span>
               </button>
             </td>
-            <td class="p-3 text-center">
+            <td style="padding:12px;text-align:center;border-bottom:1px solid #e2e8f0;">
               <button type="button" onclick="openOicScrutinyDetail('${escapePlotHtml(app.appNo)}')"
-                class="bg-[#22c55e] hover:bg-[#16a34a] text-white text-[11px] font-bold px-3.5 py-1.5 rounded shadow-sm transition cursor-pointer">
+                style="background:#22c55e;color:#ffffff;font-size:11px;font-weight:700;padding:6px 14px;border-radius:4px;border:0;cursor:pointer;">
                 View
               </button>
             </td>
@@ -10585,7 +10942,7 @@
             contextBox.classList.remove('hidden');
             contextBox.className = 'rounded border p-3 text-xs bg-blue-50 border-blue-200 text-blue-950';
             contextBox.innerHTML = app.stage === 'post_approval'
-              ? `<b>Post-Approval Action:</b> ${app.applicationType === 'Mega Project Allotment' ? 'Sanctioned by Principal Secretary (PS). Generate Direct Allotment LOA for ED2 DSC.' : (app.bidCount === 'multiple' ? 'Approved by MD with >1 EOI applications. Push to MP Tender E-Bidding or confirm H1 Winner to generate LOA.' : 'Approved by MD (Single EOI). Generate 15-Day SLA LOA for ED DSC.')}`
+              ? `<div><b>Post-Approval Action:</b> ${app.applicationType === 'Mega Project Allotment' ? 'Sanctioned by Principal Secretary (PS). Generate Direct Allotment LOA for ED2 DSC.' : (app.bidCount === 'multiple' ? 'Approved by MD with >1 EOI applications. Push to MP Tender E-Bidding or confirm H1 Winner to generate LOA.' : 'Approved by MD (Single EOI). Generate 15-Day SLA LOA for ED DSC.')}</div><div class="mt-2.5"><button type="button" onclick="openOicGenerateLoaForApp('${escapePlotHtml(app.appNo)}')" class="bg-[#3b5998] hover:bg-[#324c82] text-white font-bold text-[11px] px-3 py-1.5 rounded cursor-pointer border-0">Open Official LOA Letter Preview &rarr;</button></div>`
               : `<b>Lease Deed Verification:</b> Registered Lease Deed & balance payment submitted. Verify and forward to ${app.applicationType === 'Mega Project Allotment' ? 'ED2' : 'ED'}.`;
           } else if (app.queriedBy || (app.status || '').includes('Queried')) {
             contextBox.classList.remove('hidden');
@@ -10796,11 +11153,18 @@
       app.pendingSince = p.timestamp;
       if (p.actionVal === 'query_applicant' || p.newStage === 'queried') {
         app.queryRemarks = p.commentVal || '';
-      } else if (p.actionVal === 'forward_subsidy_admin') {
-        app.queriedBy = '';
-        app.queriedBackBy = '';
-        app.queriedBackReason = '';
-        app.queriedBackTo = '';
+      } else {
+        app.oicVerifiedAt = p.timestamp;
+        if (p.actionVal === 'generate_loa_eoi_single' || p.actionVal === 'generate_loa_mega' || (p.actionVal === 'push_mp_ebidding' && (p.newStatus || '').includes('LOA Generated'))) {
+          app.loaGeneratedAt = p.timestamp;
+          app.loaRefNo = app.loaRefNo || `LOA/MPSEDC/2026/${String(app.appNo || '').split('-').pop() || '0001'}`;
+        }
+        if (p.actionVal === 'forward_subsidy_admin') {
+          app.queriedBy = '';
+          app.queriedBackBy = '';
+          app.queriedBackReason = '';
+          app.queriedBackTo = '';
+        }
       }
       app.history = app.history || [];
       app.history.push({
@@ -10835,6 +11199,9 @@
       renderScrutinyActionPanel(app);
       renderScrutinyHistory(app);
       showGlobalToast(`Status updated: ${p.historyStatus}`, 'success');
+      if (p.actionVal === 'generate_loa_eoi_single' || p.actionVal === 'generate_loa_mega') {
+        openOicGenerateLoaForApp(app.appNo);
+      }
     }
 
     function simulateApplicantQueryResponse(appNo) {
@@ -11005,10 +11372,10 @@
       const chip = document.getElementById('subsidy-active-filter-chip');
       const lbl = document.getElementById('subsidy-active-filter-label');
       const labels = {
-        pending: 'Showing: Pending Subsidy Admin (incl. Queried Back)',
-        forwarded: 'Showing: Forwarded to Finance / Next Stage',
-        approved: 'Showing: Recommended / Approved',
-        queried: 'Showing: Queried Applications',
+        pending: 'Showing: Pending',
+        forwarded: 'Showing: Forwarded to ITPM',
+        approved: 'Showing: Recommended',
+        queried: 'Showing: Queried',
         all: ''
       };
       if (chip && lbl) {
@@ -11171,15 +11538,15 @@
               <td class="p-3">${getSubsidyStatusBadgeHtml(app)}</td>
               <td class="p-3 font-semibold text-slate-800 whitespace-nowrap">${escapePlotHtml(app.applicationAt)}</td>
               <td class="p-3 font-mono text-[11px] text-slate-600 whitespace-nowrap">${escapePlotHtml(app.pendingSince)}</td>
-              <td class="p-3 text-center">
+              <td style="padding:12px;text-align:center;border-bottom:1px solid #e2e8f0;">
                 <button type="button" onclick="downloadSubsidyDossier('${escapePlotHtml(app.appNo)}')"
-                  class="bg-[#3557a0] hover:bg-[#2b4c8a] text-white text-[11px] font-semibold px-3 py-1.5 rounded inline-flex items-center gap-1 shadow-sm transition cursor-pointer whitespace-nowrap">
+                  style="background:#3557a0;color:#ffffff;font-size:11px;font-weight:600;padding:6px 12px;border-radius:4px;border:0;display:inline-flex;align-items:center;gap:5px;cursor:pointer;white-space:nowrap;">
                   <span>&#11015;</span><span>Download</span>
                 </button>
               </td>
-              <td class="p-3 text-center">
+              <td style="padding:12px;text-align:center;border-bottom:1px solid #e2e8f0;">
                 <button type="button" onclick="openSubsidyScrutinyDetail('${escapePlotHtml(app.appNo)}')"
-                  class="bg-[#22c55e] hover:bg-[#16a34a] text-white text-[11px] font-bold px-3.5 py-1.5 rounded shadow-sm transition cursor-pointer">
+                  style="background:#4ade80;color:#ffffff;font-size:11px;font-weight:700;padding:6px 14px;border-radius:4px;border:0;cursor:pointer;">
                   View
                 </button>
               </td>
@@ -11640,6 +12007,77 @@
     }
 
     // Higher Officer Workbench Engine (FINANCE_ADMIN, ED, MD)
+    window.authorityActiveKpiFilter = window.authorityActiveKpiFilter || 'pending';
+    let authoritySortKey = 'sno';
+    let authoritySortAsc = true;
+
+    function toggleOfficerSidebarGroup(key) {
+      const grp = document.getElementById('nav-' + key.replace('-', '-group-'));
+      if (!grp) return;
+      grp.classList.toggle('hidden');
+    }
+
+    function filterAuthorityByKpi(kpiKey) {
+      window.authorityActiveKpiFilter = kpiKey || 'all';
+      renderAuthorityWorkbench(window.currentOfficerRole || 'FINANCE_ADMIN');
+    }
+
+    function sortAuthorityTable(key) {
+      if (authoritySortKey === key) authoritySortAsc = !authoritySortAsc;
+      else { authoritySortKey = key; authoritySortAsc = true; }
+      const dualKeys = ['orgName', 'plotDisplay', 'appNo', 'appDate', 'status', 'pendingSince'];
+      dualKeys.forEach(k => {
+        const el = document.getElementById('auth-sort-ind-' + k);
+        if (el) el.innerHTML = '<span>&#9652;</span><span style="margin-top:-2px">&#9662;</span>';
+      });
+      const active = document.getElementById('auth-sort-ind-' + key);
+      if (active) {
+        active.innerHTML = authoritySortAsc
+          ? '<span style="color:#3b5998">&#9652;</span><span style="margin-top:-2px;opacity:0.3">&#9662;</span>'
+          : '<span style="opacity:0.3">&#9652;</span><span style="margin-top:-2px;color:#3b5998">&#9662;</span>';
+      }
+      renderAuthorityWorkbench(window.currentOfficerRole || 'FINANCE_ADMIN');
+    }
+
+    function getAuthorityRoleCardDefs(role, scoped) {
+      const pendingMine = scoped.filter(a => isApplicationAtRole(a, role));
+      const queriedCount = scoped.filter(a => String(a.status || '').toLowerCase().includes('queried') || a.stage === 'queried_back').length;
+      const icons = {
+        cycle: '<svg style="width:28px;height:28px;color:#3b5998;flex-shrink:0;" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 12a8 8 0 0113.66-5.66L20 8.5M20 4v4.5h-4.5"/><path stroke-linecap="round" stroke-linejoin="round" d="M20 12a8 8 0 01-13.66 5.66L4 15.5M4 20v-4.5h4.5"/></svg>',
+        refresh: '<svg style="width:26px;height:26px;color:#3b5998;flex-shrink:0;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12a7.5 7.5 0 11-2.2-5.3L19.5 9M19.5 4.5V9H15"/></svg>',
+        hand: '<svg style="width:26px;height:26px;color:#3b5998;flex-shrink:0;" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5.5" r="2.1"/><path d="M16.5 4.5a1 1 0 00-1 1v4.2l-1.6-.7H9.8a1.8 1.8 0 00-1.8 1.8V15a1 1 0 002 0v-3.5h.5V21a1 1 0 002 0v-4.5h.8V21a1 1 0 002 0v-9.4l1.4.6a1 1 0 001.4-.9V5.5a1 1 0 00-1-1z"/></svg>',
+        list: '<svg style="width:28px;height:28px;color:#3b5998;flex-shrink:0;" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="7.5" cy="9.5" r="1" fill="currentColor" stroke="none"/><path stroke-linecap="round" d="M10.5 9.5h6.5"/><circle cx="7.5" cy="14.5" r="1" fill="currentColor" stroke="none"/><path stroke-linecap="round" d="M10.5 14.5h6.5"/></svg>',
+        check: '<svg style="width:24px;height:24px;color:#3b5998;flex-shrink:0;" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>'
+      };
+      if (role === 'MD') {
+        const approvedCount = scoped.filter(a => String(a.status || '').includes('Approved') || a.stage === 'post_approval' || a.stage === 'lease_deed').length;
+        const rejectedCount = scoped.filter(a => String(a.status || '').toLowerCase().includes('rejected')).length;
+        return [
+          { key: 'pending', label: 'Pending', count: pendingMine.length, color: '#f59e0b', icon: icons.cycle },
+          { key: 'approved', label: 'Approved', count: approvedCount, color: '#22c55e', icon: icons.check },
+          { key: 'rejected', label: 'Rejected', count: rejectedCount, color: '#ef4444', icon: icons.check },
+          { key: 'all', label: 'All application', count: scoped.length, color: '#22c55e', icon: icons.list }
+        ];
+      }
+      if (role === 'ED') {
+        const edRecCount = scoped.filter(a => isApplicationAtRole(a, 'MD') || String(a.status || '').includes('Approved') || a.stage === 'post_approval' || a.stage === 'lease_deed').length;
+        return [
+          { key: 'pending', label: 'Pending', count: pendingMine.length, color: '#f59e0b', icon: icons.cycle },
+          { key: 'recommended', label: 'Recommended', count: edRecCount, color: '#f59e0b', icon: icons.refresh },
+          { key: 'queried', label: 'Queried', count: queriedCount, color: '#ef4444', icon: icons.hand },
+          { key: 'all', label: 'All application', count: scoped.length, color: '#22c55e', icon: icons.list }
+        ];
+      }
+      // FINANCE_ADMIN
+      const finRecCount = scoped.filter(a => isApplicationAtRole(a, 'ED') || isApplicationAtRole(a, 'MD') || String(a.status || '').includes('Approved') || a.stage === 'post_approval' || a.stage === 'lease_deed').length;
+      return [
+        { key: 'pending', label: 'Pending', count: pendingMine.length, color: '#f59e0b', icon: icons.cycle },
+        { key: 'recommended', label: 'Recommended', count: finRecCount, color: '#22c55e', icon: icons.list },
+        { key: 'queried', label: 'Queried', count: queriedCount, color: '#ef4444', icon: icons.hand },
+        { key: 'all', label: 'All application', count: scoped.length, color: '#22c55e', icon: icons.list }
+      ];
+    }
+
     function renderAuthorityWorkbench(roleKey) {
       const role = roleKey || window.currentOfficerRole || 'FINANCE_ADMIN';
       const titleMap = {
@@ -11655,30 +12093,113 @@
       const pendingMine = scoped.filter(a => isApplicationAtRole(a, role));
       setTxt('authority-kpi-pending', pendingMine.length);
       setTxt('authority-kpi-all', scoped.length);
+      setTxt('authority-top-total-eoi', scoped.length);
+
+      const activeFilter = window.authorityActiveKpiFilter || (role === 'FINANCE_ADMIN' ? 'all' : 'pending');
+      const cards = getAuthorityRoleCardDefs(role, scoped);
+      const kpiGrid = document.getElementById('authority-kpi-grid');
+      if (kpiGrid) {
+        kpiGrid.innerHTML = cards.map(c => `
+          <div id="authority-kpi-card-${c.key}" onclick="filterAuthorityByKpi('${c.key}')"
+            class="oic-kpi-card ${activeFilter === c.key ? 'active' : ''}">
+            <div style="font-size:13px;font-weight:600;color:#334155;">${escapePlotHtml(c.label)}</div>
+            <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-top:14px;">
+              <div style="font-size:28px;font-weight:500;color:${c.color};line-height:1;">${c.count}</div>
+              ${c.icon}
+            </div>
+          </div>
+        `).join('');
+      }
+
+      const chip = document.getElementById('authority-active-filter-chip');
+      const chipLbl = document.getElementById('authority-active-filter-label');
+      if (chip && chipLbl) {
+        const matchedCard = cards.find(c => c.key === activeFilter);
+        if (activeFilter !== 'all' && matchedCard) {
+          chipLbl.textContent = 'Showing: ' + matchedCard.label;
+          chip.classList.remove('hidden');
+          chip.classList.add('inline-flex');
+        } else {
+          chip.classList.add('hidden');
+          chip.classList.remove('inline-flex');
+        }
+      }
+
+      let rows = scoped.slice();
+      if (activeFilter === 'pending') rows = rows.filter(a => isApplicationAtRole(a, role));
+      else if (activeFilter === 'approved' || activeFilter === 'recommended') {
+        rows = rows.filter(a => role === 'FINANCE_ADMIN'
+          ? (isApplicationAtRole(a, 'ED') || isApplicationAtRole(a, 'MD') || String(a.status || '').includes('Approved') || a.stage === 'post_approval')
+          : role === 'ED'
+            ? (isApplicationAtRole(a, 'MD') || String(a.status || '').includes('Approved') || a.stage === 'post_approval')
+            : (String(a.status || '').includes('Approved') || a.stage === 'post_approval' || a.stage === 'lease_deed'));
+      } else if (activeFilter === 'queried') {
+        rows = rows.filter(a => String(a.status || '').toLowerCase().includes('queried') || a.stage === 'queried_back');
+      } else if (activeFilter === 'rejected') {
+        rows = rows.filter(a => String(a.status || '').toLowerCase().includes('rejected'));
+      }
+
+      const searchSel = document.getElementById('authority-search-by')?.value || 'all';
+      if (searchSel === 'pending_mine') rows = rows.filter(a => isApplicationAtRole(a, role));
+      else if (searchSel === 'EOI Allotment') rows = rows.filter(a => isSubsidyEoiScope(a));
+      else if (searchSel === 'Approved') rows = rows.filter(a => String(a.status || '').toLowerCase().includes('approved') || a.stage === 'post_approval');
+      else if (searchSel === 'Queried') rows = rows.filter(a => String(a.status || '').toLowerCase().includes('queried'));
+
+      if (authoritySortKey && authoritySortKey !== 'sno') {
+        rows.sort((a, b) => {
+          const av = String(a[authoritySortKey] || '').toLowerCase();
+          const bv = String(b[authoritySortKey] || '').toLowerCase();
+          if (av < bv) return authoritySortAsc ? -1 : 1;
+          if (av > bv) return authoritySortAsc ? 1 : -1;
+          return 0;
+        });
+      }
 
       const tbody = document.getElementById('authority-queue-tbody');
       if (!tbody) return;
-      const ordered = [...pendingMine, ...scoped.filter(a => !isApplicationAtRole(a, role))];
-      tbody.innerHTML = ordered.map((app, i) => {
-        const isMine = isApplicationAtRole(app, role);
-        return `
-          <tr class="${isMine ? 'bg-amber-50/40 hover:bg-amber-50/80' : 'hover:bg-slate-50'}">
-            <td class="p-2.5 text-center font-mono">${i + 1}</td>
-            <td class="p-2.5 font-semibold text-slate-900">${escapePlotHtml(app.orgName)}</td>
-            <td class="p-2.5">${escapePlotHtml(app.plotNo)} &bull; ${escapePlotHtml(app.itPark)}</td>
-            <td class="p-2.5 font-mono font-bold text-[#3b5998]">${escapePlotHtml(app.appNo)}</td>
-            <td class="p-2.5 text-[11px]">Fee: ${escapePlotHtml(app.appFee || '₹ 10,000.00')} | EMD: <b>${escapePlotHtml(app.advanceEmd)}</b><br>Outlay: ${escapePlotHtml(app.totalCost)}</td>
-            <td class="p-2.5">${getSubsidyStatusBadgeHtml(app)}</td>
-            <td class="p-2.5 font-semibold">${escapePlotHtml(app.applicationAt)}</td>
-            <td class="p-2.5 text-center">
-              <button type="button" onclick="openAuthorityApplication('${escapePlotHtml(app.appNo)}')"
-                class="${isMine ? 'bg-[#22c55e] hover:bg-[#16a34a]' : 'bg-slate-600 hover:bg-slate-700'} text-white text-[11px] font-bold px-3 py-1 rounded cursor-pointer">
-                ${isMine ? 'Review & Act' : 'Inspect'}
-              </button>
-            </td>
-          </tr>
-        `;
-      }).join('');
+      if (rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="13" style="padding:24px;text-align:center;color:#64748b;font-size:12px;">No applications match the selected criteria for ${escapePlotHtml(role)}.</td></tr>`;
+      } else {
+        tbody.innerHTML = rows.map((app, i) => {
+          const isMine = isApplicationAtRole(app, role);
+          const isQueried = String(app.status || '').toLowerCase().includes('queried') || String(app.status || '').toLowerCase().includes('rejected');
+          const rowBg = isQueried ? '#fef2f2' : (isMine ? '#fffbeb' : '#ffffff');
+          return `
+            <tr style="background:${rowBg};border-bottom:1px solid #e2e8f0;">
+              <td style="padding:12px;text-align:center;font-family:monospace;color:#475569;">${i + 1}</td>
+              <td style="padding:12px;font-weight:600;color:#0f172a;">
+                <div>${escapePlotHtml(app.orgName)}</div>
+                <div style="font-size:11px;color:#64748b;font-weight:400;">${escapePlotHtml(app.signatory)} (${escapePlotHtml(app.formType || 'Form 1')})</div>
+              </td>
+              <td style="padding:12px;color:#334155;">${escapePlotHtml(app.applicationType || 'EOI Allotment')}</td>
+              <td style="padding:12px;color:#334155;font-size:11.5px;">${escapePlotHtml(app.policyName)}</td>
+              <td style="padding:12px;color:#334155;">
+                <div style="font-weight:600;color:#1e293b;">${escapePlotHtml(app.plotNo)}</div>
+                <div style="font-size:11px;color:#64748b;">${escapePlotHtml(app.itPark)}</div>
+              </td>
+              <td style="padding:12px;font-family:monospace;color:#334155;">${escapePlotHtml(app.cin)}</td>
+              <td style="padding:12px;font-family:monospace;font-weight:700;color:#3b5998;">${escapePlotHtml(app.appNo)}</td>
+              <td style="padding:12px;font-family:monospace;color:#334155;white-space:nowrap;">${escapePlotHtml(app.appDate)}</td>
+              <td style="padding:12px;">${getSubsidyStatusBadgeHtml(app)}</td>
+              <td style="padding:12px;font-weight:600;color:#1e293b;white-space:nowrap;">${escapePlotHtml(getRoleDisplayLabel(app.applicationAt))}</td>
+              <td style="padding:12px;font-family:monospace;font-size:11px;color:#475569;white-space:nowrap;">${escapePlotHtml(app.pendingSince)}</td>
+              <td style="padding:12px;text-align:center;">
+                <button type="button" onclick="downloadSubsidyDossier('${escapePlotHtml(app.appNo)}')"
+                  style="background:#3557a0;color:#ffffff;font-size:11px;font-weight:600;padding:6px 12px;border-radius:4px;border:0;display:inline-flex;align-items:center;gap:5px;cursor:pointer;white-space:nowrap;">
+                  <span>&#11015;</span><span>Download</span>
+                </button>
+              </td>
+              <td style="padding:12px;text-align:center;">
+                <button type="button" onclick="openAuthorityApplication('${escapePlotHtml(app.appNo)}')"
+                  style="background:${isMine ? '#4ade80' : '#475569'};color:#ffffff;font-size:11px;font-weight:700;padding:6px 14px;border-radius:4px;border:0;cursor:pointer;white-space:nowrap;">
+                  ${isMine ? 'View' : 'Inspect'}
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+      setTxt('authority-table-footer-count', rows.length === 0 ? 'Showing 0 entries' : `Showing 1 to ${rows.length} of ${rows.length} entries`);
     }
 
     function openAuthorityApplication(appNo) {
@@ -11829,6 +12350,556 @@
       renderInvestorDashboard();
     }
 
+    // =========================================================================
+    // OIC IT PARK - GENERATE LOA (OFFICIAL LETTER OF ALLOTMENT) ENGINE
+    // =========================================================================
+    window.currentLoaAppNo = null;
+
+    function openOicGenerateLoaForApp(appNo) {
+      if (appNo) {
+        window.currentLoaAppNo = appNo;
+        try {
+          if (typeof STORAGE_KEYS !== 'undefined') localStorage.setItem(STORAGE_KEYS.LOA_APP, appNo);
+        } catch (e) { }
+      }
+      switchView('oic-generate-loa');
+    }
+
+    function getEligibleLoaApplications() {
+      const apps = (window.oicLandApplications || []).slice();
+      // Prioritize MD/PS approved, LOA-generated, or post-approval records first
+      const rank = a => {
+        const st = String(a?.status || '').toLowerCase();
+        if (a?.stage === 'post_approval' || st.includes('approved by md') || st.includes('approved by ps')) return 0;
+        if (st.includes('loa generated')) return 1;
+        return 2;
+      };
+      return apps.sort((a, b) => rank(a) - rank(b));
+    }
+
+    function initGenerateLoaView(preselectAppNo) {
+      const selectEl = document.getElementById('loa-app-select');
+      const apps = getEligibleLoaApplications();
+
+      if (!window.currentLoaAppNo && preselectAppNo) window.currentLoaAppNo = preselectAppNo;
+      if (!window.currentLoaAppNo) {
+        try {
+          const storedLoa = localStorage.getItem(STORAGE_KEYS.LOA_APP);
+          if (storedLoa && apps.some(a => a.appNo === storedLoa)) window.currentLoaAppNo = storedLoa;
+        } catch (e) { }
+      }
+      if (!window.currentLoaAppNo && apps.length > 0) {
+        window.currentLoaAppNo = apps[0].appNo;
+      }
+
+      if (selectEl) {
+        if (apps.length === 0) {
+          selectEl.innerHTML = `<option value="">-- No Land Allotment applications found --</option>`;
+        } else {
+          selectEl.innerHTML = `<option value="">-- Select Application --</option>` + apps.map(a => {
+            const loaTag = a.loaGeneratedAt ? ' [LOA Generated]' : (a.stage === 'post_approval' ? ' [Approved - Ready for LOA]' : ` [${a.status}]`);
+            return `<option value="${escapePlotHtml(a.appNo)}">${escapePlotHtml(a.appNo)} — ${escapePlotHtml(a.orgName)} (${escapePlotHtml(a.plotNo)})${escapePlotHtml(loaTag)}</option>`;
+          }).join('');
+          if (window.currentLoaAppNo) selectEl.value = window.currentLoaAppNo;
+        }
+      }
+      selectLoaApplication(window.currentLoaAppNo || '');
+    }
+
+    function selectLoaApplication(appNo) {
+      window.currentLoaAppNo = appNo || null;
+      try {
+        if (typeof STORAGE_KEYS !== 'undefined') {
+          if (appNo) localStorage.setItem(STORAGE_KEYS.LOA_APP, appNo);
+          else localStorage.removeItem(STORAGE_KEYS.LOA_APP);
+        }
+      } catch (e) { }
+
+      const app = (window.oicLandApplications || []).find(a => a.appNo === appNo) || window.submittedApplicationsMap[appNo] || null;
+      const badge = document.getElementById('loa-status-badge');
+      const btn = document.getElementById('btn-generate-loa-action');
+      if (badge) {
+        if (!app) {
+          badge.textContent = 'No Application Selected';
+          badge.style.background = '#f1f5f9';
+          badge.style.color = '#475569';
+          badge.style.borderColor = '#cbd5e1';
+        } else if (app.loaGeneratedAt || String(app.status || '').toLowerCase().includes('loa generated')) {
+          badge.textContent = `LOA Generated${app.loaRefNo ? ' (' + app.loaRefNo + ')' : ''}`;
+          badge.style.background = '#ecfdf5';
+          badge.style.color = '#065f46';
+          badge.style.borderColor = '#a7f3d0';
+        } else {
+          badge.textContent = `${app.status || 'Ready for LOA'}`;
+          badge.style.background = '#eff6ff';
+          badge.style.color = '#1e40af';
+          badge.style.borderColor = '#bfdbfe';
+        }
+      }
+      if (btn) {
+        btn.disabled = !app;
+        btn.style.opacity = app ? '1' : '0.55';
+        btn.textContent = (app && (app.loaGeneratedAt || String(app.status || '').toLowerCase().includes('loa generated')))
+          ? 'Regenerate / Update LOA'
+          : 'Generate LOA';
+      }
+      renderLoaLetterSheet(app);
+    }
+
+    function formatLoaDisplayDate(dateStr) {
+      if (dateStr && /^\d{2}\/\d{2}\/\d{4}/.test(dateStr)) return dateStr.slice(0, 10).replace(/\//g, '.');
+      const now = new Date();
+      const pad = n => String(n).padStart(2, '0');
+      return `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${now.getFullYear()}`;
+    }
+
+    function renderLoaLetterSheet(app) {
+      const sheet = document.getElementById('loa-letter-sheet');
+      if (!sheet) return;
+
+      const todayStr = formatLoaDisplayDate('');
+      const orgName = app?.orgName || 'Applicant / Organization Name';
+      const regAddress = app?.regAddress || 'Registered Office Address, Madhya Pradesh';
+      const appNo = app?.appNo || '—';
+      const plotNo = app?.plotNo || '—';
+      const itPark = app?.itPark || 'MPSEDC IT Park';
+      const plotSizeAcres = app?.plotSizeAcres || '0.00 Acre';
+      const plotSizeSqFt = app?.plotSizeSqFt ? ` (${app.plotSizeSqFt})` : '';
+      const policyName = app?.policyName || 'MP IT, ITeS & ESDM Policy 2023';
+      const landPremium = app?.landPremium || '₹ 0.00';
+      const devCharges = app?.devCharges || '₹ 0.00';
+      const appFee = app?.appFee || '₹ 10,000.00';
+      const advanceEmd = app?.advanceEmd || '₹ 0.00';
+      const maintCharges = app?.maintCharges || '₹ 0.00';
+      const leaseRent = app?.leaseRent || '₹ 0.00';
+      const totalLandAmount = app?.totalLandAmount || '₹ 0.00';
+      const timeline = app?.timeline || 'Commercial commencement within the approved milestone schedule.';
+      const headcount = app?.headcount || 'As committed in DPR';
+      const submittedDate = app?.submissionDate || app?.pendingSince || app?.appDate || todayStr;
+      const isMega = String(app?.applicationType || '').toLowerCase().includes('mega');
+      const slaDays = isMega ? '30' : '15';
+      const loaRefLine = app?.loaRefNo ? ` | Ref: ${app.loaRefNo}` : '';
+
+      sheet.innerHTML = `
+        <!-- Header Row matching Screenshot 2026-11-26 115343.png -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:14px;border-bottom:1px solid #e2e8f0;margin-bottom:22px;">
+          <div style="flex-shrink:0;">
+            <svg width="74" height="56" viewBox="0 0 80 62" xmlns="http://www.w3.org/2000/svg" aria-label="MPSEDC Logo">
+              <path d="M10 18 L24 8 L42 12 L58 6 L72 20 L65 36 L52 44 L36 38 L22 46 L10 34 Z" fill="none" stroke="#3b5998" stroke-width="2" stroke-linejoin="round"/>
+              <circle cx="24" cy="20" r="2.2" fill="#3b5998"/>
+              <circle cx="48" cy="18" r="2.2" fill="#3b5998"/>
+              <circle cx="58" cy="30" r="2.2" fill="#3b5998"/>
+              <text x="40" y="31" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="800" fill="#1e3a8a">MPS@DC</text>
+              <text x="40" y="56" text-anchor="middle" font-family="Arial, sans-serif" font-size="6.2" font-weight="700" fill="#3b5998">INFOTECH ENGINE OF M.P.</text>
+            </svg>
+          </div>
+          <div style="text-align:center;flex:1;">
+            <div style="font-size:15.5px;font-weight:700;color:#1e293b;letter-spacing:0.02em;text-transform:uppercase;line-height:1.3;">
+              M.P. STATE ELECTRONICS DEVELOPMENT CORPORATION LTD.
+            </div>
+            <div style="font-size:12px;font-weight:600;color:#2563eb;margin-top:3px;">
+              A Government of MP Undertaking
+            </div>
+          </div>
+          <div style="flex-shrink:0;">
+            <svg width="56" height="56" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="Government of Madhya Pradesh Emblem">
+              <circle cx="32" cy="32" r="28" fill="#fef3c7" stroke="#991b1b" stroke-width="3"/>
+              <circle cx="32" cy="32" r="22" fill="#fffbeb" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3 2"/>
+              <path d="M24 38 L32 16 L40 38 Z" fill="#b45309"/>
+              <circle cx="32" cy="25" r="4" fill="#991b1b"/>
+              <rect x="21" y="39" width="22" height="4" rx="1" fill="#78350f"/>
+              <text x="32" y="51" text-anchor="middle" font-family="Arial, sans-serif" font-size="5.5" font-weight="800" fill="#7f1d1d">GOVT OF MP</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Reference & Date Line -->
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;font-size:12px;color:#475569;margin-bottom:14px;">
+          <div>
+            <span>MPSEDC: Land Allotment</span>
+            <span style="margin-left:8px;color:#64748b;">(Application No.: <b>${escapePlotHtml(appNo)}</b> &bull; Plot No.: <b>${escapePlotHtml(plotNo)}</b>${escapePlotHtml(loaRefLine)})</span>
+          </div>
+          <div>Bhopal, Dated <b>${escapePlotHtml(todayStr)}</b></div>
+        </div>
+
+        <!-- Addressee & Subject -->
+        <div style="font-size:12px;line-height:1.65;color:#334155;margin-bottom:18px;">
+          <div style="font-weight:700;color:#1e3a8a;">M/s ${escapePlotHtml(orgName)}</div>
+          <div style="font-weight:700;color:#1e3a8a;">${escapePlotHtml(regAddress)}</div>
+          <div style="margin-top:16px;">Subject: <b style="color:#0f172a;">Letter of Allotment (LOA)</b></div>
+        </div>
+
+        <!-- Greeting -->
+        <div style="font-size:12px;color:#3b5998;margin-bottom:14px;">Dear Sir/Madam,</div>
+
+        <!-- Opening Paragraph -->
+        <div style="font-size:12px;line-height:1.8;color:#3b5998;margin-bottom:14px;">
+          We refer to your application dated <b>${escapePlotHtml(submittedDate)}</b> expressing your interest in securing industrial IT/ITeS land at <b>${escapePlotHtml(itPark)}, Plot No. ${escapePlotHtml(plotNo)}</b>. We are pleased to inform you that your request for the allotment of plot has been approved by the competent authority under the following terms and conditions:
+        </div>
+
+        <!-- Numbered Clauses 1 to 9 -->
+        <ol style="margin:0 0 18px 26px;padding:0;font-size:12px;line-height:1.8;color:#3b5998;display:flex;flex-direction:column;gap:5px;">
+          <li><b>Plot Allocation:</b> Plot No. <b>${escapePlotHtml(plotNo)}</b> admeasuring an area of <b>${escapePlotHtml(plotSizeAcres)}</b>${escapePlotHtml(plotSizeSqFt)} at <b>${escapePlotHtml(itPark)}</b> has been allotted to you as per your application (${escapePlotHtml(app?.applicationType || 'EOI Allotment')}).</li>
+          <li><b>Land Premium &amp; Development Charges:</b> The net payable land premium is <b>${escapePlotHtml(landPremium)}</b> (under <b>${escapePlotHtml(policyName)}</b>) and development charges are <b>${escapePlotHtml(devCharges)}</b>. Applicable taxes and stamp duty will be charged at actuals.</li>
+          <li><b>Application / Advance EMD:</b> Non-refundable application fee of <b>${escapePlotHtml(appFee)}</b> and 25% Advance EMD of <b>${escapePlotHtml(advanceEmd)}</b> have been accounted against the land allotment consideration.</li>
+          <li><b>Maintenance Charges:</b> You will be required to pay annual maintenance charges of <b>${escapePlotHtml(maintCharges)}</b> for the upkeep of the IT Park campus, internal roads, street lighting, common utilities, etc., on a shared basis.</li>
+          <li><b>Annual Lease Rent:</b> Annual lease rent of <b>${escapePlotHtml(leaseRent)}</b> will be payable annually in accordance with MPSEDC Land Allotment Policy guidelines.</li>
+          <li><b>Implementation &amp; Construction Term:</b> The project implementation period shall adhere to your approved schedule (<b>${escapePlotHtml(timeline)}</b>) along with the committed employment target (<b>${escapePlotHtml(headcount)}</b>).</li>
+          <li><b>Possession:</b> Physical possession of the allotted plot will be deemed effective following acceptance of this LOA, full balance payment, and execution of the Lease Deed.</li>
+          <li><b>Payment Schedule:</b> Balance land premium and allied charges (Total Land Amount: <b>${escapePlotHtml(totalLandAmount)}</b>) shall be remitted within the statutory SLA window of <b>${slaDays} days</b> from the date of issuance of this LOA.</li>
+          <li><b>Lease Deed Execution SLA:</b> A copy of the Lease Deed format will be issued for execution upon balance payment verification. The Lease Deed must be signed and executed within <b>30 days</b> (${slaDays}-day payment compliance SLA) from the date of this LOA. Failure to complete payment or execute the Lease Deed within this time frame will result in the cancellation of the allotment.</li>
+        </ol>
+
+        <!-- Closing & Sign-Off -->
+        <div style="font-size:12px;line-height:1.9;color:#3b5998;display:flex;flex-direction:column;gap:8px;">
+          <div>We kindly request that you complete all necessary formalities related to the allotment at the earliest.</div>
+          <div>Thank you for your attention to this matter.</div>
+          <div style="margin-top:6px;">
+            <div>Sincerely,</div>
+            <div style="margin-top:4px;font-weight:600;color:#1e3a8a;">ED / OIC IT Park</div>
+            <div>Competent Authority</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function executeGenerateLoaAction() {
+      const appNo = document.getElementById('loa-app-select')?.value || window.currentLoaAppNo;
+      const app = (window.oicLandApplications || []).find(a => a.appNo === appNo) || window.submittedApplicationsMap[appNo];
+      if (!app) {
+        showGlobalToast('Please select a Land Allotment application before generating LOA.', 'error');
+        return;
+      }
+
+      const ts = formatCurrentOicTimestamp();
+      const suffix = String(app.appNo || '').split('-').pop() || '0001';
+      const loaRef = app.loaRefNo || `LOA/MPSEDC/2026/${suffix}`;
+      const isMega = String(app.applicationType || '').toLowerCase().includes('mega');
+
+      app.loaRefNo = loaRef;
+      app.loaGeneratedAt = ts;
+      app.oicVerifiedAt = app.oicVerifiedAt || ts;
+      app.stage = 'post_approval';
+      app.status = isMega
+        ? 'LOA Generated (Direct Allotment) - Pending ED2 DSC Sign'
+        : 'LOA Generated (15-Day SLA) - Pending ED DSC Sign';
+      app.applicationAt = isMega ? 'ED2' : 'Executive Director (ED)';
+      app.pendingSince = ts;
+      app.history = app.history || [];
+      app.history.push({
+        actor: 'OIC IT Park',
+        timestamp: ts,
+        status: `LOA Generated (${loaRef})`,
+        remark: `Official Letter of Allotment (${loaRef}) generated for ${app.orgName} (${app.plotNo}, ${app.itPark}).`
+      });
+
+      window.submittedApplicationsMap[app.appNo] = app;
+      savePersistedApplications();
+      updateOicStats();
+      updateOicProcessStats();
+      renderOicApplicationsTable();
+      renderInvestorDashboard();
+      if (typeof renderSubsidyDashboard === 'function') renderSubsidyDashboard();
+      if (typeof renderAuthorityWorkbench === 'function' && window.currentOfficerRole) renderAuthorityWorkbench(window.currentOfficerRole);
+
+      initGenerateLoaView(app.appNo);
+      showGlobalToast(`Official LOA (${loaRef}) generated & persisted for ${app.appNo}.`, 'success');
+    }
+
+    // =========================================================================
+    // OIC IT PARK - FLOAT TENDER FOR EOI ENGINE (#view-oic-float-tender)
+    // =========================================================================
+    const FLOAT_TENDER_PARK_CATALOG = [
+      'Crystal IT Park, Indore',
+      'IT Park Badwai, Bhopal',
+      'IT Park Sinhasa, Indore',
+      'IT Park Purva, Jabalpur',
+      'IT Park Ganga Malanpur, Gwalior'
+    ];
+
+    const FLOAT_TENDER_PRESET_PLOTS = {
+      'Crystal IT Park, Indore': [
+        { plotNo: 'ITP-IND-201', plotName: 'ITP-IND-201-A', sizeAcres: 2.50, purpose: 'IT/ITeS/ESDM/Data Centre/Edge Data Centre' },
+        { plotNo: 'ITP-IND-202', plotName: 'ITP-IND-202-B', sizeAcres: 1.25, purpose: 'IT/ITeS Software Development' }
+      ],
+      'IT Park Badwai, Bhopal': [
+        { plotNo: 'ITP-BHP-108', plotName: 'ITP-BHP-108-A', sizeAcres: 0.45, purpose: 'Edge Data Centre / Cloud Infrastructure' },
+        { plotNo: 'ITP-BHP-109', plotName: 'ITP-BHP-109-B', sizeAcres: 1.50, purpose: 'IT/ITeS & ESDM Manufacturing' }
+      ],
+      'IT Park Sinhasa, Indore': [
+        { plotNo: 'ITP-SIN-114', plotName: 'ITP-SIN-114-A', sizeAcres: 1.40, purpose: 'Semiconductor Design & IT/ITeS' },
+        { plotNo: 'ITP-SIN-115', plotName: 'ITP-SIN-115-B', sizeAcres: 2.00, purpose: 'Cloud Data Centre Facility' }
+      ],
+      'IT Park Purva, Jabalpur': [
+        { plotNo: 'ITP-JBP-019', plotName: 'ITP-JBP-019-A', sizeAcres: 0.75, purpose: 'Global Capability Centre (GCC)' },
+        { plotNo: 'ITP-JBP-020', plotName: 'ITP-JBP-020-B', sizeAcres: 1.10, purpose: 'IT/ITeS Operational Block' }
+      ],
+      'IT Park Ganga Malanpur, Gwalior': [
+        { plotNo: 'ITP-GWL-008', plotName: 'ITP-GWL-008-A', sizeAcres: 0.50, purpose: 'IT/ITeS/ESDM/Data Centre/Edge Data Centre' },
+        { plotNo: 'ITP-GWL-009', plotName: 'ITP-GWL-009-B', sizeAcres: 1.75, purpose: 'ESDM Electronics Cluster Unit' }
+      ]
+    };
+
+    function toIsoDateForInput(raw) {
+      if (!raw) return '';
+      const s = String(raw).trim();
+      if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+      const m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+      if (m) return `${m[3]}-${m[2]}-${m[1]}`;
+      return '';
+    }
+
+    function toDisplayDateFromIso(isoDate, timeSuffix) {
+      if (!isoDate || !/^\d{4}-\d{2}-\d{2}$/.test(isoDate)) return isoDate || '';
+      const [y, m, d] = isoDate.split('-');
+      return `${d}/${m}/${y} ${timeSuffix || '10:00'}`;
+    }
+
+    function clearFloatTenderValidation(which) {
+      const keys = which === 'all' ? ['park', 'plot', 'start', 'end'] : [which];
+      const elMap = { park: 'ft-it-park', plot: 'ft-plot-no', start: 'ft-start-date', end: 'ft-end-date' };
+      keys.forEach(k => {
+        document.getElementById(`ft-${k}-err`)?.classList.add('hidden');
+        const inp = document.getElementById(elMap[k]);
+        if (inp) inp.style.borderColor = '#cbd5e1';
+      });
+    }
+
+    function getPlotsForFloatTenderPark(parkName) {
+      const target = String(parkName || '').trim().toLowerCase();
+      const invMatches = (oicPlotInventory || []).filter(p =>
+        String(p.itPark || p.park || '').trim().toLowerCase() === target
+      ).map(p => ({
+        plotNo: p.plotNo || p.id,
+        plotName: p.plotName || ((p.plotNo || p.id) + '-A'),
+        sizeAcres: Number(p.sizeAcres !== undefined ? p.sizeAcres : (p.acres || 1.0)),
+        startDate: p.tenderStartDateIso || toIsoDateForInput(p.startDate),
+        endDate: p.tenderEndDateIso || toIsoDateForInput(p.endDate),
+        fromInventory: true
+      }));
+
+      const presets = (FLOAT_TENDER_PRESET_PLOTS[parkName] || []).filter(
+        pr => !invMatches.some(m => m.plotNo === pr.plotNo)
+      );
+      return [...invMatches, ...presets];
+    }
+
+    function initFloatTenderView() {
+      clearFloatTenderValidation('all');
+      const parkSel = document.getElementById('ft-it-park');
+      if (!parkSel) return;
+
+      const prevPark = parkSel.value;
+      const inventoryParks = (oicPlotInventory || []).map(p => p.itPark || p.park).filter(Boolean);
+      const uniqueParks = Array.from(new Set([...inventoryParks, ...FLOAT_TENDER_PARK_CATALOG]));
+
+      parkSel.innerHTML = `<option value="">-- Select IT Park --</option>` +
+        uniqueParks.map(pk => `<option value="${escapePlotHtml(pk)}">${escapePlotHtml(pk)}</option>`).join('');
+
+      if (prevPark && uniqueParks.includes(prevPark)) {
+        parkSel.value = prevPark;
+      } else if (uniqueParks.length > 0) {
+        parkSel.value = uniqueParks[0];
+      }
+
+      handleFloatTenderParkChange();
+    }
+
+    function handleFloatTenderParkChange() {
+      clearFloatTenderValidation('park');
+      const parkSel = document.getElementById('ft-it-park');
+      const plotSel = document.getElementById('ft-plot-no');
+      const parkName = parkSel?.value || '';
+      if (!plotSel) return;
+
+      if (!parkName) {
+        plotSel.innerHTML = `<option value="">-- Select Plot No. --</option>`;
+        document.getElementById('ft-plot-name').value = '';
+        document.getElementById('ft-total-area').value = '';
+        return;
+      }
+
+      const candidates = getPlotsForFloatTenderPark(parkName);
+      plotSel.innerHTML = `<option value="">-- Select Plot No. --</option>` +
+        candidates.map(c => `<option value="${escapePlotHtml(c.plotNo)}">${escapePlotHtml(c.plotNo)}</option>`).join('');
+
+      if (candidates.length > 0) {
+        plotSel.value = candidates[0].plotNo;
+        loadFloatTenderPlotDetails(false);
+      } else {
+        document.getElementById('ft-plot-name').value = '';
+        document.getElementById('ft-total-area').value = '';
+      }
+    }
+
+    function loadFloatTenderPlotDetails(showFeedbackToast) {
+      clearFloatTenderValidation('plot');
+      const parkName = document.getElementById('ft-it-park')?.value || '';
+      const plotNo = document.getElementById('ft-plot-no')?.value || '';
+      const nameEl = document.getElementById('ft-plot-name');
+      const areaEl = document.getElementById('ft-total-area');
+      const startEl = document.getElementById('ft-start-date');
+      const endEl = document.getElementById('ft-end-date');
+
+      if (!parkName) {
+        document.getElementById('ft-park-err')?.classList.remove('hidden');
+        if (showFeedbackToast) showGlobalToast('Please select an IT Park first.', 'error');
+        return;
+      }
+      if (!plotNo) {
+        if (nameEl) nameEl.value = '';
+        if (areaEl) areaEl.value = '';
+        if (showFeedbackToast) {
+          document.getElementById('ft-plot-err')?.classList.remove('hidden');
+          showGlobalToast('Please select a Plot No.', 'error');
+        }
+        return;
+      }
+
+      const candidates = getPlotsForFloatTenderPark(parkName);
+      const match = candidates.find(c => c.plotNo === plotNo) || {
+        plotNo,
+        plotName: plotNo + '-A',
+        sizeAcres: 1.0
+      };
+
+      if (nameEl) nameEl.value = match.plotName || (plotNo + '-A');
+      if (areaEl) areaEl.value = formatAcres(match.sizeAcres || 1.0);
+
+      // Default clean bidding window if not already stored on the plot
+      const today = new Date();
+      const endDefault = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+      const fmtIso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      if (startEl) startEl.value = match.startDate || fmtIso(today);
+      if (endEl) endEl.value = match.endDate || fmtIso(endDefault);
+
+      if (showFeedbackToast) {
+        showGlobalToast(`Loaded plot details for ${plotNo} (${parkName}).`, 'info');
+      }
+    }
+
+    function submitFloatTenderForm(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      clearFloatTenderValidation('all');
+
+      const parkEl = document.getElementById('ft-it-park');
+      const plotEl = document.getElementById('ft-plot-no');
+      const startEl = document.getElementById('ft-start-date');
+      const endEl = document.getElementById('ft-end-date');
+      const nameVal = document.getElementById('ft-plot-name')?.value?.trim() || '';
+
+      const parkName = parkEl?.value || '';
+      const plotNo = plotEl?.value || '';
+      const startIso = startEl?.value || '';
+      const endIso = endEl?.value || '';
+
+      let ok = true;
+      if (!parkName) {
+        document.getElementById('ft-park-err')?.classList.remove('hidden');
+        if (parkEl) parkEl.style.borderColor = '#dc2626';
+        ok = false;
+      }
+      if (!plotNo) {
+        document.getElementById('ft-plot-err')?.classList.remove('hidden');
+        if (plotEl) plotEl.style.borderColor = '#dc2626';
+        ok = false;
+      }
+      if (!startIso) {
+        document.getElementById('ft-start-err')?.classList.remove('hidden');
+        if (startEl) startEl.style.borderColor = '#dc2626';
+        ok = false;
+      }
+      if (!endIso || (startIso && endIso < startIso)) {
+        document.getElementById('ft-end-err')?.classList.remove('hidden');
+        if (endEl) endEl.style.borderColor = '#dc2626';
+        ok = false;
+      }
+      if (!ok) {
+        showGlobalToast('Please fill all mandatory fields and ensure Bidding End Date is on or after Start Date.', 'error');
+        return;
+      }
+
+      const displayStart = toDisplayDateFromIso(startIso, '10:00');
+      const displayEnd = toDisplayDateFromIso(endIso, '17:00');
+      const ts = formatCurrentOicTimestamp();
+
+      let plotRec = (oicPlotInventory || []).find(p => (p.plotNo === plotNo || p.id === plotNo));
+      if (plotRec) {
+        plotRec.itPark = parkName;
+        plotRec.park = parkName;
+        if (nameVal) plotRec.plotName = nameVal;
+        plotRec.startDate = displayStart;
+        plotRec.endDate = displayEnd;
+        plotRec.tenderStartDateIso = startIso;
+        plotRec.tenderEndDateIso = endIso;
+        plotRec.tenderFloated = true;
+        plotRec.published = true;
+        plotRec.floatedAt = ts;
+      } else {
+        const preset = (FLOAT_TENDER_PRESET_PLOTS[parkName] || []).find(p => p.plotNo === plotNo) || {
+          plotNo, plotName: nameVal || (plotNo + '-A'), sizeAcres: 1.50, purpose: 'IT/ITeS/ESDM/Data Centre/Edge Data Centre'
+        };
+        const acres = Number(preset.sizeAcres || 1.50);
+        const sqft = Math.round(acres * 43560);
+        const prem = Math.round(acres * 28000000);
+        const dev = Math.round(prem * 0.25);
+        const maint = Math.round(acres * 450000);
+        const lease = Math.round(prem * 0.01);
+        const total = prem + dev + maint + lease;
+        const emd = Math.round(prem * 0.25);
+        plotRec = {
+          id: plotNo,
+          itPark: parkName,
+          park: parkName,
+          plotNo: plotNo,
+          plotName: nameVal || preset.plotName,
+          purpose: preset.purpose,
+          landUse: preset.purpose,
+          landType: 'EOI Allotment',
+          sizeAcres: acres,
+          acres: acres,
+          sizeSqFt: sqft,
+          sqft: sqft,
+          premium: prem,
+          payablePremium: prem,
+          dev: dev,
+          devCharges: dev,
+          maint: maint,
+          maintCharges: maint,
+          lease: lease,
+          leaseRent: lease,
+          appCharges: 10000,
+          totalLandAmount: total,
+          total: total,
+          advance: emd,
+          emd: emd,
+          secDep: Math.round(prem * 0.02),
+          startDate: displayStart,
+          endDate: displayEnd,
+          tenderStartDateIso: startIso,
+          tenderEndDateIso: endIso,
+          tenderFloated: true,
+          published: true,
+          floatedAt: ts
+        };
+        oicPlotInventory.push(plotRec);
+        window.plotMasterDB = oicPlotInventory;
+      }
+
+      savePersistedPlots();
+      if (typeof renderOicPlotTable === 'function') renderOicPlotTable();
+      if (typeof syncPlotsWithInvestorView === 'function') syncPlotsWithInvestorView();
+      if (typeof updateOicStats === 'function') updateOicStats();
+
+      const banner = document.getElementById('ft-success-banner');
+      const bannerTxt = document.getElementById('ft-success-banner-text');
+      if (banner && bannerTxt) {
+        bannerTxt.innerHTML = `<b>&#10003; EOI Tender Notice Floated &amp; Published:</b> Plot <b>${escapePlotHtml(plotNo)}</b> (${escapePlotHtml(plotRec.plotName || nameVal)}, ${escapePlotHtml(formatAcres(plotRec.sizeAcres))}) at <b>${escapePlotHtml(parkName)}</b> &bull; Window: <b>${escapePlotHtml(displayStart)}</b> to <b>${escapePlotHtml(displayEnd)}</b>.`;
+        banner.classList.remove('hidden');
+      }
+      showGlobalToast(`Tender floated & published live for ${plotNo} (${parkName}).`, 'success');
+    }
+
     // Initialize state on DOM ready (Load all persisted plots, drafts, applications & restore view)
     window.addEventListener('DOMContentLoaded', () => {
       setDefaultEoiDates();
@@ -11859,6 +12930,12 @@
 
         if (savedView === 'oic-scrutiny-detail' && savedScrutinyApp && window.submittedApplicationsMap[savedScrutinyApp]) {
           openOicScrutinyDetail(savedScrutinyApp);
+        } else if (savedView === 'oic-generate-loa') {
+          const savedLoaApp = localStorage.getItem(STORAGE_KEYS.LOA_APP);
+          if (savedLoaApp) window.currentLoaAppNo = savedLoaApp;
+          switchView('oic-generate-loa');
+        } else if (savedView === 'oic-float-tender') {
+          switchView('oic-float-tender');
         } else if (savedView === 'subsidy-scrutiny' && savedSubsidyApp && window.submittedApplicationsMap[savedSubsidyApp]) {
           openSubsidyScrutinyDetail(savedSubsidyApp);
         } else if (savedView === 'eoi-form' && savedRectifyApp && window.submittedApplicationsMap[savedRectifyApp]) {
