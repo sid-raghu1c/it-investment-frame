@@ -6356,13 +6356,13 @@
 
               <!-- Row 3: Two-Column Read-Only Row (Plot Name & Total Area (Acres)) -->
               <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;">
-                <div>
+                <!-- <div>
                   <label for="ft-plot-name"
                     style="display:block;font-size:12.5px;font-weight:600;color:#334155;margin-bottom:6px;">Plot
                     Name</label>
                   <input type="text" id="ft-plot-name" readonly placeholder="Plot Name"
                     style="width:100%;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:5px;padding:8px 12px;font-size:13px;color:#334155;background:#e9edf2;outline:none;">
-                </div>
+                </div> -->
                 <div>
                   <label for="ft-total-area"
                     style="display:block;font-size:12.5px;font-weight:600;color:#334155;margin-bottom:6px;">Total Area
@@ -9853,6 +9853,12 @@
     }
 
     // Seed submittedApplicationsMap for unified lookup
+    window.oicLandApplications = loadPersistedApplications();
+    window.submittedApplicationsMap = {};
+    (window.oicLandApplications || []).forEach(app => {
+      if (app && app.appNo) window.submittedApplicationsMap[app.appNo] = app;
+    });
+
     function savePersistedApplications() {
       try {
         localStorage.setItem(STORAGE_KEYS.APPS, JSON.stringify(window.oicLandApplications || []));
@@ -9867,6 +9873,65 @@
       } catch (e) { }
       if (typeof showGlobalToast === 'function') showGlobalToast('Demo state reset to defaults. Reloading...', 'info');
       setTimeout(() => { location.reload(); }, 250);
+    }
+
+    function clearApplicantQueryRectificationMode(clearStorage = true) {
+      window.activeQueryRectificationAppNo = null;
+      if (clearStorage) {
+        try {
+          if (typeof STORAGE_KEYS !== 'undefined') localStorage.removeItem(STORAGE_KEYS.RECTIFY_APP);
+        } catch (e) { }
+      }
+      const existingBanner = document.getElementById('eoi-query-rectification-banner');
+      if (existingBanner) existingBanner.remove();
+      const submitBtn = document.getElementById('btn-submit-affix-dsc');
+      if (submitBtn) {
+        submitBtn.innerHTML = '<span>Submit &amp; Affix DSC</span>';
+      }
+    }
+
+    function cancelApplicantQueryRectification() {
+      clearApplicantQueryRectificationMode(true);
+      switchView('dashboard');
+    }
+
+    function applyEoiFormSnapshotForRectification(app) {
+      if (!app) return;
+      const snap = (app.formSnapshot && typeof app.formSnapshot === 'object') ? app.formSnapshot : null;
+      const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (!el || val === undefined || val === null) return;
+        if (el.type === 'checkbox') el.checked = Boolean(val);
+        else el.value = String(val);
+      };
+      if (snap) {
+        Object.entries(snap).forEach(([k, v]) => {
+          if (k === 'directors') return;
+          setVal(k, v);
+        });
+      } else {
+        setVal('applicant-name', app.orgName || '');
+        setVal('applicant-inc-date', app.incDate && app.incDate !== '—' ? app.incDate : '');
+        setVal('applicant-cin', app.cin || '');
+        setVal('applicant-pan', app.pan || '');
+        setVal('applicant-gstin', app.gstin || '');
+        setVal('applicant-reg-address', app.regAddress || '');
+        setVal('auth-name', app.signatory || '');
+        setVal('auth-designation', app.designation || '');
+        setVal('auth-mobile', app.mobile || '');
+        setVal('auth-email', app.email || '');
+        setVal('proj-title', app.projTitle || '');
+        setVal('proj-manpower', app.headcount || '');
+        setVal('proj-timeline', app.timeline || '');
+      }
+      if (typeof calculateProjectFinancials === 'function') calculateProjectFinancials();
+      [1, 2, 3, 4, 5].forEach(n => {
+        const panel = document.getElementById('sec-' + n);
+        if (panel) {
+          panel.classList.remove('is-collapsed');
+          panel.classList.add('is-expanded');
+        }
+      });
     }
 
     function openApplicantQueryRectification(appNo) {
@@ -10044,6 +10109,19 @@
 
     function respondToQueryFromInvestor(appNo) {
       openApplicantQueryRectification(appNo);
+    }
+
+    let investorActiveKpiFilter = 'applied';
+
+    function selectInvestorKpi(cardEl, kpiKey) {
+      investorActiveKpiFilter = kpiKey || 'applied';
+      document.querySelectorAll('#view-dashboard .grid .k').forEach(k => k.classList.remove('act'));
+      if (cardEl) cardEl.classList.add('act');
+      renderInvestorDashboard();
+    }
+
+    function resumeInvestorDraft(plotKey) {
+      openEoiFormForPlot(plotKey);
     }
 
     function renderInvestorDashboard() {
